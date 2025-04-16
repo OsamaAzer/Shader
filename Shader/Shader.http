@@ -1,0 +1,6 @@
+@Shader_HostAddress = http://localhost:5166
+
+GET {{Shader_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
