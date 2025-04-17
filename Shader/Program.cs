@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Shader.Data;
+using Shader.Services.Abstraction;
+using Shader.Services.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<ShaderContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));  
+builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -3,8 +3,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shader.Data.Entities
 {
-    public class Client : BaseEntity
+    public class Client
     {
+        [Key]
+        public int Id { get; set; }
+        [Required, MaxLength(100)]
+        public string Name { get; set; }
+        [Required, MaxLength(100)]
+        public string City { get; set; }
+        [RegularExpression(@"^(?:\+20|0)?(1[0-2]|15)\d{8}$", ErrorMessage = "Invalid Egyptian phone number.")]
+        public string PhoneNumber { get; set; }
+        public DateOnly? DateOfLastTransaction { get; set; }
         public AccountStatus Status { get; set; }
         public decimal TotalAmount { get; set; } // المبلغ الكلي
         public decimal TotalAmountPaid { get; set; }

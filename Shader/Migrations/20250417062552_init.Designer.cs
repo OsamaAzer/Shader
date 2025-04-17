@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shader.Data;
 
@@ -11,9 +12,11 @@ using Shader.Data;
 namespace Shader.Migrations
 {
     [DbContext(typeof(ShaderContext))]
-    partial class ShaderContextModelSnapshot : ModelSnapshot
+    [Migration("20250417062552_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,6 +67,12 @@ namespace Shader.Migrations
 
                     b.Property<int>("NumberOfCagesSold")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalAmountSold")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -298,7 +307,7 @@ namespace Shader.Migrations
                     b.Property<decimal?>("TotalAmountSold")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("TotalCages")
+                    b.Property<int>("TotalCages")
                         .HasColumnType("int");
 
                     b.Property<int?>("UnReturnedCages")
