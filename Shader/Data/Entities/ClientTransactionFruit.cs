@@ -7,5 +7,4 @@ public class ClientTransactionFruit
     public ClientTransaction ClientTransaction { get; set; } = null!;
     public int FruitId { get; set; }
     public Fruit Fruit { get; set; } = null!;
-    public int NumberOfCagesSold { get; set; }
 }

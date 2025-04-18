@@ -7,5 +7,4 @@ public class SupplierTransactionFruit
     public SupplierTransaction SupplierTransaction { get; set; } = null!;
     public int FruitId { get; set; }
     public Fruit Fruit { get; set; } = null!;
-    public int NumberOfCagesReceived { get; set; }
 }

@@ -12,8 +12,8 @@ namespace Shader.Services.Implementation
     {
         public async Task<IEnumerable<RSupplierDTO>> GetAllSuppliersAsync()
         {
-            var suppliers = context.Suppliers.OrderBy(s => s.Name).ToDTO<Supplier, RSupplierDTO>();
-            return suppliers;
+            var suppliersDTO = context.Suppliers.OrderBy(s => s.Name).ToDTO<Supplier, RSupplierDTO>().ToList();
+            return await Task.FromResult<IEnumerable<RSupplierDTO>>(suppliersDTO);
         }
 
         public async Task<RSupplierDTO> GetSupplierByIdAsync(int id)

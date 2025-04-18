@@ -9,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ShaderContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));  
 builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

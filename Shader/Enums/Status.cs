@@ -1,6 +1,6 @@
 ﻿namespace Shader.Enums
 {
-    public enum AccountStatus
+    public enum Status
     {
         Active = 1,
         InActive

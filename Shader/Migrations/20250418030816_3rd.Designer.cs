@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shader.Data;
 
@@ -11,9 +12,11 @@ using Shader.Data;
 namespace Shader.Migrations
 {
     [DbContext(typeof(ShaderContext))]
-    partial class ShaderContextModelSnapshot : ModelSnapshot
+    [Migration("20250418030816_3rd")]
+    partial class _3rd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,6 +63,9 @@ namespace Shader.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("FruitId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumberOfCagesSold")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -355,9 +361,6 @@ namespace Shader.Migrations
                     b.Property<int?>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberOfCagesReceived")
-                        .HasColumnType("int");
-
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
@@ -379,6 +382,9 @@ namespace Shader.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("FruitId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumberOfCagesReceived")
                         .HasColumnType("int");
 
                     b.Property<int>("SupplierTransactionId")

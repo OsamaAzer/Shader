@@ -1,10 +1,9 @@
 ﻿using Shader.Enums;
 
-namespace Shader.Data.Entities
+namespace Shader.Data.DTOs
 {
-    public class Expense 
+    public class RExpenseDTO
     {
-        public int Id { get; set; }
         public ExpenseType Type { get; set; } // نوع المصروف
         public decimal Amount { get; set; }
         public string? Description { get; set; }

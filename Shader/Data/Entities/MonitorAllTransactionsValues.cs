@@ -1,6 +1,6 @@
 ﻿namespace Shader.Data.Entities
 {
-    public class SystemOwner
+    public class MonitorAllTransactionsValues
     {
         public int Id { get; set; }
         public decimal TotalAmount { get; set; } // المبلغ الكلي

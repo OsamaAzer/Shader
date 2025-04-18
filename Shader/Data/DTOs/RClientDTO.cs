@@ -1,17 +1,11 @@
 ﻿using Shader.Enums;
-using System.ComponentModel.DataAnnotations;
 
-namespace Shader.Data.Entities
+namespace Shader.Data.DTOs
 {
-    public class Client
+    public class RClientDTO
     {
-        [Key]
-        public int Id { get; set; }
-        [Required, MaxLength(100)]
         public string Name { get; set; }
-        [Required, MaxLength(100)]
         public string City { get; set; }
-        [RegularExpression(@"^(?:\+20|0)?(1[0-2]|15)\d{8}$", ErrorMessage = "Invalid Egyptian phone number.")]
         public string PhoneNumber { get; set; }
         public DateOnly? DateOfLastTransaction { get; set; }
         public Status Status { get; set; }
@@ -25,6 +19,5 @@ namespace Shader.Data.Entities
         public int TotalNumberOfCagesTook { get; set; }
         public int TotalNumberOfCagesReturned { get; set; }
         public int TotalNumberOfUnReturnedCages { get; set; }
-        ICollection<ClientTransaction> Transactions { get; set; } = new List<ClientTransaction>();
     }
 }
