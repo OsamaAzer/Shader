@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shader.Data;
 
@@ -11,9 +12,11 @@ using Shader.Data;
 namespace Shader.Migrations
 {
     [DbContext(typeof(ShaderContext))]
-    partial class ShaderContextModelSnapshot : ModelSnapshot
+    [Migration("20250422213832_3.1.3")]
+    partial class _313
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,14 +33,17 @@ namespace Shader.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("CashTransactionId")
                         .HasColumnType("int");
 
                     b.Property<int>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberOfCages")
-                        .HasColumnType("int");
+                    b.Property<decimal>("NumberOfCages")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PriceOfKiloGram")
                         .HasColumnType("decimal(18,2)");
@@ -56,14 +62,23 @@ namespace Shader.Migrations
 
             modelBuilder.Entity("ClientTransactionFruit", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ClientTransactionId")
                         .HasColumnType("int");
 
                     b.Property<int>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberOfCages")
-                        .HasColumnType("int");
+                    b.Property<decimal>("NumberOfCages")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PriceOfKiloGram")
                         .HasColumnType("decimal(18,2)");
@@ -71,7 +86,9 @@ namespace Shader.Migrations
                     b.Property<decimal>("WeightInKilograms")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("ClientTransactionId", "FruitId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientTransactionId");
 
                     b.HasIndex("FruitId");
 
@@ -192,7 +209,7 @@ namespace Shader.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("DiscountAmount")
+                    b.Property<decimal?>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("FruitId")
@@ -201,7 +218,7 @@ namespace Shader.Migrations
                     b.Property<decimal>("RemainingAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("RemainingMortgageAmount")
+                    b.Property<decimal?>("RemainingMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<TimeOnly>("Time")
@@ -213,7 +230,7 @@ namespace Shader.Migrations
                     b.Property<decimal>("TotalCageMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("TotalCageMortgageAmountPaid")
+                    b.Property<decimal?>("TotalCageMortgageAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -272,14 +289,8 @@ namespace Shader.Migrations
                     b.Property<bool>("IsCageHasMortgage")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("NumberOfKilogramsSold")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("NumberOfMortgagePaidCages")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("PriceOfKilogramsSold")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("RemainingCages")
                         .HasColumnType("int");

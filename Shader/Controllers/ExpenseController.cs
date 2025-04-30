@@ -19,13 +19,13 @@ namespace Shader.Controllers
         public async Task<IActionResult> GetExpensesByDateRange
             ([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate, [FromQuery] TimeOnly? startTime, [FromQuery] TimeOnly? endTime)
         {
-            if ((startDate is null || endDate is null) && (startDate is not null || endDate is not null) && (startTime is null && endTime is null))
+            if ((startDate is null || endDate is null) && (startDate is not null || endDate is not null))
                 return BadRequest("Start date and end date are required.");
 
             if(startDate >= endDate)
                 return BadRequest("Start date must be less than end date.");
 
-            if ((startTime is null || endTime is null) && (startTime is not null || endTime is not null) && (startDate is null && endDate is null))
+            if ((startTime is null || endTime is null) && (startTime is not null || endTime is not null))
                 return BadRequest("Start time and end time are required.");
 
             if (startTime >= endTime)
@@ -63,8 +63,8 @@ namespace Shader.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (expenseDto.Amount <= 0) return BadRequest("Amount must be greater than zero.");
             var result = await _expenseService.AddExpenseAsync(expenseDto);
-            if (!result) return StatusCode(500, "An error occurred while adding the expense.");
-            return NoContent();
+            if (result is null) return StatusCode(500, "An error occurred while adding the expense.");
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -73,8 +73,8 @@ namespace Shader.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (expenseDto.Amount <= 0) return BadRequest("Amount must be greater than zero.");
             var result = await _expenseService.UpdateExpenseAsync(id, expenseDto);
-            if (!result) return NotFound();
-            return NoContent();
+            if (result is null) return NotFound();
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]

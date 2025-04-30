@@ -6,8 +6,8 @@ namespace Shader.Services.Abstraction
     {
         Task<RSupplierDTO> GetSupplierByIdAsync(int id);
         Task<IEnumerable<RSupplierDTO>> GetAllSuppliersAsync();
-        Task<bool> AddSupplierAsync(WSupplierDTO supplier);
-        Task<bool> UpdateSupplierAsync(int id, WSupplierDTO supplier);
+        Task<RSupplierDTO> AddSupplierAsync(WSupplierDTO supplier);
+        Task<RSupplierDTO> UpdateSupplierAsync(int id, WSupplierDTO supplier);
         Task<bool> DeleteSupplierAsync(int id);
     }
 }

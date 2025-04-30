@@ -35,8 +35,8 @@ namespace Shader.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _clientService.AddClientAsync(dto);
-            if (!result) return StatusCode(500, "An error occurred while adding the client.");
-            return NoContent();
+            if (result is null) return StatusCode(500, "An error occurred while adding the client.");
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -44,8 +44,8 @@ namespace Shader.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _clientService.UpdateClientAsync(id, dto);
-            if (!result) return NotFound();
-            return NoContent();
+            if (result is null) return NotFound();
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Shader.Data;
 using Shader.Services.Abstraction;
 using Shader.Services.Implementation;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +12,13 @@ builder.Services.AddDbContext<ShaderContext>(options =>
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IFruitService, FruitService>();
+builder.Services.AddScoped<ICashTransactionService, CashTransactionService>();
+builder.Services.AddScoped<IClientTransactionService, ClientTransactionService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{ options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -11,6 +11,6 @@
         Maintenance,
         DailySalaries,
         MonthlySalaries,
-        Other,
+        Other
     }
 }

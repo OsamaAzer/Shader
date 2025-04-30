@@ -12,26 +12,28 @@ namespace Shader.Services.Implementation
         {
             var client = await context.Clients.FindAsync(id);
             if (client == null) return null;
-            return client.ToDTO<Client, RClientDTO>();
+            return client.Map<Client, RClientDTO>();
         }
         public async Task<IEnumerable<RAllClientsDTO>> GetAllClientsAsync()
         {
-            var clientsDTO =  context.Clients.OrderBy(c => c.Name).ToDTO<Client, RAllClientsDTO>().ToList();
+            var clientsDTO =  context.Clients.OrderBy(c => c.Name).Map<Client, RAllClientsDTO>().ToList();
             return await Task.FromResult<IEnumerable<RAllClientsDTO>>(clientsDTO);
         }
-        public async Task<bool> AddClientAsync(WClientDTO dto)
+        public async Task<RClientDTO> AddClientAsync(WClientDTO dto)
         {
-            var client = dto.ToEntity<Client, WClientDTO>();
+            var client = dto.Map<WClientDTO, Client>();
             await context.Clients.AddAsync(client);
-            return await context.SaveChangesAsync() > 0;
+            await context.SaveChangesAsync();
+            return client.Map<Client, RClientDTO>();
         }
-        public async Task<bool> UpdateClientAsync(int id, WClientDTO dto)
+        public async Task<RClientDTO> UpdateClientAsync(int id, WClientDTO dto)
         {
             var existingClient = await context.Clients.FindAsync(id);
-            if (existingClient == null) return false;
-            dto.ToEntity(existingClient);
+            if (existingClient == null) return null;
+            dto.Map(existingClient);
             context.Clients.Update(existingClient);
-            return await context.SaveChangesAsync() > 0;
+            await context.SaveChangesAsync();
+            return existingClient.Map<Client, RClientDTO>();
         }
         public async Task<bool> DeleteClientAsync(int id)
         {

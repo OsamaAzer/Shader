@@ -12,35 +12,34 @@ namespace Shader.Services.Implementation
     {
         public async Task<IEnumerable<RSupplierDTO>> GetAllSuppliersAsync()
         {
-            var suppliersDTO = context.Suppliers.OrderBy(s => s.Name).ToDTO<Supplier, RSupplierDTO>().ToList();
+            var suppliersDTO = context.Suppliers.OrderBy(s => s.Name).Map<Supplier, RSupplierDTO>().ToList();
             return await Task.FromResult<IEnumerable<RSupplierDTO>>(suppliersDTO);
         }
 
         public async Task<RSupplierDTO> GetSupplierByIdAsync(int id)
         {
-            var supplier = await context.Suppliers
-                .Where(s => s.Id == id)
-                .Select(s => s.ToDTO<Supplier, RSupplierDTO>())
-                .FirstOrDefaultAsync();
+            var supplier = await context.Suppliers.FindAsync(id);
             if (supplier is null) return await Task.FromResult<RSupplierDTO>(null);
-            return supplier;
+            return supplier.Map<Supplier, RSupplierDTO>();
             //var supplier = await context.Suppliers.FindAsync(id);
             //if (supplier is null) return null;
             //return supplier.ToDTO<Supplier, SupplierDTO>();
         }
-        public async Task<bool> AddSupplierAsync(WSupplierDTO dto)
+        public async Task<RSupplierDTO> AddSupplierAsync(WSupplierDTO dto)
         {
-            Supplier supplier = dto.ToEntity<Supplier, WSupplierDTO>();
+            Supplier supplier = dto.Map<WSupplierDTO, Supplier>();
             await context.Suppliers.AddAsync(supplier);
-            return await context.SaveChangesAsync() > 0;
+            await context.SaveChangesAsync();
+            return supplier.Map<Supplier, RSupplierDTO>();
         }
-        public async Task<bool> UpdateSupplierAsync(int id, WSupplierDTO dto)
+        public async Task<RSupplierDTO> UpdateSupplierAsync(int id, WSupplierDTO dto)
         {
             var existingSupplier = await context.Suppliers.FindAsync(id);
-            if (existingSupplier is null) return false;
-            dto.ToEntity(existingSupplier);
+            if (existingSupplier is null) return null;
+            dto.Map(existingSupplier);
             context.Suppliers.Update(existingSupplier);
-            return await context.SaveChangesAsync() > 0;
+            await context.SaveChangesAsync();
+            return existingSupplier.Map<Supplier, RSupplierDTO>();
         }
         public async Task<bool> DeleteSupplierAsync(int id)
         {

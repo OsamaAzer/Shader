@@ -8,8 +8,6 @@ namespace Shader.Data
         public DbSet<Fruit> Fruits { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Client> Clients { get; set; }
-        public DbSet<SupplierTransaction> SupplierTransactions { get; set; }
-        public DbSet<SupplierTransactionFruit> SupplierTransactionFruits { get; set; }
         public DbSet<ClientTransaction> ClientTransactions { get; set; }
         public DbSet<ClientTransactionFruit> ClientTransactionFruits { get; set; }
         public DbSet<CashTransaction> CashTransactions { get; set; }
@@ -18,15 +16,8 @@ namespace Shader.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<SupplierTransactionFruit>()
-                .HasOne(stf => stf.SupplierTransaction)
-                .WithMany(st => st.SupplierTransactionFruits)
-                .HasForeignKey(stf => stf.SupplierTransactionId);
-
-            modelBuilder.Entity<SupplierTransactionFruit>()
-                .HasOne(stf => stf.Fruit)
-                .WithMany()
-                .HasForeignKey(stf => stf.FruitId);
+            modelBuilder.Entity<ClientTransactionFruit>()
+                .HasKey(ctf => new { ctf.ClientTransactionId, ctf.FruitId });
 
             modelBuilder.Entity<ClientTransactionFruit>()
                 .HasOne(ctf => ctf.ClientTransaction)

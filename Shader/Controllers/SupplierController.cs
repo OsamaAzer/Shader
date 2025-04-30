@@ -18,14 +18,14 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RSupplierDTO>>> GetAllSuppliers()
+        public async Task<IActionResult> GetAllSuppliers()
         {
             var suppliers = await _supplierService.GetAllSuppliersAsync();
             return Ok(suppliers);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<RSupplierDTO>> GetSupplierById(int id)
+        public async Task<IActionResult> GetSupplierById(int id)
         {
             var supplier = await _supplierService.GetSupplierByIdAsync(id);
             if (supplier == null) return NotFound();
@@ -33,26 +33,26 @@ namespace Shader.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddSupplier([FromBody] WSupplierDTO supplierDto)
+        public async Task<IActionResult> AddSupplier([FromBody] WSupplierDTO supplierDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _supplierService.AddSupplierAsync(supplierDto);
-            if (!result) return StatusCode(500, "An error occurred while adding the supplier.");
+            if (result is null) return StatusCode(500, "An error occurred while adding the supplier.");
             //return CreatedAtAction(nameof(GetSupplierById), new { id = supplierDto.Id }, supplierDto);
-            return NoContent();
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateSupplier(int id, [FromBody] WSupplierDTO supplierDto)
+        public async Task<IActionResult> UpdateSupplier(int id, [FromBody] WSupplierDTO supplierDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _supplierService.UpdateSupplierAsync(id, supplierDto);
-            if (!result) return NotFound();
-            return NoContent();
+            if (result is null) return NotFound();
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteSupplier(int id)
+        public async Task<IActionResult> DeleteSupplier(int id)
         {
             var result = await _supplierService.DeleteSupplierAsync(id);
             if (!result) return NotFound();

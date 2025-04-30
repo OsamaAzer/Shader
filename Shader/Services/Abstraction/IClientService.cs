@@ -7,8 +7,8 @@ namespace Shader.Services.Abstraction
     {
         Task<RClientDTO> GetClientByIdAsync(int id);
         Task<IEnumerable<RAllClientsDTO>> GetAllClientsAsync();
-        Task<bool> AddClientAsync(WClientDTO dto);
-        Task<bool> UpdateClientAsync(int id, WClientDTO dto);
+        Task<RClientDTO> AddClientAsync(WClientDTO dto);
+        Task<RClientDTO> UpdateClientAsync(int id, WClientDTO dto);
         Task<bool> DeleteClientAsync(int id);
     }
 }

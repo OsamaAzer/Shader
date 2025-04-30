@@ -13,6 +13,6 @@ namespace Shader.Data.Entities
         [RegularExpression(@"^(?:\+20|0)?(1[0-2]|15)\d{8}$", ErrorMessage = "Invalid Egyptian phone number.")]
         public string? PhoneNumber { get; set; }
         public DateOnly? DateOfLastTransaction { get; set; } = null;
-        ICollection<SupplierTransaction> Transactions { get; set; } = new List<SupplierTransaction>();
+        public ICollection<Fruit> Fruits { get; set; } = new List<Fruit>();
     }
 }

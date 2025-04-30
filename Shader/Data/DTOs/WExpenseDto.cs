@@ -11,7 +11,5 @@ namespace Shader.Data.DTOs
         public decimal Amount { get; set; }
         [MaxLength(250)]
         public string? Description { get; set; }
-        public DateOnly? date { get; set; }
-        public TimeOnly? time { get; set; }
     }
 }

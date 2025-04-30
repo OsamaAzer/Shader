@@ -13,7 +13,7 @@ namespace Shader.Data.Entities
         public string City { get; set; }
         [RegularExpression(@"^(?:\+20|0)?(1[0-2]|15)\d{8}$", ErrorMessage = "Invalid Egyptian phone number.")]
         public string PhoneNumber { get; set; }
-        public DateOnly? DateOfLastTransaction { get; set; }
+        public DateOnly? DateOfLastTransaction { get; set; } 
         public Status Status { get; set; }
         public decimal TotalAmount { get; set; } // المبلغ الكلي
         public decimal TotalAmountPaid { get; set; }
@@ -25,6 +25,6 @@ namespace Shader.Data.Entities
         public int TotalNumberOfCagesTook { get; set; }
         public int TotalNumberOfCagesReturned { get; set; }
         public int TotalNumberOfUnReturnedCages { get; set; }
-        ICollection<ClientTransaction> Transactions { get; set; } = new List<ClientTransaction>();
+        public ICollection<ClientTransaction> Transactions { get; set; } = new List<ClientTransaction>();
     }
 }

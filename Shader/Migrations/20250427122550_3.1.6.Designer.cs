@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shader.Data;
 
@@ -11,9 +12,11 @@ using Shader.Data;
 namespace Shader.Migrations
 {
     [DbContext(typeof(ShaderContext))]
-    partial class ShaderContextModelSnapshot : ModelSnapshot
+    [Migration("20250427122550_3.1.6")]
+    partial class _316
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,8 +65,8 @@ namespace Shader.Migrations
                     b.Property<int>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberOfCages")
-                        .HasColumnType("int");
+                    b.Property<decimal>("NumberOfCages")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PriceOfKiloGram")
                         .HasColumnType("decimal(18,2)");
@@ -192,7 +195,7 @@ namespace Shader.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("DiscountAmount")
+                    b.Property<decimal?>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("FruitId")
@@ -213,7 +216,7 @@ namespace Shader.Migrations
                     b.Property<decimal>("TotalCageMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("TotalCageMortgageAmountPaid")
+                    b.Property<decimal?>("TotalCageMortgageAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");

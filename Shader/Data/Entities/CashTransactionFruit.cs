@@ -7,5 +7,7 @@ public class CashTransactionFruit
     public CashTransaction CashTransaction { get; set; }
     public int FruitId { get; set; }
     public Fruit Fruit { get; set; }
-    public int NumberOfCages { get; set; } // عدد القفص
+    public int NumberOfCages { get; set; } 
+    public decimal WeightInKilograms { get; set; }
+    public decimal PriceOfKiloGram { get; set; }
 }

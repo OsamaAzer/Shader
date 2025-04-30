@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shader.Data;
 
@@ -11,9 +12,11 @@ using Shader.Data;
 namespace Shader.Migrations
 {
     [DbContext(typeof(ShaderContext))]
-    partial class ShaderContextModelSnapshot : ModelSnapshot
+    [Migration("20250421122809_3rd.1.2")]
+    partial class _3rd12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,14 +33,17 @@ namespace Shader.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("CashTransactionId")
                         .HasColumnType("int");
 
                     b.Property<int>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberOfCages")
-                        .HasColumnType("int");
+                    b.Property<decimal>("NumberOfCages")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PriceOfKiloGram")
                         .HasColumnType("decimal(18,2)");
@@ -56,14 +62,23 @@ namespace Shader.Migrations
 
             modelBuilder.Entity("ClientTransactionFruit", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ClientTransactionId")
                         .HasColumnType("int");
 
                     b.Property<int>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberOfCages")
-                        .HasColumnType("int");
+                    b.Property<decimal>("NumberOfCages")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PriceOfKiloGram")
                         .HasColumnType("decimal(18,2)");
@@ -71,7 +86,9 @@ namespace Shader.Migrations
                     b.Property<decimal>("WeightInKilograms")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("ClientTransactionId", "FruitId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientTransactionId");
 
                     b.HasIndex("FruitId");
 
@@ -192,7 +209,7 @@ namespace Shader.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("DiscountAmount")
+                    b.Property<decimal?>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("FruitId")
@@ -201,7 +218,7 @@ namespace Shader.Migrations
                     b.Property<decimal>("RemainingAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("RemainingMortgageAmount")
+                    b.Property<decimal?>("RemainingMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<TimeOnly>("Time")
@@ -213,7 +230,7 @@ namespace Shader.Migrations
                     b.Property<decimal>("TotalCageMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("TotalCageMortgageAmountPaid")
+                    b.Property<decimal?>("TotalCageMortgageAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -261,7 +278,7 @@ namespace Shader.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("CageMortgageValue")
+                    b.Property<decimal?>("CageMortgageValue")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("FruitName")
@@ -269,36 +286,37 @@ namespace Shader.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsCageHasMortgage")
+                    b.Property<bool?>("IsCageHasMortgage")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("NumberOfKilogramsSold")
+                    b.Property<int?>("NumberOfMortgagePaidCages")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RemainingCages")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReturnedCages")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoldCages")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("TotalAmountReceived")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("NumberOfMortgagePaidCages")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("PriceOfKilogramsSold")
+                    b.Property<decimal?>("TotalAmountRemain")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("RemainingCages")
+                    b.Property<decimal?>("TotalAmountSold")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("TotalCages")
                         .HasColumnType("int");
 
-                    b.Property<int>("SoldCages")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalCages")
+                    b.Property<int?>("UnReturnedCages")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SupplierId");
 
                     b.ToTable("Fruits");
                 });
@@ -330,6 +348,64 @@ namespace Shader.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Suppliers");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.SupplierTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FruitId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("Time")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FruitId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("SupplierTransactions");
+                });
+
+            modelBuilder.Entity("SupplierTransactionFruit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FruitId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumberOfCagesReceived")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierTransactionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FruitId");
+
+                    b.HasIndex("SupplierTransactionId");
+
+                    b.ToTable("SupplierTransactionFruits");
                 });
 
             modelBuilder.Entity("CashTransactionFruit", b =>
@@ -380,7 +456,7 @@ namespace Shader.Migrations
             modelBuilder.Entity("Shader.Data.Entities.ClientTransaction", b =>
                 {
                     b.HasOne("Shader.Data.Entities.Client", "Client")
-                        .WithMany("Transactions")
+                        .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -392,10 +468,14 @@ namespace Shader.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("Shader.Data.Entities.Fruit", b =>
+            modelBuilder.Entity("Shader.Data.Entities.SupplierTransaction", b =>
                 {
+                    b.HasOne("Shader.Data.Entities.Fruit", null)
+                        .WithMany("SupplierTransactions")
+                        .HasForeignKey("FruitId");
+
                     b.HasOne("Shader.Data.Entities.Supplier", "Supplier")
-                        .WithMany("Fruits")
+                        .WithMany()
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -403,14 +483,28 @@ namespace Shader.Migrations
                     b.Navigation("Supplier");
                 });
 
+            modelBuilder.Entity("SupplierTransactionFruit", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Fruit", "Fruit")
+                        .WithMany()
+                        .HasForeignKey("FruitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shader.Data.Entities.SupplierTransaction", "SupplierTransaction")
+                        .WithMany("SupplierTransactionFruits")
+                        .HasForeignKey("SupplierTransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Fruit");
+
+                    b.Navigation("SupplierTransaction");
+                });
+
             modelBuilder.Entity("Shader.Data.Entities.CashTransaction", b =>
                 {
                     b.Navigation("CashTransactionFruits");
-                });
-
-            modelBuilder.Entity("Shader.Data.Entities.Client", b =>
-                {
-                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Shader.Data.Entities.ClientTransaction", b =>
@@ -423,11 +517,13 @@ namespace Shader.Migrations
                     b.Navigation("CashTransactions");
 
                     b.Navigation("ClientTransactions");
+
+                    b.Navigation("SupplierTransactions");
                 });
 
-            modelBuilder.Entity("Shader.Data.Entities.Supplier", b =>
+            modelBuilder.Entity("Shader.Data.Entities.SupplierTransaction", b =>
                 {
-                    b.Navigation("Fruits");
+                    b.Navigation("SupplierTransactionFruits");
                 });
 #pragma warning restore 612, 618
         }
