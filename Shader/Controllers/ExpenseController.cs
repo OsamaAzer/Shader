@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Shader.Data.DTOs;
+using Shader.Data.Dtos.Expense;
 using Shader.Services.Abstraction;
 
 namespace Shader.Controllers
@@ -15,34 +15,36 @@ namespace Shader.Controllers
             _expenseService = expenseService;
         }
 
-        [HttpGet("search-with-range")]
+        [HttpGet("range")]
         public async Task<IActionResult> GetExpensesByDateRange
-            ([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate, [FromQuery] TimeOnly? startTime, [FromQuery] TimeOnly? endTime)
+            ([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
         {
-            if ((startDate is null || endDate is null) && (startDate is not null || endDate is not null))
-                return BadRequest("Start date and end date are required.");
+            try
+            {
+                var expenses = await _expenseService.GetExpensesByDateAndTimeRangeAsync(startDate, endDate);
+                return Ok(expenses);
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(ex.Message);
+            }
 
-            if(startDate >= endDate)
-                return BadRequest("Start date must be less than end date.");
-
-            if ((startTime is null || endTime is null) && (startTime is not null || endTime is not null))
-                return BadRequest("Start time and end time are required.");
-
-            if (startTime >= endTime)
-                return BadRequest("Start time must be less than end time.");
-
-            var expenses = await _expenseService.GetExpensesByDateAndTimeRangeAsync(startDate, endDate, startTime, endTime);
-            return Ok(expenses);
         }
 
-        [HttpGet("get-specific-date")]
+        [HttpGet("date")]
         public async Task<IActionResult> GetExpensesByDate([FromQuery] DateOnly date)
         {
             var expenses = await _expenseService.GetExpensesByDateAsync(date);
             return Ok(expenses);
         }
-
-        [HttpGet("get-all")]
+        [HttpGet("today")]
+        public async Task<IActionResult> GetTodayExpenses()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var expenses = await _expenseService.GetExpensesByDateAsync(today);
+            return Ok(expenses);
+        }
+        [HttpGet]
         public async Task<IActionResult> GetAllExpenses()
         {
             var expenses = await _expenseService.GetAllExpensesAsync();
@@ -52,13 +54,19 @@ namespace Shader.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetExpenseById(int id)
         {
-            var expense = await _expenseService.GetExpenseByIdAsync(id);
-            if (expense == null) return NotFound();
-            return Ok(expense);
+            try
+            {
+                var expense = await _expenseService.GetExpenseByIdAsync(id);
+                return Ok(expense);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddExpense([FromBody] WExpenseDTO expenseDto)
+        public async Task<IActionResult> AddExpense([FromBody] WExpenseDto expenseDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (expenseDto.Amount <= 0) return BadRequest("Amount must be greater than zero.");
@@ -68,21 +76,34 @@ namespace Shader.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateExpense(int id, [FromBody] WExpenseDTO expenseDto)
+        public async Task<IActionResult> UpdateExpense(int id, [FromBody] WExpenseDto expenseDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (expenseDto.Amount <= 0) return BadRequest("Amount must be greater than zero.");
-            var result = await _expenseService.UpdateExpenseAsync(id, expenseDto);
-            if (result is null) return NotFound();
-            return Ok(result);
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = await _expenseService.UpdateExpenseAsync(id, expenseDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExpense(int id)
         {
-            var result = await _expenseService.DeleteExpenseAsync(id);
-            if (!result) return NotFound();
-            return NoContent();
+            try
+            {
+                var result = await _expenseService.DeleteExpenseAsync(id);
+                if (!result) return BadRequest("Something went wrong while deleting expense!");
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
     }
 }

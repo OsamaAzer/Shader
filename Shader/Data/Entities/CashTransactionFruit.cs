@@ -2,7 +2,6 @@
 
 public class CashTransactionFruit
 {
-    public int Id { get; set; }
     public int CashTransactionId { get; set; }
     public CashTransaction CashTransaction { get; set; }
     public int FruitId { get; set; }

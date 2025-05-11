@@ -24,12 +24,6 @@ namespace Shader.Migrations
 
             modelBuilder.Entity("CashTransactionFruit", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("CashTransactionId")
                         .HasColumnType("int");
 
@@ -45,9 +39,7 @@ namespace Shader.Migrations
                     b.Property<decimal>("WeightInKilograms")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("CashTransactionId");
+                    b.HasKey("CashTransactionId", "FruitId");
 
                     b.HasIndex("FruitId");
 
@@ -86,8 +78,8 @@ namespace Shader.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -95,10 +87,10 @@ namespace Shader.Migrations
                     b.Property<int?>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly>("Time")
-                        .HasColumnType("time");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
-                    b.Property<decimal>("TotalAmount")
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -116,30 +108,31 @@ namespace Shader.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly?>("DateOfLastTransaction")
-                        .HasColumnType("date");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalDiscountAmount")
@@ -150,15 +143,6 @@ namespace Shader.Migrations
 
                     b.Property<decimal>("TotalMortgageAmountPaid")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("TotalNumberOfCagesReturned")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalNumberOfCagesTook")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalNumberOfUnReturnedCages")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalRemainingAmount")
                         .HasColumnType("decimal(18,2)");
@@ -171,6 +155,36 @@ namespace Shader.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("Shader.Data.Entities.ClientPayments", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("ClientPayments");
+                });
+
             modelBuilder.Entity("Shader.Data.Entities.ClientTransaction", b =>
                 {
                     b.Property<int>("Id")
@@ -179,18 +193,14 @@ namespace Shader.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("AmountPaid")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
@@ -198,22 +208,16 @@ namespace Shader.Migrations
                     b.Property<int?>("FruitId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("RemainingAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
-                    b.Property<decimal>("RemainingMortgageAmount")
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<TimeOnly>("Time")
-                        .HasColumnType("time");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalCageMortgageAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalCageMortgageAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -236,14 +240,14 @@ namespace Shader.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeOnly>("Time")
-                        .HasColumnType("time");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -264,19 +268,24 @@ namespace Shader.Migrations
                     b.Property<decimal>("CageMortgageValue")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FruitName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsBilled")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsCageHasMortgage")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("NumberOfKilogramsSold")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("NumberOfMortgagePaidCages")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("PriceOfKilogramsSold")
                         .HasColumnType("decimal(18,2)");
@@ -290,6 +299,9 @@ namespace Shader.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SupplierBillId")
+                        .HasColumnType("int");
+
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
@@ -298,9 +310,192 @@ namespace Shader.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SupplierBillId");
+
                     b.HasIndex("SupplierId");
 
                     b.ToTable("Fruits");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.Merchant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("CurrentAmountBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CurrentMortgageAmountBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PurchaseAmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchaseTotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchaseTotalDiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchaseTotalMortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchaseTotalMortgageAmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchaseTotalRemainingAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PurchaseTotalRemainingMortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingAmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingTotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingTotalDiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingTotalMortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingTotalMortgageAmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingTotalRemainingAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SellingTotalRemainingMortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Merchants");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MerchantPayments", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MerchantId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TransactionType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MerchantId");
+
+                    b.ToTable("MerchantPayments");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MerchantTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MerchantId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalCageMortgageAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TransactionType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MerchantId");
+
+                    b.ToTable("MerchantTransactions");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MerchantTransactionFruit", b =>
+                {
+                    b.Property<int>("MerchantTransactionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FruitId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumberOfCages")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PriceOfKiloGram")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("WeightInKilograms")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("MerchantTransactionId", "FruitId");
+
+                    b.HasIndex("FruitId");
+
+                    b.ToTable("MerchantTransactionFruits");
                 });
 
             modelBuilder.Entity("Shader.Data.Entities.Supplier", b =>
@@ -313,16 +508,14 @@ namespace Shader.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly?>("DateOfLastTransaction")
-                        .HasColumnType("date");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
@@ -330,6 +523,55 @@ namespace Shader.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Suppliers");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.SupplierBill", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CommissionRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MshalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MyCommisionValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NylonValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ValueDueToSupplier")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("SupplierBills");
                 });
 
             modelBuilder.Entity("CashTransactionFruit", b =>
@@ -377,6 +619,17 @@ namespace Shader.Migrations
                         .HasForeignKey("FruitId");
                 });
 
+            modelBuilder.Entity("Shader.Data.Entities.ClientPayments", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Client", "Client")
+                        .WithMany("Payments")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+                });
+
             modelBuilder.Entity("Shader.Data.Entities.ClientTransaction", b =>
                 {
                     b.HasOne("Shader.Data.Entities.Client", "Client")
@@ -394,8 +647,64 @@ namespace Shader.Migrations
 
             modelBuilder.Entity("Shader.Data.Entities.Fruit", b =>
                 {
+                    b.HasOne("Shader.Data.Entities.SupplierBill", null)
+                        .WithMany("Fruits")
+                        .HasForeignKey("SupplierBillId");
+
                     b.HasOne("Shader.Data.Entities.Supplier", "Supplier")
                         .WithMany("Fruits")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MerchantPayments", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Merchant", "Merchant")
+                        .WithMany("Payments")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Merchant");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MerchantTransaction", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Merchant", "Merchant")
+                        .WithMany("Transactions")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Merchant");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MerchantTransactionFruit", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Fruit", "Fruit")
+                        .WithMany()
+                        .HasForeignKey("FruitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shader.Data.Entities.MerchantTransaction", "MerchantTransaction")
+                        .WithMany("MerchantTransactionFruits")
+                        .HasForeignKey("MerchantTransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Fruit");
+
+                    b.Navigation("MerchantTransaction");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.SupplierBill", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Supplier", "Supplier")
+                        .WithMany("SupplierBills")
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -410,6 +719,8 @@ namespace Shader.Migrations
 
             modelBuilder.Entity("Shader.Data.Entities.Client", b =>
                 {
+                    b.Navigation("Payments");
+
                     b.Navigation("Transactions");
                 });
 
@@ -425,7 +736,26 @@ namespace Shader.Migrations
                     b.Navigation("ClientTransactions");
                 });
 
+            modelBuilder.Entity("Shader.Data.Entities.Merchant", b =>
+                {
+                    b.Navigation("Payments");
+
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MerchantTransaction", b =>
+                {
+                    b.Navigation("MerchantTransactionFruits");
+                });
+
             modelBuilder.Entity("Shader.Data.Entities.Supplier", b =>
+                {
+                    b.Navigation("Fruits");
+
+                    b.Navigation("SupplierBills");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.SupplierBill", b =>
                 {
                     b.Navigation("Fruits");
                 });

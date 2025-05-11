@@ -1,15 +1,17 @@
-﻿using Shader.Data.DTOs;
+﻿using Shader.Data.Dtos.CashTransaction;
 using Shader.Data.Entities;
 
 namespace Shader.Services.Abstraction
 {
     public interface ICashTransactionService
     {
-        Task<CashTransaction> AddCashTransactionAsync(WCashTransactionDTO cashTransactionDTO);
-        Task<CashTransaction> UpdateCashTransactionAsync(int id, WCashTransactionDTO cashTransactionDTO);
+        Task<RCashTDto> AddCashTransactionAsync(WCashTDto cashTransactionDto);
+        Task<RCashTDto> UpdateCashTransactionAsync(int id, WCashTDto cashTransactionDto);
         Task<bool> DeleteCashTransactionAsync(int id);
-        Task<CashTransaction> GetCashTransactionByIdAsync(int id);
-        Task<IEnumerable<CashTransaction>> GetAllCashTransactionsAsync();
-        Task<IEnumerable<CashTransaction>> GetCashTransactionsByDateAndTimeRangeAsync(DateOnly? startDate, DateOnly? endDate, TimeOnly? startTime, TimeOnly? endTime);
+        Task<RCashTDto> GetCashTransactionByIdAsync(int id);
+        Task<IEnumerable<RCashTDto>> GetAllCashTransactionsAsync();
+        Task<IEnumerable<RCashTDto>> GetCashTransactionsByDateAsync(DateOnly date);
+        Task<IEnumerable<RCashTDto>> GetCashTransactionsByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate);
     }
 }

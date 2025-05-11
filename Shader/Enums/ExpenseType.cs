@@ -2,7 +2,6 @@
 {
     public enum ExpenseType
     {
-        None = 0,
         Transportation = 1,
         Rent,
         Electricity,

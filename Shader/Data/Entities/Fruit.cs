@@ -5,16 +5,16 @@ namespace Shader.Data.Entities
 {
     public class Fruit
     {
-        [Key]
         public int Id { get; set; }
-        [Required, MaxLength(100)]
         public string FruitName { get; set; }
         public FruitStatus Status { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now   ;
         public int SupplierId { get; set; }
         public Supplier Supplier { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public bool IsCageHasMortgage { get; set; } = false;
+        public bool IsBilled { get; set; } = false; // هل تم إصدار فاتورة للفواكه
         public decimal CageMortgageValue { get; set; } // قيمة رهن القفص
-        public int NumberOfMortgagePaidCages { get; set; } // عدد القفص المدفوع الرهن
         public int TotalCages { get; set; }
         public int SoldCages { get; set; }
         public int RemainingCages { get; set; }
@@ -23,5 +23,6 @@ namespace Shader.Data.Entities
         public ICollection<ClientTransaction> ClientTransactions { get; set; } = new List<ClientTransaction>(); // المعاملات المرتبطة بالفواكه
         public ICollection<CashTransaction> CashTransactions { get; set; } = new List<CashTransaction>(); // المعاملات المرتبطة بالفواكه
 
+        // todo : flag to check if the fruit has a bill
     }
 }

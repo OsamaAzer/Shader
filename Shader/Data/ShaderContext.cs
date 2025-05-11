@@ -8,8 +8,14 @@ namespace Shader.Data
         public DbSet<Fruit> Fruits { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Client> Clients { get; set; }
+        public DbSet<SupplierBill> SupplierBills { get; set; }
+        public DbSet<Merchant> Merchants { get; set; }
         public DbSet<ClientTransaction> ClientTransactions { get; set; }
+        public DbSet<ClientPayments> ClientPayments { get; set; }
         public DbSet<ClientTransactionFruit> ClientTransactionFruits { get; set; }
+        public DbSet<MerchantTransaction> MerchantTransactions { get; set; }
+        public DbSet<MerchantPayments> MerchantPayments { get; set; }
+        public DbSet<MerchantTransactionFruit> MerchantTransactionFruits { get; set; }
         public DbSet<CashTransaction> CashTransactions { get; set; }
         public DbSet<CashTransactionFruit> CashTransactionFruits { get; set; }
         public DbSet<Expense> Expenses { get; set; }
@@ -28,7 +34,23 @@ namespace Shader.Data
                 .HasOne(ctf => ctf.Fruit)
                 .WithMany()
                 .HasForeignKey(ctf => ctf.FruitId);
-            
+
+            modelBuilder.Entity<MerchantTransactionFruit>()
+                .HasKey(ctf => new { ctf.MerchantTransactionId, ctf.FruitId });
+
+            modelBuilder.Entity<MerchantTransactionFruit>()
+                .HasOne(ctf => ctf.MerchantTransaction)
+                .WithMany(ct => ct.MerchantTransactionFruits)
+                .HasForeignKey(ctf => ctf.MerchantTransactionId);
+
+            modelBuilder.Entity<MerchantTransactionFruit>()
+                .HasOne(ctf => ctf.Fruit)
+                .WithMany()
+                .HasForeignKey(ctf => ctf.FruitId);
+
+            modelBuilder.Entity<CashTransactionFruit>()
+                .HasKey(ctf => new { ctf.CashTransactionId, ctf.FruitId });
+
             modelBuilder.Entity<CashTransactionFruit>()
                 .HasOne(ctf => ctf.CashTransaction)
                 .WithMany(ct => ct.CashTransactionFruits)
@@ -38,10 +60,6 @@ namespace Shader.Data
                 .HasOne(ctf => ctf.Fruit)
                 .WithMany()
                 .HasForeignKey(ctf => ctf.FruitId);
-            
-            //modelBuilder.Entity<Expense>()
-            //    .Property(e => e.Amount)
-            //    .HasColumnType("decimal(18, 2)");
         }
     }
 }

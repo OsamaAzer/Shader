@@ -15,6 +15,9 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IFruitService, FruitService>();
 builder.Services.AddScoped<ICashTransactionService, CashTransactionService>();
 builder.Services.AddScoped<IClientTransactionService, ClientTransactionService>();
+builder.Services.AddScoped<ISupplierBillService, SupplierBillService>();
+builder.Services.AddScoped<IMerchantService, MerchantService>();
+builder.Services.AddScoped<IMerchantTransactionService, MerchantTransactionService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });

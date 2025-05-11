@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Shader.Services.Abstraction;
-using Shader.Data.DTOs;
+using Shader.Data.Dtos.CashTransaction;
 
 namespace Shader.Controllers
 {
@@ -16,46 +16,69 @@ namespace Shader.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddCashTransaction([FromBody] WCashTransactionDTO cashTransactionDTO)
+        public async Task<IActionResult> AddCashTransaction([FromBody] WCashTDto cashTransactionDto)
         {
-            if (cashTransactionDTO == null)
-                return BadRequest("Invalid data.");
-
-            var result = await _cashTransactionService.AddCashTransactionAsync(cashTransactionDTO);
-            return Ok(result);
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = await _cashTransactionService.AddCashTransactionAsync(cashTransactionDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCashTransaction(int id, [FromBody] WCashTransactionDTO cashTransactionDTO)
+        public async Task<IActionResult> UpdateCashTransaction(int id, [FromBody] WCashTDto cashTransactionDto)
         {
-            if (cashTransactionDTO == null)
-                return BadRequest("Invalid data.");
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = await _cashTransactionService.UpdateCashTransactionAsync(id, cashTransactionDto);
+                if (result == null) return NotFound();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
 
-            var result = await _cashTransactionService.UpdateCashTransactionAsync(id, cashTransactionDTO);
-            if (result == null)
-                return NotFound();
 
-            return Ok(result);
+
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCashTransaction(int id)
         {
-            var result = await _cashTransactionService.DeleteCashTransactionAsync(id);
-            if (!result)
-                return NotFound();
+            try
+            {
+                var result = await _cashTransactionService.DeleteCashTransactionAsync(id);
+                if (!result) return BadRequest("Something went wrong while deleting transaction!");
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCashTransactionById(int id)
         {
-            var result = await _cashTransactionService.GetCashTransactionByIdAsync(id);
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
+            try
+            {
+                var result = await _cashTransactionService.GetCashTransactionByIdAsync(id);
+                return Ok(result);
+            }
+            catch(Exception ex) 
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpGet]
@@ -65,19 +88,33 @@ namespace Shader.Controllers
             return Ok(result);
         }
 
-        [HttpGet("by-date-range")]
-        public async Task<IActionResult> GetCashTransactionsByDateRange([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate, [FromQuery] TimeOnly? startTime, [FromQuery] TimeOnly? endTime)
+        [HttpGet("today")]
+        public async Task<IActionResult> GetTodayCashTransactions()
         {
-            if ((startDate is null || endDate is null) && (startDate is not null || endDate is not null))
-                return BadRequest("Both dates are required!!");
-            if ((startTime is null || endTime is null) && (startTime is not null || endTime is not null))
-                return BadRequest("Both times are required!!");
-            if(startDate >= endDate)
-                return BadRequest("StartDate must be less than EndDate!");
-            if (startTime >= endTime)
-                return BadRequest("StartTime must be less than EndTime!");
-            var result = await _cashTransactionService.GetCashTransactionsByDateAndTimeRangeAsync(startDate, endDate, startTime, endTime);
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var result = await _cashTransactionService.GetCashTransactionsByDateAsync(today);
             return Ok(result);
+        }
+
+        [HttpGet("date")]
+        public async Task<IActionResult> GetCashTransactionsByDate([FromQuery] DateOnly date)
+        {
+            var result = await _cashTransactionService.GetCashTransactionsByDateAsync(date);
+            return Ok(result);
+        }
+
+        [HttpGet("range")]
+        public async Task<IActionResult> GetCashTransactionsByDateRange([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        {
+            try
+            {
+                var result = await _cashTransactionService.GetCashTransactionsByDateRangeAsync(startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex) 
+            { 
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

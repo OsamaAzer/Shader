@@ -87,7 +87,7 @@ namespace Shader.Mapping
             }
             return destination;
         }
-        public static TDestination ToDTO<TSource, TDestination>(this TSource source)
+        public static TDestination ToDto<TSource, TDestination>(this TSource source)
             where TDestination : class, new()
         {
             var destination = new TDestination();
@@ -101,7 +101,7 @@ namespace Shader.Mapping
             }
             return destination;
         }
-        public static IEnumerable<TDestination> ToDTOs<TSource, TDestination>(this IEnumerable<TSource> sources)
+        public static IEnumerable<TDestination> ToDtos<TSource, TDestination>(this IEnumerable<TSource> sources)
             where TDestination : class, new()
             where TSource : class, new()
         {

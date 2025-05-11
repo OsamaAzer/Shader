@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shader.Data;
-using Shader.Data.DTOs;
+using Shader.Data.Dtos.Supplier;
 using Shader.Data.Entities;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
@@ -10,42 +10,60 @@ namespace Shader.Services.Implementation
 {
     public class SupplierService(ShaderContext context) : ISupplierService
     {
-        public async Task<IEnumerable<RSupplierDTO>> GetAllSuppliersAsync()
+        public async Task<IEnumerable<RSupplierDto>> GetAllSuppliersAsync()
         {
-            var suppliersDTO = context.Suppliers.OrderBy(s => s.Name).Map<Supplier, RSupplierDTO>().ToList();
-            return await Task.FromResult<IEnumerable<RSupplierDTO>>(suppliersDTO);
+            var suppliersDto = context.Suppliers
+                .Where(s=> !s.IsDeleted)
+                .OrderBy(s => s.Name);
+            return await Task.FromResult(suppliersDto.Map<Supplier, RSupplierDto>());
         }
+        public async Task<IEnumerable<RSupplierDto>> GetAllSuppliersWithNameAsync(string name)
+        {
+            var suppliers = await context.Suppliers
+                .Where(s => !s.IsDeleted)
+                .Where(s => s.Name.ToLower().Contains(name.ToLower()))
+                .OrderBy(s => s.Name)
+                .ToListAsync();
 
-        public async Task<RSupplierDTO> GetSupplierByIdAsync(int id)
-        {
-            var supplier = await context.Suppliers.FindAsync(id);
-            if (supplier is null) return await Task.FromResult<RSupplierDTO>(null);
-            return supplier.Map<Supplier, RSupplierDTO>();
-            //var supplier = await context.Suppliers.FindAsync(id);
-            //if (supplier is null) return null;
-            //return supplier.ToDTO<Supplier, SupplierDTO>();
+            return await Task.FromResult(suppliers.Map<Supplier, RSupplierDto>());  
         }
-        public async Task<RSupplierDTO> AddSupplierAsync(WSupplierDTO dto)
+        public async Task<RSupplierDto> GetSupplierByIdAsync(int id)
         {
-            Supplier supplier = dto.Map<WSupplierDTO, Supplier>();
+            var supplier = await context.Suppliers
+                .Where(s => s.Id == id && !s.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (supplier is null) throw new Exception($"Supplier with id:({id}) does not exist!");
+            return supplier.Map<Supplier, RSupplierDto>();
+        }
+        public async Task<RSupplierDto> AddSupplierAsync(WSupplierDto dto)
+        {
+            Supplier supplier = dto.Map<WSupplierDto, Supplier>();
             await context.Suppliers.AddAsync(supplier);
             await context.SaveChangesAsync();
-            return supplier.Map<Supplier, RSupplierDTO>();
+            return supplier.Map<Supplier, RSupplierDto>();
         }
-        public async Task<RSupplierDTO> UpdateSupplierAsync(int id, WSupplierDTO dto)
+        public async Task<RSupplierDto> UpdateSupplierAsync(int id, WSupplierDto dto)
         {
-            var existingSupplier = await context.Suppliers.FindAsync(id);
-            if (existingSupplier is null) return null;
+            var existingSupplier = await context.Suppliers
+                .Where(s => s.Id == id && !s.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (existingSupplier is null) throw new Exception($"Supplier with id:({id}) does not exist!");
             dto.Map(existingSupplier);
             context.Suppliers.Update(existingSupplier);
             await context.SaveChangesAsync();
-            return existingSupplier.Map<Supplier, RSupplierDTO>();
+            return existingSupplier.Map<Supplier, RSupplierDto>();
         }
         public async Task<bool> DeleteSupplierAsync(int id)
         {
-            var supplier = await context.Suppliers.FindAsync(id);
-            if(supplier is null) return false;
-            context.Suppliers.Remove(supplier);
+            var supplier = await context.Suppliers
+                .Where(s => s.Id == id && !s.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (supplier is null) throw new Exception($"Supplier with id:({id}) does not exist!");
+            supplier.IsDeleted = true;
+            context.Suppliers.Update(supplier);
             return await context.SaveChangesAsync() > 0;
         }
     }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shader.Data;
-using Shader.Data.DTOs;
+using Shader.Data.Dtos.Expense;
 using Shader.Data.Entities;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
@@ -10,72 +10,75 @@ namespace Shader.Services.Implementation
 {
     public class ExpenseService(ShaderContext context) : IExpenseService
     {
-        public async Task<IEnumerable<RExpenseDTO>> GetExpensesByDateAndTimeRangeAsync
-            (DateOnly? startDate, DateOnly? endDate, TimeOnly? startTime, TimeOnly? endTime)
+        public async Task<IEnumerable<RExpenseDto>> GetExpensesByDateAndTimeRangeAsync
+            (DateOnly startDate, DateOnly endDate)
         {
-            var todayDate = DateOnly.FromDateTime(DateTime.Now);
-            IQueryable<Expense> query = context.Expenses.AsQueryable();
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+            
+            var expensesDto =  context.Expenses
+                .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) >= startDate && DateOnly.FromDateTime(e.Date) <= endDate)
+                .OrderByDescending(e => e.Date)
+                .OrderByDescending(e => e.Date.Hour)
+                .Map<Expense, RExpenseDto>().ToList();
 
-            if (startDate is not null && endDate is not null)
-                query = query.Where(e => e.Date >= startDate && e.Date <= endDate);
-
-            if (startTime is not null && endTime is not null)
-                query = query.Where(e => e.Date == todayDate)
-                             .Where(e => e.Time >= startTime && e.Time <= endTime);
-
-            var expensesDTO = query.OrderByDescending(e => e.Date)
-                                   .OrderByDescending(e => e.Time)
-                                   .Map<Expense, RExpenseDTO>().ToList();
-            return await Task.FromResult<IEnumerable<RExpenseDTO>>(expensesDTO);
+            return await Task.FromResult<IEnumerable<RExpenseDto>>(expensesDto);
         }
-        public async Task<IEnumerable<RExpenseDTO>> GetExpensesByDateAsync(DateOnly date)
+        public async Task<IEnumerable<RExpenseDto>> GetExpensesByDateAsync(DateOnly date)
         {
             var expenseDto = context.Expenses
-                .Where(e => e.Date == date)
+                .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) == date)
                 .OrderByDescending(e => e.Date)
-                .OrderByDescending(e => e.Time)
-                .Map<Expense, RExpenseDTO>().ToList();
-            return await Task.FromResult<IEnumerable<RExpenseDTO>>(expenseDto);
+                .OrderByDescending(e => e.Date.Hour)
+                .Map<Expense, RExpenseDto>().ToList();
+            return await Task.FromResult<IEnumerable<RExpenseDto>>(expenseDto);
         }
-        public async Task<IEnumerable<RExpenseDTO>> GetAllExpensesAsync()
+        public async Task<IEnumerable<RExpenseDto>> GetAllExpensesAsync()
         {
-            var expensesDTO = context.Expenses
+            var expensesDto = context.Expenses
+                .Where (e => !e.IsDeleted)
                 .OrderByDescending(e => e.Date)
-                .OrderByDescending(e => e.Time)
-                .Map<Expense, RExpenseDTO>().ToList();
-            return await Task.FromResult<IEnumerable<RExpenseDTO>>(expensesDTO);
+                .OrderByDescending(e => e.Date.Hour)
+                .Map<Expense, RExpenseDto>().ToList();
+            return await Task.FromResult<IEnumerable<RExpenseDto>>(expensesDto);
         }
-        public async Task<RExpenseDTO> GetExpenseByIdAsync(int id)
+        public async Task<RExpenseDto> GetExpenseByIdAsync(int id)
         {
-            var expense = await context.Expenses.FindAsync(id);
-            if (expense is null) return null;
-            var dto = expense.Map<Expense, RExpenseDTO>();
-            if (dto is null) return await Task.FromResult<RExpenseDTO>(null);
-            return dto;
+            var expense = await context.Expenses
+                .Where(e => e.Id == id && !e.IsDeleted)
+                .FirstOrDefaultAsync();
+            if (expense is null) throw new Exception("This expense does not exist!");
+            return expense.Map<Expense, RExpenseDto>();
         }
-        public async Task<RExpenseDTO> AddExpenseAsync(WExpenseDTO dto)
+        public async Task<RExpenseDto> AddExpenseAsync(WExpenseDto dto)
         {
-            var expense = dto.Map<WExpenseDTO, Expense>();
-            expense.Date = DateOnly.FromDateTime(DateTime.Now);
-            expense.Time = TimeOnly.FromDateTime(DateTime.Now);
+            var expense = dto.Map<WExpenseDto, Expense>();
+            expense.Date = DateTime.Now;
             await context.Expenses.AddAsync(expense);
             await context.SaveChangesAsync();
-            return expense.Map<Expense, RExpenseDTO>();
+            return expense.Map<Expense, RExpenseDto>();
         }
-        public async Task<RExpenseDTO> UpdateExpenseAsync(int id, WExpenseDTO dto)
+        public async Task<RExpenseDto> UpdateExpenseAsync(int id, WExpenseDto dto)
         {
-            var existingExpense = await context.Expenses.FindAsync(id);
-            if (existingExpense is null) return null;
+            if (dto.Amount <= 0) throw new Exception("Amount must be greater than zero.");
+
+            var existingExpense = await context.Expenses
+                .Where(e => e.Id == id && !e.IsDeleted)
+                .FirstOrDefaultAsync();
+            if (existingExpense is null) throw new Exception("This expense does not exist!");
+
             dto.Map(existingExpense);
             context.Expenses.Update(existingExpense);
             await context.SaveChangesAsync();
-            return existingExpense.Map<Expense, RExpenseDTO>();
+            return existingExpense.Map<Expense, RExpenseDto>();
         }
         public async Task<bool> DeleteExpenseAsync(int id)
         {
-            var existingExpense = await context.Expenses.FindAsync(id);
-            if (existingExpense is null) return false;
-            context.Expenses.Remove(existingExpense);
+            var existingExpense = await context.Expenses
+                .Where(e => e.Id == id && !e.IsDeleted)
+                .FirstOrDefaultAsync();
+            if (existingExpense is null) throw new Exception("This expense does not exist!");
+            context.Expenses.Update(existingExpense);
             return await context.SaveChangesAsync() > 0;
         }
     }

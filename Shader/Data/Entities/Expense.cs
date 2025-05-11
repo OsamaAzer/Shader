@@ -6,9 +6,9 @@ namespace Shader.Data.Entities
     {
         public int Id { get; set; }
         public ExpenseType Type { get; set; } // نوع المصروف
+        public bool IsDeleted { get; set; } = false;
         public decimal Amount { get; set; }
         public string? Description { get; set; }
-        public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public TimeOnly Time { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
+        public DateTime Date { get; set; } = DateTime.Now;
     }
 }

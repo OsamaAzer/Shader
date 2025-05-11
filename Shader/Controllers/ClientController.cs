@@ -1,6 +1,8 @@
+using Humanizer;
 using Microsoft.AspNetCore.Mvc;
-using Shader.Data.DTOs;
+using Shader.Data.Dtos.Client;
 using Shader.Services.Abstraction;
+using Shader.Services.Implementation;
 
 namespace Shader.Controllers
 {
@@ -15,12 +17,25 @@ namespace Shader.Controllers
             _clientService = clientService;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("details/{id}")]
         public async Task<IActionResult> GetClientById(int id)
         {
-            var client = await _clientService.GetClientByIdAsync(id);
-            if (client == null) return NotFound();
-            return Ok(client);
+            try
+            {
+                var client = await _clientService.GetClientByIdAsync(id);
+                return Ok(client);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> GetClientsWithName(string name)
+        {
+            var clients = await _clientService.GetAllClientsWithNameAsync(name);
+            return Ok(clients);
         }
 
         [HttpGet]
@@ -31,7 +46,7 @@ namespace Shader.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddClient([FromBody] WClientDTO dto)
+        public async Task<IActionResult> AddClient([FromBody] WClientDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _clientService.AddClientAsync(dto);
@@ -39,21 +54,50 @@ namespace Shader.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateClient(int id, [FromBody] WClientDTO dto)
+        [HttpPut("update-payments/{clientId}")]
+        public async Task<IActionResult> UpdateTransactionWithPaymentOfAnAmount(int clientId, decimal paidAmount, decimal mortgageAmount)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await _clientService.UpdateClientAsync(id, dto);
-            if (result is null) return NotFound();
-            return Ok(result);
+            try
+            {
+                var updatedTransaction = await _clientService.UpdateClientTransactionPayments(clientId, paidAmount, mortgageAmount);
+                if (updatedTransaction == null) return BadRequest("Something went wrong while updating the client data!");
+                return Ok(updatedTransaction);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateClient(int id, [FromBody] WClientDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            try
+            {
+                var result = await _clientService.UpdateClientAsync(id, dto);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(int id)
         {
-            var result = await _clientService.DeleteClientAsync(id);
-            if (!result) return NotFound();
-            return NoContent();
+            try
+            {
+                var result = await _clientService.DeleteClientAsync(id);
+                if (!result) return BadRequest("Something went wrong in the delete operation!");
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
