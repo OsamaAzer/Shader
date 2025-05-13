@@ -5,6 +5,7 @@ namespace Shader.Data.DTOs.ShaderTransaction
 {
     public class RMerchantTDetailsDto
     {
+        public int Id { get; set; }
         public DateTime Date { get; set; }
         public string Description { get; set; }
         public string MerchantName { get; set; }

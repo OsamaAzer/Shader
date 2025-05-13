@@ -9,6 +9,7 @@ namespace Shader.Mapping
         {
             return new RClientPaymentDto
             {
+                Id = payment.Id,
                 ClientName = payment.Client.Name,
                 Date = payment.Date,
                 MortgageAmount = payment.MortgageAmount,
@@ -29,6 +30,7 @@ namespace Shader.Mapping
         {
             return payments.Select(payment => new RClientPaymentDto
             {
+                Id = payment.Id,
                 ClientName = payment.Client.Name,
                 Date = payment.Date,
                 MortgageAmount = payment.MortgageAmount,

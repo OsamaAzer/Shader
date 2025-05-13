@@ -4,6 +4,7 @@ namespace Shader.Data.Dtos.Expense
 {
     public class RExpenseDto
     {
+        public int Id { get; set; }
         public ExpenseType Type { get; set; } // نوع المصروف
         public decimal Amount { get; set; }
         public string? Description { get; set; }

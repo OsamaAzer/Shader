@@ -11,6 +11,7 @@ namespace Shader.Mapping
         {
             return merchantTransactions.Select(merchantTransaction => new RMerchantTDto
             {
+                Id = merchantTransaction.Id,
                 MerchantName = merchantTransaction.Merchant.Name,
                 Date = merchantTransaction.Date,
                 TotalAmount = merchantTransaction.TotalAmount,
@@ -20,7 +21,8 @@ namespace Shader.Mapping
                     FruitName = merchantTransactionFruit.Fruit.FruitName,
                     NumberOfCages = merchantTransactionFruit.NumberOfCages,
                     WeightInKilograms = merchantTransactionFruit.WeightInKilograms,
-                    PriceOfKiloGram = merchantTransactionFruit.PriceOfKiloGram
+                    PriceOfKiloGram = merchantTransactionFruit.PriceOfKiloGram,
+                    TransactionPrice = merchantTransactionFruit.TransactionPrice
                 }).ToList()
             });
         }
@@ -28,7 +30,7 @@ namespace Shader.Mapping
         {
             return new RMerchantTDetailsDto
             {
-
+                Id = merchantTransaction.Id,
                 MerchantName = merchantTransaction.Merchant.Name,
                 Date = merchantTransaction.Date,
                 Description = merchantTransaction.Description,
@@ -41,7 +43,8 @@ namespace Shader.Mapping
                     FruitName = merchantTransactionFruit.Fruit.FruitName,
                     NumberOfCages = merchantTransactionFruit.NumberOfCages,
                     WeightInKilograms = merchantTransactionFruit.WeightInKilograms,
-                    PriceOfKiloGram = merchantTransactionFruit.PriceOfKiloGram
+                    PriceOfKiloGram = merchantTransactionFruit.PriceOfKiloGram,
+                    TransactionPrice = merchantTransactionFruit.TransactionPrice
                 }).ToList()
             };
         }
@@ -64,7 +67,8 @@ namespace Shader.Mapping
                 FruitId = stfDto.FruitId,
                 NumberOfCages = stfDto.NumberOfCages,
                 WeightInKilograms = stfDto.WeightInKilograms,
-                PriceOfKiloGram = stfDto.PriceOfKiloGram
+                PriceOfKiloGram = stfDto.PriceOfKiloGram,
+                TransactionPrice = stfDto.PriceOfKiloGram * stfDto.WeightInKilograms
             }).ToList();
 
             return transaction;

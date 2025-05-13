@@ -4,6 +4,7 @@ namespace Shader.Data.Dtos.Fruit
 {
     public class RFruitsDto
     {
+        public int Id { get; set; }
         public string FruitName { get; set; }
         public FruitStatus Status { get; set; }
         public bool IsCageHasMortgage { get; set; }

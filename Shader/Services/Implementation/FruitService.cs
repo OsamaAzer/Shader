@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Humanizer;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Shader.Data;
 using Shader.Data.Dtos.Fruit;
@@ -129,6 +130,21 @@ namespace Shader.Services.Implementation
             var fruits = fruitDtos.Map<WRangeFruitDto, Fruit>().ToList();
             foreach (var fruit in fruits)
             {
+                if (context.Fruits.Where(f => !f.IsDeleted).Any(f => f.FruitName == fruit.FruitName))
+                    throw new Exception($"There is a fruit with the same Name!!");
+
+                if (fruit.TotalCages <= 0)
+                    throw new Exception($"Please Enter a valid number of cages!!");
+
+                if (fruit.CageMortgageValue < 0)
+                    throw new Exception($"Please enter a valid Cage mortgage amound");
+
+                if (fruit.CageMortgageValue == 0)
+                    fruit.IsCageHasMortgage = false;
+
+                if (fruit.CageMortgageValue > 0)
+                    fruit.IsCageHasMortgage = true;
+
                 fruit.Date = DateTime.Now;
                 fruit.SupplierId = supplierId;
                 fruit.SoldCages = 0;
@@ -139,7 +155,10 @@ namespace Shader.Services.Implementation
                 else
                     fruit.Status = FruitStatus.NotAvailabe;
 
-                if (supplier.Merchant is not null && supplier.IsMerchant)
+                if (!supplier.IsMerchant)
+                    fruit.MerchantPurchasePrice = 0;
+
+                if (supplier.IsMerchant && supplier.Merchant is not null)
                 {
                     supplier.Merchant.SellPrice += fruit.MerchantPurchasePrice;
                     supplier.Merchant.SellTotalAmount += fruit.MerchantPurchasePrice;
@@ -166,6 +185,15 @@ namespace Shader.Services.Implementation
                     .Where(f => !f.IsDeleted)
                     .FirstOrDefaultAsync(f => f.Id == dto.SupplierId) ??
                     throw new Exception($"Supplier with id:({dto.SupplierId}) does not exist!");
+
+            if (dto.TotalCages <= 0)
+                throw new Exception($"Please Enter a valid number of cages!!");
+
+            if (dto.CageMortgageValue < 0)
+                throw new Exception($"Please enter a valid Cage mortgage amound");
+
+            if (context.Fruits.Where(f => !f.IsDeleted && f.FruitName == fruit.FruitName).Count() >= 1) // TODO : Handle Repeated fruit names
+                throw new Exception($"There is a fruit with the same Name!!");
 
             if (fruit.SupplierId != dto.SupplierId)
             {
@@ -201,10 +229,19 @@ namespace Shader.Services.Implementation
                 supplier.Merchant.SellTotalRemainingAmount - supplier.Merchant.PurchaseTotalRemainingAmount;
                 context.Merchants.Update(supplier.Merchant);
             }
-            //dto.Map(fruit);
+            if (!supplier.IsMerchant)
+                fruit.MerchantPurchasePrice = 0;
+
+                //dto.Map(fruit);
             fruit.SupplierId = supplier.Id;
             fruit.Supplier = supplier;
             fruit.RemainingCages = fruit.TotalCages - fruit.SoldCages;
+
+            if (fruit.CageMortgageValue == 0)
+                fruit.IsCageHasMortgage = false;
+
+            if (fruit.CageMortgageValue > 0)
+                fruit.IsCageHasMortgage = true;
 
             if (fruit.RemainingCages > 0 && fruit.RemainingCages > 0)
                 fruit.Status = FruitStatus.InStock;

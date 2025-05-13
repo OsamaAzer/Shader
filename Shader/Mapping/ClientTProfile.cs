@@ -12,6 +12,7 @@ namespace Shader.Mapping
         {
             return clientTransactions.Select(clientTransaction => new RClientTDto
             {
+                Id = clientTransaction.Id,
                 ClientName = clientTransaction.Client.Name,
                 Date = clientTransaction.Date,
                 TotalAmount = clientTransaction.TotalAmount,
@@ -21,7 +22,8 @@ namespace Shader.Mapping
                     FruitName = clientTransactionFruit.Fruit.FruitName,
                     NumberOfCages = clientTransactionFruit.NumberOfCages,
                     WeightInKilograms = clientTransactionFruit.WeightInKilograms,
-                    PriceOfKiloGram = clientTransactionFruit.PriceOfKiloGram
+                    PriceOfKiloGram = clientTransactionFruit.PriceOfKiloGram,
+                    TransactionPrice = clientTransactionFruit.TransactionPrice
                 }).ToList()
             });
         }
@@ -29,7 +31,7 @@ namespace Shader.Mapping
         {
             return new RClientTDetailsDto
             {
-
+                Id = clientTransaction.Id,
                 ClientName = clientTransaction.Client.Name,
                 Date = clientTransaction.Date,
                 Description = clientTransaction.Description,
@@ -42,7 +44,8 @@ namespace Shader.Mapping
                     FruitName = clientTransactionFruit.Fruit.FruitName,
                     NumberOfCages = clientTransactionFruit.NumberOfCages,
                     WeightInKilograms = clientTransactionFruit.WeightInKilograms,
-                    PriceOfKiloGram = clientTransactionFruit.PriceOfKiloGram
+                    PriceOfKiloGram = clientTransactionFruit.PriceOfKiloGram,
+                    TransactionPrice = clientTransactionFruit.TransactionPrice
                 }).ToList()
             };
         }
@@ -65,7 +68,8 @@ namespace Shader.Mapping
                 FruitId = clientTransactionFruitDto.FruitId,
                 NumberOfCages = clientTransactionFruitDto.NumberOfCages,
                 WeightInKilograms = clientTransactionFruitDto.WeightInKilograms,
-                PriceOfKiloGram = clientTransactionFruitDto.PriceOfKiloGram
+                PriceOfKiloGram = clientTransactionFruitDto.PriceOfKiloGram,
+                TransactionPrice = clientTransactionFruitDto.WeightInKilograms * clientTransactionFruitDto.PriceOfKiloGram,
             }).ToList();
             return transaction;
         }

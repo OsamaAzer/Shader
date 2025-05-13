@@ -6,6 +6,7 @@ namespace Shader.Data.DTOs.ShaderTransaction
 {
     public class RMerchantTDto
     {
+        public int Id { get; set; }
         public DateTime Date { get; set; }
         public string MerchantName { get; set; }
         public decimal TotalAmount { get; set; } // المبلغ الإجمالي

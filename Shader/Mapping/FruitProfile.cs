@@ -9,12 +9,12 @@ namespace Shader.Mapping
         {
             return new RFruitDetailsDto
             {
+                Id = fruit.Id,
                 FruitName = fruit.FruitName,
                 Status = fruit.Status,
                 Date = fruit.Date,
                 SupplierName = fruit.Supplier?.Name,
                 MerchantPurchasePrice = fruit.MerchantPurchasePrice,
-                IsDeleted = fruit.IsDeleted,
                 IsBilled = fruit.IsBilled,
                 IsCageHasMortgage = fruit.IsCageHasMortgage,
                 CageMortgageValue = fruit.CageMortgageValue,

@@ -4,6 +4,7 @@ namespace Shader.Data.DTOs.MerchantPayment
 {
     public class RMerchantPaymentDto
     {
+        public int Id { get; set; }
         public string MerchantName { get; set; } 
         public TransactionType TransactionType { get; set; }
         public DateTime Date { get; set; }

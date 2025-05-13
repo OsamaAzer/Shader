@@ -67,9 +67,11 @@ namespace Shader.Services.Implementation
             throw new Exception($"Merchant with ID {paymentDto.MerchantId} not found.");
             var newPayment = paymentDto.ToMerchantPayment();
 
-            if(existingMerchant.CurrentAmountBalance == 0)
+            if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
+                throw new Exception($"Payment amount or mortgage amount can't be negative.");
+            if (existingMerchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
                 throw new Exception($"Merchant current balance equal {existingMerchant.CurrentAmountBalance}.");
-            if (existingMerchant.CurrentMortgageAmountBalance == 0)
+            if (existingMerchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
                 throw new Exception($"Merchant current mortgage balance equal {existingMerchant.CurrentMortgageAmountBalance}.");
 
             if (existingMerchant.CurrentAmountBalance < 0 || existingMerchant.CurrentMortgageAmountBalance < 0)
@@ -86,9 +88,9 @@ namespace Shader.Services.Implementation
             }
             if (existingMerchant.CurrentAmountBalance > 0 || existingMerchant.CurrentMortgageAmountBalance > 0)
             {
-                if (paymentDto.PaidAmount > existingMerchant.CurrentAmountBalance * -1)
+                if (paymentDto.PaidAmount > existingMerchant.CurrentAmountBalance )
                     throw new Exception($"Payment amount exceeds the remaining amount {existingMerchant.CurrentAmountBalance}.");
-                if (paymentDto.MortgageAmount > existingMerchant.CurrentMortgageAmountBalance * -1)
+                if (paymentDto.MortgageAmount > existingMerchant.CurrentMortgageAmountBalance )
                     throw new Exception($"Payment amount exceeds the remaining mortgage amount {existingMerchant.CurrentMortgageAmountBalance}.");
                 existingMerchant.SellAmountPaid += paymentDto.PaidAmount;
                 existingMerchant.SellTotalRemainingAmount = existingMerchant.SellTotalAmount - existingMerchant.SellAmountPaid;

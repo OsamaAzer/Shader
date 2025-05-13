@@ -20,7 +20,8 @@ namespace Shader.Mapping
                 FruitId = fruit.FruitId,
                 NumberOfCages = fruit.NumberOfCages,
                 PriceOfKiloGram = fruit.PriceOfKiloGram,
-                WeightInKilograms = fruit.WeightInKilograms
+                WeightInKilograms = fruit.WeightInKilograms,
+                TransactionPrice = fruit.PriceOfKiloGram * fruit.WeightInKilograms
             }).ToList();
             return transaction;
         }
@@ -29,6 +30,7 @@ namespace Shader.Mapping
         {
             return new RCashTDto
             {
+                Id = cashTransaction.Id,
                 Date = cashTransaction.Date,
                 Description = cashTransaction.Description,
                 Price = cashTransaction.CashTransactionFruits.Sum(cashTransactionFruit => cashTransactionFruit.PriceOfKiloGram * cashTransactionFruit.WeightInKilograms),
@@ -37,7 +39,8 @@ namespace Shader.Mapping
                     FruitName = cashTransactionFruit.Fruit.FruitName,
                     NumberOfCages = cashTransactionFruit.NumberOfCages,
                     WeightInKilograms = cashTransactionFruit.WeightInKilograms,
-                    PriceOfKiloGram = cashTransactionFruit.PriceOfKiloGram
+                    PriceOfKiloGram = cashTransactionFruit.PriceOfKiloGram,
+                    TransactionPrice = cashTransactionFruit.TransactionPrice
                 }).ToList()
             };
         }
@@ -46,6 +49,7 @@ namespace Shader.Mapping
         {
             return cashTransactions.Select(cashTransaction => new RCashTDto
             {
+                Id = cashTransaction.Id,
                 Date = cashTransaction.Date,
                 Description = cashTransaction.Description,
                 Price = cashTransaction.Price,
@@ -54,7 +58,8 @@ namespace Shader.Mapping
                     FruitName = cashTransactionFruit.Fruit.FruitName,
                     NumberOfCages = cashTransactionFruit.NumberOfCages,
                     WeightInKilograms = cashTransactionFruit.WeightInKilograms,
-                    PriceOfKiloGram = cashTransactionFruit.PriceOfKiloGram
+                    PriceOfKiloGram = cashTransactionFruit.PriceOfKiloGram,
+                    TransactionPrice = cashTransactionFruit.TransactionPrice
                 }).ToList()
             });
         }

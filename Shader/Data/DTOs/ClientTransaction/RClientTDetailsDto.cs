@@ -5,6 +5,7 @@ namespace Shader.Data.Dtos.ClientTransaction
 {
         public class RClientTDetailsDto 
         {
+            public int Id { get; set; }
             public DateTime Date { get; set; }
             public string Description { get; set; }
             public string ClientName { get; set; }

@@ -9,6 +9,7 @@ namespace Shader.Mapping
         {
             return new RMerchantPaymentDto
             {
+                Id = payment.Id,
                 MerchantName = payment.Merchant.Name,
                 TransactionType = payment.TransactionType,
                 Date = payment.Date,
@@ -30,6 +31,7 @@ namespace Shader.Mapping
         {
             return payments.Select(payment => new RMerchantPaymentDto
             {
+                Id = payment.Id,
                 MerchantName = payment.Merchant.Name,
                 TransactionType = payment.TransactionType,
                 Date = payment.Date,

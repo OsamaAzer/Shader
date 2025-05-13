@@ -9,4 +9,5 @@ public class ClientTransactionFruit
     public int NumberOfCages { get; set; } 
     public decimal WeightInKilograms { get; set; }
     public decimal PriceOfKiloGram { get; set; }
+    public decimal TransactionPrice { get; set; }
 }

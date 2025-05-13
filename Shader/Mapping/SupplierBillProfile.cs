@@ -34,6 +34,7 @@ namespace Shader.Mapping
             }
             var billDto = new RSupplierBillDto
             {
+                Id = bill.Id,
                 SupplierName = bill.Supplier.Name,
                 Description = bill.Description,
                 Date = bill.Date,

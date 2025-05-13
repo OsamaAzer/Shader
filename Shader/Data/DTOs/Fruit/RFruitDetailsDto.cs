@@ -5,12 +5,12 @@ namespace Shader.Data.Dtos.Fruit
 {
     public class RFruitDetailsDto
     {
+        public int Id { get; set; }
         public string FruitName { get; set; }
         public FruitStatus Status { get; set; }
         public DateTime Date { get; set; } 
         public string SupplierName { get; set; }
         public decimal MerchantPurchasePrice { get; set; } 
-        public bool IsDeleted { get; set; } = false;
         public bool IsBilled { get; set; }
         public bool IsCageHasMortgage { get; set; }
         public decimal CageMortgageValue { get; set; }

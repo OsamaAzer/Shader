@@ -4,6 +4,7 @@ namespace Shader.Data.DTOs.ShaderSeller
 {
     public class RMerchantDto
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public string City { get; set; }
         public string PhoneNumber { get; set; }

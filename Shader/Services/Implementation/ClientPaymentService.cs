@@ -56,30 +56,32 @@ namespace Shader.Services.Implementation
             return payment.ToRClientPayment();
         }
        public async Task<RClientPaymentDto> CreatePaymentAsync(WClientPaymentDto paymentDto)
-    {
-        var existingClient = await context.Clients
-            .Where(c => !c.IsDeleted)
-            .FirstOrDefaultAsync(c => c.Id == paymentDto.ClientId) ??
-        throw new Exception($"Client with ID {paymentDto.ClientId} not found.");
+        {
+            var existingClient = await context.Clients
+                .Where(c => !c.IsDeleted)
+                .FirstOrDefaultAsync(c => c.Id == paymentDto.ClientId) ??
+            throw new Exception($"Client with ID {paymentDto.ClientId} not found.");
 
-        if (existingClient.TotalRemainingAmount == 0)
-            throw new Exception($"Client unpaid remaining amount equal {existingClient.TotalRemainingAmount}.");
-        if (existingClient.TotalRemainingMortgageAmount == 0)
-            throw new Exception($"Client unpaid remaining mortgage amount equal {existingClient.TotalRemainingMortgageAmount}.");
-        if (paymentDto.PaidAmount > existingClient.TotalRemainingAmount)
-            throw new Exception($"Payment amount exceeds the remaining amount {existingClient.TotalRemainingAmount}.");
-        if (paymentDto.MortgageAmount > existingClient.TotalRemainingMortgageAmount)
-            throw new Exception($"Payment amount exceeds the remaining mortgage amount {existingClient.TotalRemainingMortgageAmount}.");
+            if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
+                throw new Exception($"Payment amount or mortgage amount can't be negative.");
+            if (existingClient.TotalRemainingAmount == 0 && paymentDto.PaidAmount > 0)
+                throw new Exception($"Client unpaid remaining amount equal {existingClient.TotalRemainingAmount}.");
+            if (existingClient.TotalRemainingMortgageAmount == 0 && paymentDto.MortgageAmount > 0)
+                throw new Exception($"Client unpaid remaining mortgage amount equal {existingClient.TotalRemainingMortgageAmount}.");
+            if (paymentDto.PaidAmount > existingClient.TotalRemainingAmount)
+                throw new Exception($"Payment amount exceeds the remaining amount {existingClient.TotalRemainingAmount}.");
+            if (paymentDto.MortgageAmount > existingClient.TotalRemainingMortgageAmount)
+                throw new Exception($"Payment amount exceeds the remaining mortgage amount {existingClient.TotalRemainingMortgageAmount}.");
 
-        existingClient.AmountPaid += paymentDto.PaidAmount;
-        existingClient.TotalRemainingAmount = existingClient.TotalAmount - existingClient.AmountPaid;
-        existingClient.TotalMortgageAmountPaid += paymentDto.MortgageAmount;
-        existingClient.TotalMortgageAmountPaid = existingClient.TotalMortgageAmount - existingClient.TotalMortgageAmountPaid;
-        var clientPayment = paymentDto.ToClientPayment();
-        await context.ClientPayments.AddAsync(clientPayment);
-        await context.SaveChangesAsync();
-        return clientPayment.ToRClientPayment();
-    }
+            existingClient.AmountPaid += paymentDto.PaidAmount;
+            existingClient.TotalRemainingAmount = existingClient.TotalAmount - existingClient.AmountPaid;
+            existingClient.TotalMortgageAmountPaid += paymentDto.MortgageAmount;
+            existingClient.TotalMortgageAmountPaid = existingClient.TotalMortgageAmount - existingClient.TotalMortgageAmountPaid;
+            var clientPayment = paymentDto.ToClientPayment();
+            await context.ClientPayments.AddAsync(clientPayment);
+            await context.SaveChangesAsync();
+            return clientPayment.ToRClientPayment();
+        }
        public async Task<RClientPaymentDto> UpdatePaymentAsync(int id, WClientPaymentDto paymentDto)
        {
             var existingPayment = await context.ClientPayments
