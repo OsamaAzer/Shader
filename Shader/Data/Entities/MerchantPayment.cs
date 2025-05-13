@@ -3,7 +3,7 @@ using System.Transactions;
 
 namespace Shader.Data.Entities
 {
-    public class MerchantPayments
+    public class MerchantPayment
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }

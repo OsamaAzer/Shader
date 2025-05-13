@@ -19,7 +19,6 @@ namespace Shader.Services.Implementation
             var expensesDto =  context.Expenses
                 .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) >= startDate && DateOnly.FromDateTime(e.Date) <= endDate)
                 .OrderByDescending(e => e.Date)
-                .OrderByDescending(e => e.Date.Hour)
                 .Map<Expense, RExpenseDto>().ToList();
 
             return await Task.FromResult<IEnumerable<RExpenseDto>>(expensesDto);
@@ -29,7 +28,6 @@ namespace Shader.Services.Implementation
             var expenseDto = context.Expenses
                 .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) == date)
                 .OrderByDescending(e => e.Date)
-                .OrderByDescending(e => e.Date.Hour)
                 .Map<Expense, RExpenseDto>().ToList();
             return await Task.FromResult<IEnumerable<RExpenseDto>>(expenseDto);
         }
@@ -38,7 +36,6 @@ namespace Shader.Services.Implementation
             var expensesDto = context.Expenses
                 .Where (e => !e.IsDeleted)
                 .OrderByDescending(e => e.Date)
-                .OrderByDescending(e => e.Date.Hour)
                 .Map<Expense, RExpenseDto>().ToList();
             return await Task.FromResult<IEnumerable<RExpenseDto>>(expensesDto);
         }
@@ -46,8 +43,8 @@ namespace Shader.Services.Implementation
         {
             var expense = await context.Expenses
                 .Where(e => e.Id == id && !e.IsDeleted)
-                .FirstOrDefaultAsync();
-            if (expense is null) throw new Exception("This expense does not exist!");
+                .FirstOrDefaultAsync()??
+                throw new Exception("This expense does not exist!");
             return expense.Map<Expense, RExpenseDto>();
         }
         public async Task<RExpenseDto> AddExpenseAsync(WExpenseDto dto)
@@ -64,8 +61,8 @@ namespace Shader.Services.Implementation
 
             var existingExpense = await context.Expenses
                 .Where(e => e.Id == id && !e.IsDeleted)
-                .FirstOrDefaultAsync();
-            if (existingExpense is null) throw new Exception("This expense does not exist!");
+                .FirstOrDefaultAsync()??
+                throw new Exception("This expense does not exist!");
 
             dto.Map(existingExpense);
             context.Expenses.Update(existingExpense);
@@ -76,8 +73,9 @@ namespace Shader.Services.Implementation
         {
             var existingExpense = await context.Expenses
                 .Where(e => e.Id == id && !e.IsDeleted)
-                .FirstOrDefaultAsync();
-            if (existingExpense is null) throw new Exception("This expense does not exist!");
+                .FirstOrDefaultAsync() ??
+                throw new Exception("This expense does not exist!");
+            existingExpense.IsDeleted = true;
             context.Expenses.Update(existingExpense);
             return await context.SaveChangesAsync() > 0;
         }

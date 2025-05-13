@@ -14,6 +14,7 @@ namespace Shader.Services.Implementation
             return await context.SupplierBills
                 .Include(sb => sb.Fruits)
                 .Where(sb => !sb.IsDeleted)
+                .OrderByDescending(sb => sb.Date)
                 .ToListAsync();
         }
         public async Task<IEnumerable<SupplierBill>> GetSupplierBillsBySupplierIdAsync(int supplierId)
@@ -21,6 +22,7 @@ namespace Shader.Services.Implementation
             return await context.SupplierBills
                 .Include(sb => sb.Fruits)
                 .Where(sb => sb.SupplierId == supplierId && !sb.IsDeleted)
+                .OrderByDescending(sb => sb.Date)
                 .ToListAsync();
         }
         public async Task<SupplierBill> GetSupplierBillByIdAsync(int id)
@@ -49,19 +51,28 @@ namespace Shader.Services.Implementation
                 fruit.IsBilled = true;
             }
 
-            bill.Supplier = await context.Suppliers
+            var supplier = await context.Suppliers
+                .Where(s => !s.IsDeleted)
                 .FirstOrDefaultAsync(s => s.Id == billDto.SupplierId) ??
                 throw new Exception("This supplier does not exist!");
 
+            supplier.TotalAmountOfBills += bill.TotalAmount;
+            context.Suppliers.Update(supplier);
             await context.SupplierBills.AddAsync(bill);
             await context.SaveChangesAsync();
-            var readBillDto = bill.MapToRSupplierBillDto();
-            return readBillDto;
+            return bill.MapToRSupplierBillDto();
         }
         public async Task<RSupplierBillDto> UpdateSupplierBillAsync(int id, WSupplierBillDto billDto)
         {
             var supplierBill = await GetSupplierBillByIdAsync(id) ??
                 throw new Exception("This supplier bill does not exist!");
+
+            var supplier = await context.Suppliers
+                .Where(s => !s.IsDeleted)
+                .FirstOrDefaultAsync(s => s.Id == billDto.SupplierId) ??
+                throw new Exception("This supplier does not exist!");
+            supplier.TotalAmountOfBills -= supplierBill.TotalAmount;
+
             foreach (var fruit in supplierBill.Fruits)
             {
                 if(billDto.Fruits.All(f => f != fruit.Id))
@@ -70,6 +81,8 @@ namespace Shader.Services.Implementation
                 }
             }
             billDto.Map(supplierBill);
+            supplier.TotalAmountOfBills += supplierBill.TotalAmount;
+            context.Suppliers.Update(supplier);
             context.SupplierBills.Update(supplierBill);
             await context.SaveChangesAsync();
             return supplierBill.MapToRSupplierBillDto();
@@ -78,11 +91,19 @@ namespace Shader.Services.Implementation
         {
             var supplierBill = await GetSupplierBillByIdAsync(id) ??
                 throw new Exception("This supplier bill does not exist!");
+
+            var supplier = await context.Suppliers
+                .Where(s => !s.IsDeleted)
+                .FirstOrDefaultAsync(s => s.Id == supplierBill.SupplierId) ??
+                throw new Exception("This supplier does not exist!");
+            supplier.TotalAmountOfBills -= supplierBill.TotalAmount;
+
             foreach (var fruit in supplierBill.Fruits)
             {
                 fruit.IsBilled = false;
             }
             supplierBill.IsDeleted = true;
+            context.Suppliers.Update(supplier);
             context.SupplierBills.Update(supplierBill);
             return await context.SaveChangesAsync() > 0;
         }

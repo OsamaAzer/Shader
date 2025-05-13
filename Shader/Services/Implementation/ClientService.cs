@@ -111,7 +111,13 @@ namespace Shader.Services.Implementation
         {
             var existingClient = await context.Clients
                 .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception($"Client with id:({id}) does not exist!");
+                .FirstOrDefaultAsync(c => c.Id == id) ?? 
+                throw new Exception($"Client with id:({id}) does not exist!");
+
+            if (existingClient.TotalRemainingAmount != 0)
+                throw new Exception($"The client has remaining amount equal {existingClient.TotalRemainingAmount}, can't be deleted!");
+            if (existingClient.TotalRemainingMortgageAmount != 0)
+                throw new Exception($"The client has remaining mortgage amount equal {existingClient.TotalRemainingMortgageAmount} , can't be deleted!");
 
             existingClient.IsDeleted = true;
             context.Clients.Update(existingClient);

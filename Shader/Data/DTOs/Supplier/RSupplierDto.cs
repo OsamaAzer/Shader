@@ -5,5 +5,7 @@
         public string Name { get; set; }
         public string City { get; set; }
         public string PhoneNumber { get; set; }
+        public bool IsMerchant { get; set; }  // هل المورد تاجر
+        public decimal TotalAmountOfBills { get; set; } // المبلغ الإجمالي للفواتير
     }
 }

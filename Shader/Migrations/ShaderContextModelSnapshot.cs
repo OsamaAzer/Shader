@@ -155,7 +155,7 @@ namespace Shader.Migrations
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("Shader.Data.Entities.ClientPayments", b =>
+            modelBuilder.Entity("Shader.Data.Entities.ClientPayment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -284,6 +284,9 @@ namespace Shader.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("MerchantPurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("NumberOfKilogramsSold")
                         .HasColumnType("decimal(18,2)");
 
@@ -370,28 +373,28 @@ namespace Shader.Migrations
                     b.Property<decimal>("PurchaseTotalRemainingMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingAmountPaid")
+                    b.Property<decimal>("SellAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingPrice")
+                    b.Property<decimal>("SellPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingTotalAmount")
+                    b.Property<decimal>("SellTotalAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingTotalDiscountAmount")
+                    b.Property<decimal>("SellTotalDiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingTotalMortgageAmount")
+                    b.Property<decimal>("SellTotalMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingTotalMortgageAmountPaid")
+                    b.Property<decimal>("SellTotalMortgageAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingTotalRemainingAmount")
+                    b.Property<decimal>("SellTotalRemainingAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SellingTotalRemainingMortgageAmount")
+                    b.Property<decimal>("SellTotalRemainingMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -399,7 +402,7 @@ namespace Shader.Migrations
                     b.ToTable("Merchants");
                 });
 
-            modelBuilder.Entity("Shader.Data.Entities.MerchantPayments", b =>
+            modelBuilder.Entity("Shader.Data.Entities.MerchantPayment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -464,9 +467,6 @@ namespace Shader.Migrations
                     b.Property<decimal>("TotalCageMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MerchantId");
@@ -513,6 +513,12 @@ namespace Shader.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsMerchant")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MerchantId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -520,7 +526,12 @@ namespace Shader.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("TotalAmountOfBills")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("MerchantId");
 
                     b.ToTable("Suppliers");
                 });
@@ -619,7 +630,7 @@ namespace Shader.Migrations
                         .HasForeignKey("FruitId");
                 });
 
-            modelBuilder.Entity("Shader.Data.Entities.ClientPayments", b =>
+            modelBuilder.Entity("Shader.Data.Entities.ClientPayment", b =>
                 {
                     b.HasOne("Shader.Data.Entities.Client", "Client")
                         .WithMany("Payments")
@@ -660,7 +671,7 @@ namespace Shader.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Shader.Data.Entities.MerchantPayments", b =>
+            modelBuilder.Entity("Shader.Data.Entities.MerchantPayment", b =>
                 {
                     b.HasOne("Shader.Data.Entities.Merchant", "Merchant")
                         .WithMany("Payments")
@@ -699,6 +710,15 @@ namespace Shader.Migrations
                     b.Navigation("Fruit");
 
                     b.Navigation("MerchantTransaction");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.Supplier", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Merchant", "Merchant")
+                        .WithMany()
+                        .HasForeignKey("MerchantId");
+
+                    b.Navigation("Merchant");
                 });
 
             modelBuilder.Entity("Shader.Data.Entities.SupplierBill", b =>

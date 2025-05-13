@@ -1,4 +1,5 @@
 ﻿using Shader.Data.DTOs.ClientTransaction;
+using Shader.Enums;
 
 namespace Shader.Data.DTOs.ShaderTransaction
 {

@@ -2,7 +2,7 @@
 {
     public enum TransactionType
     {
-        Purchase = 1,
-        Sell,
+        PayingMoney = 1,
+        ReceivingMoney,
     }
 }

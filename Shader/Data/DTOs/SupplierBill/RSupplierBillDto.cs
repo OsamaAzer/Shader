@@ -15,7 +15,7 @@ namespace Shader.Data.DTOs.SupplierBill
         public decimal ValueDueToSupplier { get; set; } // المبلغ المستحق للمورد
         public decimal MshalValue { get; set; } // قيمة المشال
         public decimal NylonValue { get; set; } // قيمة النايلون
-        public List<RAllFruitsDto> Fruits { get; set; } 
+        public List<RFruitsDto> Fruits { get; set; } 
 
     }
 }

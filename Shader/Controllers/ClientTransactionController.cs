@@ -128,23 +128,23 @@ namespace Shader.Controllers
             }
         }
 
-        [HttpPut("payment/{id}")]
-        public async Task<IActionResult> UpdateTransactionWithAmountPaidAndDiscountAmount
-            (int id , decimal paidAmount, decimal discountAmount, decimal cageMortgageAmountPaid)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            try
-            {
-                var updatedTransaction = await _clientTransactionService
-                    .UpdateClientTransactionWithPayments(id, paidAmount, discountAmount, cageMortgageAmountPaid);
-                if (updatedTransaction == null) return BadRequest("Something went wrong while updating the transaction!");
-                return Ok(updatedTransaction);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //[HttpPut("payment/{id}")]
+        //public async Task<IActionResult> UpdateTransactionWithAmountPaidAndDiscountAmount
+        //    (int id , decimal paidAmount, decimal discountAmount, decimal cageMortgageAmountPaid)
+        //{
+        //    if (!ModelState.IsValid) return BadRequest(ModelState);
+        //    try
+        //    {
+        //        var updatedTransaction = await _clientTransactionService
+        //            .UpdateClientTransactionWithPayments(id, paidAmount, discountAmount, cageMortgageAmountPaid);
+        //        if (updatedTransaction == null) return BadRequest("Something went wrong while updating the transaction!");
+        //        return Ok(updatedTransaction);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
 
        
 

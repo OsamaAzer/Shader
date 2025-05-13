@@ -14,9 +14,7 @@ namespace Shader.Mapping
                 MerchantName = merchantTransaction.Merchant.Name,
                 Date = merchantTransaction.Date,
                 TotalAmount = merchantTransaction.TotalAmount,
-                //RemainingAmount = merchantTransaction.RemainingAmount,
                 TotalCageMortgageAmount = merchantTransaction.TotalCageMortgageAmount,
-                //RemainingMortgageAmount = merchantTransaction.RemainingMortgageAmount,
                 MerchantTransactionFruits = merchantTransaction.MerchantTransactionFruits.Select(merchantTransactionFruit => new RMerchantTFruitDto
                 {
                     FruitName = merchantTransactionFruit.Fruit.FruitName,
@@ -37,11 +35,7 @@ namespace Shader.Mapping
                 Price = merchantTransaction.Price,
                 DiscountAmount = merchantTransaction.DiscountAmount,
                 TotalAmount = merchantTransaction.TotalAmount,
-                //AmountPaid = merchantTransaction.AmountPaid,
-                //RemainingAmount = merchantTransaction.RemainingAmount,
                 TotalCageMortgageAmount = merchantTransaction.TotalCageMortgageAmount,
-                //TotalCageMortgageAmountPaid = merchantTransaction.TotalCageMortgageAmountPaid,
-                //RemainingMortgageAmount = merchantTransaction.RemainingMortgageAmount,
                 MerchantTransactionFruits = merchantTransaction.MerchantTransactionFruits.Select(merchantTransactionFruit => new RMerchantTFruitDto
                 {
                     FruitName = merchantTransactionFruit.Fruit.FruitName,
@@ -55,9 +49,9 @@ namespace Shader.Mapping
         public static MerchantTransaction MapToMerchantTransaction(this WMerchantTDto stDto, MerchantTransaction? transaction = null)
         {
             transaction ??= new MerchantTransaction();
-
             transaction.Description = stDto.Description;
-            transaction.MerchantId = stDto.ShaderId;
+            transaction.DiscountAmount = stDto.DiscountAmount;
+            transaction.MerchantId = stDto.MerchantId;
             if (transaction.Date == default)
             {
                 transaction.Date = DateTime.Now;
@@ -72,7 +66,6 @@ namespace Shader.Mapping
                 WeightInKilograms = stfDto.WeightInKilograms,
                 PriceOfKiloGram = stfDto.PriceOfKiloGram
             }).ToList();
-            //transaction.RemainingAmount = transaction.TotalAmount - transaction.AmountPaid;
 
             return transaction;
         }

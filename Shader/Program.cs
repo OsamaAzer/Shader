@@ -18,6 +18,8 @@ builder.Services.AddScoped<IClientTransactionService, ClientTransactionService>(
 builder.Services.AddScoped<ISupplierBillService, SupplierBillService>();
 builder.Services.AddScoped<IMerchantService, MerchantService>();
 builder.Services.AddScoped<IMerchantTransactionService, MerchantTransactionService>();
+builder.Services.AddScoped<IClientPaymentService, ClientPaymentService>();
+builder.Services.AddScoped<IMerchantPaymentService, MerchantPaymentService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });

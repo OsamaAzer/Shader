@@ -54,21 +54,21 @@ namespace Shader.Controllers
             return Ok(result);
         }
 
-        [HttpPut("update-payments/{clientId}")]
-        public async Task<IActionResult> UpdateTransactionWithPaymentOfAnAmount(int clientId, decimal paidAmount, decimal mortgageAmount)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            try
-            {
-                var updatedTransaction = await _clientService.UpdateClientTransactionPayments(clientId, paidAmount, mortgageAmount);
-                if (updatedTransaction == null) return BadRequest("Something went wrong while updating the client data!");
-                return Ok(updatedTransaction);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //[HttpPut("update-payments/{clientId}")]
+        //public async Task<IActionResult> UpdateTransactionWithPaymentOfAnAmount(int clientId, decimal paidAmount, decimal mortgageAmount)
+        //{
+        //    if (!ModelState.IsValid) return BadRequest(ModelState);
+        //    try
+        //    {
+        //        var updatedTransaction = await _clientService.UpdateClientTransactionPayments(clientId, paidAmount, mortgageAmount);
+        //        if (updatedTransaction == null) return BadRequest("Something went wrong while updating the client data!");
+        //        return Ok(updatedTransaction);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
 
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateClient(int id, [FromBody] WClientDto dto)

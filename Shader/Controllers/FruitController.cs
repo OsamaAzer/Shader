@@ -116,6 +116,8 @@ namespace Shader.Controllers
             }
         }
 
+        
+
         [HttpPost("bulk/{supplierId}")]
         public async Task<IActionResult> AddFruits(int supplierId, [FromBody] List<WRangeFruitDto> fruitDtos)
         {

@@ -20,7 +20,7 @@ namespace Shader.Data.Entities
         public decimal TotalMortgageAmount { get; set; } // قيمة الرهن
         public decimal TotalMortgageAmountPaid { get; set; } // قيمة الرهن المدفوع
         public decimal TotalRemainingMortgageAmount { get; set; } // قيمة الرهن المتبقي
-        public ICollection<ClientPayments> Payments { get; set; } = new List<ClientPayments>();
+        public ICollection<ClientPayment> Payments { get; set; } = new List<ClientPayment>();
         public ICollection<ClientTransaction> Transactions { get; set; } = new List<ClientTransaction>();
     }
 }

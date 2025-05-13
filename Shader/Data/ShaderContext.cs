@@ -11,10 +11,10 @@ namespace Shader.Data
         public DbSet<SupplierBill> SupplierBills { get; set; }
         public DbSet<Merchant> Merchants { get; set; }
         public DbSet<ClientTransaction> ClientTransactions { get; set; }
-        public DbSet<ClientPayments> ClientPayments { get; set; }
+        public DbSet<ClientPayment> ClientPayments { get; set; }
         public DbSet<ClientTransactionFruit> ClientTransactionFruits { get; set; }
         public DbSet<MerchantTransaction> MerchantTransactions { get; set; }
-        public DbSet<MerchantPayments> MerchantPayments { get; set; }
+        public DbSet<MerchantPayment> MerchantPayments { get; set; }
         public DbSet<MerchantTransactionFruit> MerchantTransactionFruits { get; set; }
         public DbSet<CashTransaction> CashTransactions { get; set; }
         public DbSet<CashTransactionFruit> CashTransactionFruits { get; set; }

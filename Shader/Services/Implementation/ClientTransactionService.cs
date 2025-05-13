@@ -28,7 +28,6 @@ namespace Shader.Services.Implementation
                 .Include(c => c.Client)
                 .Where(c => c.ClientId == clientId && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
-                .OrderDescending()
                 .ToListAsync();
             return transactions.MapToRClientTDto();
         }
@@ -45,7 +44,6 @@ namespace Shader.Services.Implementation
                 .Include(c => c.Client)
                 .Where(c => c.ClientId == clientId && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
-                .OrderDescending()
                 .ToListAsync();
             return transactions.MapToRClientTDto();
         }
@@ -68,7 +66,6 @@ namespace Shader.Services.Implementation
                 .Include(c => c.Client)
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
-                .OrderDescending()
                 .ToListAsync();
             return transactions.MapToRClientTDto();
         }
@@ -85,7 +82,6 @@ namespace Shader.Services.Implementation
                 .Where(c => !c.IsDeleted)
                 .Where(c => DateOnly.FromDateTime(c.Date) >= startDate && DateOnly.FromDateTime(c.Date) <= endDate)
                 .OrderByDescending(c => c.Date)
-                .OrderByDescending(c => c.Date.Hour)
                 .ToListAsync();
 
             return transactions.MapToRClientTDto();
@@ -121,26 +117,28 @@ namespace Shader.Services.Implementation
                     .Where(f => !f.IsDeleted)
                     .FirstOrDefaultAsync(f => f.Id == ctf.FruitId) ?? throw new Exception("This fruit dosen't exist");
 
-                if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe) 
-                    throw new Exception("The number of cages is not enough");
-                fruit.NumberOfKilogramsSold += ctf.WeightInKilograms;
-                fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                fruit.PriceOfKilogramsSold += ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                fruit.RemainingCages -= ctf.NumberOfCages;
-                fruit.SoldCages += ctf.NumberOfCages;
-
-                if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                    fruit.Status = FruitStatus.NotAvailabe;
-                else
-                    fruit.Status = FruitStatus.InStock;
-
-                if (fruit.IsCageHasMortgage)
+                if (fruit is not null)
                 {
-                    transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * ctf.NumberOfCages;
-                    //client.TotalMortgageAmount += fruit.CageMortgageValue * ctf.NumberOfCages;
+                    if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
+                        throw new Exception("The number of cages is not enough");
+                    fruit.NumberOfKilogramsSold += ctf.WeightInKilograms;
+                    fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
+                    fruit.PriceOfKilogramsSold += ctf.PriceOfKiloGram * ctf.WeightInKilograms;
+                    fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
+                    fruit.RemainingCages -= ctf.NumberOfCages;
+                    fruit.SoldCages += ctf.NumberOfCages;
+
+                    if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
+                        fruit.Status = FruitStatus.NotAvailabe;
+                    else
+                        fruit.Status = FruitStatus.InStock;
+
+                    if (fruit.IsCageHasMortgage)
+                    {
+                        transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * ctf.NumberOfCages;
+                    }
+                    context.Fruits.Update(fruit);
                 }
-                context.Fruits.Update(fruit);
             }
 
             await context.ClientTransactions.AddAsync(transaction);
@@ -170,26 +168,28 @@ namespace Shader.Services.Implementation
                     var removedFruit = await context.Fruits
                         .Where(f => f.Id == ctf.FruitId)
                         .Where(f => !f.IsDeleted)
-                        .FirstOrDefaultAsync() ?? throw new Exception("This fruit dosen't exist");
-                    removedFruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
-                    removedFruit.NumberOfKilogramsSold = Math.Round(removedFruit.NumberOfKilogramsSold, 2);
-                    removedFruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                    removedFruit.PriceOfKilogramsSold = Math.Round(removedFruit.PriceOfKilogramsSold, 2);
-                    removedFruit.RemainingCages += ctf.NumberOfCages;
-                    removedFruit.SoldCages -= ctf.NumberOfCages;
-
-                    if (removedFruit.RemainingCages == 0 && removedFruit.SoldCages == removedFruit.TotalCages)
-                        removedFruit.Status = FruitStatus.NotAvailabe;
-                    else
-                        removedFruit.Status = FruitStatus.InStock;
-
-                    if (removedFruit.IsCageHasMortgage)
+                        .FirstOrDefaultAsync();
+                    if (removedFruit is not null)
                     {
-                        transaction.TotalCageMortgageAmount -= removedFruit.CageMortgageValue * ctf.NumberOfCages;
-                        //client.TotalMortgageAmount -= removedFruit.CageMortgageValue * ctf.NumberOfCages;
-                    }
+                        removedFruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
+                        removedFruit.NumberOfKilogramsSold = Math.Round(removedFruit.NumberOfKilogramsSold, 2);
+                        removedFruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
+                        removedFruit.PriceOfKilogramsSold = Math.Round(removedFruit.PriceOfKilogramsSold, 2);
+                        removedFruit.RemainingCages += ctf.NumberOfCages;
+                        removedFruit.SoldCages -= ctf.NumberOfCages;
 
-                    context.Fruits.Update(removedFruit);
+                        if (removedFruit.RemainingCages == 0 && removedFruit.SoldCages == removedFruit.TotalCages)
+                            removedFruit.Status = FruitStatus.NotAvailabe;
+                        else
+                            removedFruit.Status = FruitStatus.InStock;
+
+                        if (removedFruit.IsCageHasMortgage)
+                        {
+                            transaction.TotalCageMortgageAmount -= removedFruit.CageMortgageValue * ctf.NumberOfCages;
+                        }
+
+                        context.Fruits.Update(removedFruit);
+                    }
                 }
                 else
                 {
@@ -200,45 +200,47 @@ namespace Shader.Services.Implementation
 
                         var fruit = await context.Fruits
                             .Where(f => !f.IsDeleted)
-                            .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId) ?? throw new Exception("This fruit dosen't exist");
+                            .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId);
 
-                        if (fruit.RemainingCages == 0) throw new Exception("The number of cages is not enough");
-                        fruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
-                        fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                        fruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                        fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                        fruit.RemainingCages += ctf.NumberOfCages;
-                        fruit.SoldCages -= ctf.NumberOfCages;
-
-                        if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                            fruit.Status = FruitStatus.NotAvailabe;
-                        else
-                            fruit.Status = FruitStatus.InStock;
-
-                        if (fruit.IsCageHasMortgage)
+                        if (fruit is not null)
                         {
-                            transaction.TotalCageMortgageAmount -= fruit.CageMortgageValue * ctf.NumberOfCages;
-                            //client.TotalMortgageAmount -= fruit.CageMortgageValue * ctf.NumberOfCages;
+                            if (fruit.RemainingCages == 0) throw new Exception("The number of cages is not enough");
+                            fruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
+                            fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
+                            fruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
+                            fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
+                            fruit.RemainingCages += ctf.NumberOfCages;
+                            fruit.SoldCages -= ctf.NumberOfCages;
+
+                            if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
+                                fruit.Status = FruitStatus.NotAvailabe;
+                            else
+                                fruit.Status = FruitStatus.InStock;
+
+                            if (fruit.IsCageHasMortgage)
+                            {
+                                transaction.TotalCageMortgageAmount -= fruit.CageMortgageValue * ctf.NumberOfCages;
+                            }
+
+                            fruit.NumberOfKilogramsSold += ctfDto.WeightInKilograms;
+                            fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
+                            fruit.PriceOfKilogramsSold += ctfDto.PriceOfKiloGram * ctfDto.WeightInKilograms;
+                            fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
+                            fruit.RemainingCages -= ctfDto.NumberOfCages;
+                            fruit.SoldCages += ctfDto.NumberOfCages;
+
+                            if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
+                                fruit.Status = FruitStatus.NotAvailabe;
+                            else
+                                fruit.Status = FruitStatus.InStock;
+
+                            if (fruit.IsCageHasMortgage)
+                            {
+                                transaction.TotalCageMortgageAmount = fruit.CageMortgageValue * ctfDto.NumberOfCages;
+                            }
+
+                            context.Fruits.Update(fruit);
                         }
-
-                        fruit.NumberOfKilogramsSold += ctfDto.WeightInKilograms;
-                        fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                        fruit.PriceOfKilogramsSold += ctfDto.PriceOfKiloGram * ctfDto.WeightInKilograms;
-                        fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                        fruit.RemainingCages -= ctfDto.NumberOfCages;
-                        fruit.SoldCages += ctfDto.NumberOfCages;
-
-                        if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                            fruit.Status = FruitStatus.NotAvailabe;
-                        else
-                            fruit.Status = FruitStatus.InStock;
-
-                        if (fruit.IsCageHasMortgage)
-                        {
-                            transaction.TotalCageMortgageAmount = fruit.CageMortgageValue * ctfDto.NumberOfCages;
-                        }
-
-                        context.Fruits.Update(fruit);
                     }
                 }
             }
@@ -249,11 +251,9 @@ namespace Shader.Services.Implementation
             {
                 client.Price -= transaction.Price;
                 client.TotalAmount -= transaction.TotalAmount;
-                //client.AmountPaid -= transaction.AmountPaid;
                 client.TotalRemainingAmount = client.TotalAmount - client.AmountPaid;
                 client.TotalDiscountAmount -= transaction.DiscountAmount;
                 client.TotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-                //client.TotalMortgageAmountPaid -= transaction.TotalCageMortgageAmountPaid;
                 client.TotalRemainingMortgageAmount = client.TotalMortgageAmount - client.TotalMortgageAmountPaid;
                 //client = await clientService.UpdateClientAggregatesAsync(client.Id);
                 //context.Clients.Update(client);
@@ -270,11 +270,9 @@ namespace Shader.Services.Implementation
                 {
                     removedClient.Price -= transaction.Price;
                     removedClient.TotalAmount -= transaction.TotalAmount;
-                    //removedClient.AmountPaid -= transaction.AmountPaid;
                     removedClient.TotalRemainingAmount = client.TotalAmount - client.AmountPaid;
                     removedClient.TotalDiscountAmount -= transaction.DiscountAmount;
                     removedClient.TotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-                    //removedClient.TotalMortgageAmountPaid -= transaction.TotalCageMortgageAmountPaid;
                     removedClient.TotalRemainingMortgageAmount = client.TotalMortgageAmount - client.TotalMortgageAmountPaid;
                     context.Clients.Update(removedClient);
                     //removedClient = await clientService.UpdateClientAggregatesAsync(removedClient.Id);
@@ -288,15 +286,11 @@ namespace Shader.Services.Implementation
 
             client.Price += transaction.Price;
             client.TotalAmount += transaction.Price - transaction.DiscountAmount;
-            //client.AmountPaid += transaction.AmountPaid;
             client.TotalRemainingAmount = client.TotalAmount - client.AmountPaid;
             client.TotalDiscountAmount += transaction.DiscountAmount;
             client.TotalMortgageAmount += transaction.TotalCageMortgageAmount;
-            //client.TotalMortgageAmountPaid += transaction.TotalCageMortgageAmountPaid;
             client.TotalRemainingMortgageAmount = client.TotalMortgageAmount - client.TotalMortgageAmountPaid;
             context.Clients.Update(client);
-            //client = await clientService.UpdateClientAggregatesAsync(client.Id);
-            //context.Clients.Update(client);
             await context.SaveChangesAsync();
             return transaction.MapToRClientTDetailsDto();
         }
@@ -344,7 +338,6 @@ namespace Shader.Services.Implementation
             await context.SaveChangesAsync();
             return transaction.MapToRClientTDetailsDto();
         }
-        
         public async Task<bool> DeleteClientTransactionAsync(int id)
         {
             var transaction = await context.ClientTransactions
@@ -358,21 +351,23 @@ namespace Shader.Services.Implementation
                 var fruit = await context.Fruits
                     .Where(f => f.Id == ctf.FruitId)
                     .Where(f => !f.IsDeleted)
-                    .FirstOrDefaultAsync() ?? throw new Exception("This fruit dosen't exist");
+                    .FirstOrDefaultAsync();
+                if(fruit is not null)
+                {
+                    fruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
+                    fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
+                    fruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
+                    fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
+                    fruit.RemainingCages += ctf.NumberOfCages;
+                    fruit.SoldCages -= ctf.NumberOfCages;
 
-                fruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
-                fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                fruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                fruit.RemainingCages += ctf.NumberOfCages;
-                fruit.SoldCages -= ctf.NumberOfCages;
+                    if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
+                        fruit.Status = FruitStatus.NotAvailabe;
+                    else
+                        fruit.Status = FruitStatus.InStock;
 
-                if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                    fruit.Status = FruitStatus.NotAvailabe;
-                else
-                    fruit.Status = FruitStatus.InStock;
-
-                context.Fruits.Update(fruit);
+                    context.Fruits.Update(fruit);
+                }
             }
             transaction.IsDeleted = true;
             //client.Price -= transaction.Price;

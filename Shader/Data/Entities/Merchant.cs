@@ -21,15 +21,15 @@ namespace Shader.Data.Entities
         public decimal PurchaseTotalRemainingMortgageAmount { get; set; } // قيمة الرهن المتبقي
         public decimal CurrentAmountBalance { get; set; } // Positive = merchant owes us, Negative = we owe merchant
         public decimal CurrentMortgageAmountBalance { get; set; } // Positive = merchant owes us, Negative = we owe merchant
-        public decimal SellingPrice { get; set; } 
-        public decimal SellingTotalAmount { get; set; } 
-        public decimal SellingAmountPaid { get; set; }
-        public decimal SellingTotalRemainingAmount { get; set; }
-        public decimal SellingTotalDiscountAmount { get; set; } 
-        public decimal SellingTotalMortgageAmount { get; set; } 
-        public decimal SellingTotalMortgageAmountPaid { get; set; } 
-        public decimal SellingTotalRemainingMortgageAmount { get; set; } 
-        public ICollection<MerchantPayments> Payments { get; set; } = new List<MerchantPayments>();
+        public decimal SellPrice { get; set; } 
+        public decimal SellTotalAmount { get; set; } 
+        public decimal SellAmountPaid { get; set; }
+        public decimal SellTotalRemainingAmount { get; set; }
+        public decimal SellTotalDiscountAmount { get; set; } 
+        public decimal SellTotalMortgageAmount { get; set; } 
+        public decimal SellTotalMortgageAmountPaid { get; set; } 
+        public decimal SellTotalRemainingMortgageAmount { get; set; } 
+        public ICollection<MerchantPayment> Payments { get; set; } = new List<MerchantPayment>();
         public ICollection<MerchantTransaction> Transactions { get; set; } = new List<MerchantTransaction>();
     }
 }

@@ -44,11 +44,10 @@ namespace Shader.Mapping
                 ValueDueToSupplier = bill.ValueDueToSupplier,
                 MshalValue = bill.MshalValue,
                 NylonValue = bill.NylonValue,
-                Fruits = bill.Fruits.Select(fruit => new RAllFruitsDto
+                Fruits = bill.Fruits.Select(fruit => new RFruitsDto
                 {
                     FruitName = fruit.FruitName,
                     TotalCages = fruit.TotalCages,
-                    SoldCages = fruit.SoldCages,
                     RemainingCages = fruit.RemainingCages,
                     PriceOfKilogramsSold = fruit.PriceOfKilogramsSold,
                     NumberOfKilogramsSold = fruit.NumberOfKilogramsSold,

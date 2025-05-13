@@ -15,9 +15,7 @@ namespace Shader.Mapping
                 ClientName = clientTransaction.Client.Name,
                 Date = clientTransaction.Date,
                 TotalAmount = clientTransaction.TotalAmount,
-                //RemainingAmount = clientTransaction.RemainingAmount,
                 TotalCageMortgageAmount = clientTransaction.TotalCageMortgageAmount,
-                //RemainingMortgageAmount = clientTransaction.RemainingMortgageAmount,
                 ClientTransactionFruits = clientTransaction.ClientTransactionFruits.Select(clientTransactionFruit => new RClientTFruitDto
                 {
                     FruitName = clientTransactionFruit.Fruit.FruitName,
@@ -38,11 +36,7 @@ namespace Shader.Mapping
                 Price = clientTransaction.Price,
                 DiscountAmount = clientTransaction.DiscountAmount,
                 TotalAmount = clientTransaction.TotalAmount,
-                //AmountPaid = clientTransaction.AmountPaid,
-                //RemainingAmount = clientTransaction.RemainingAmount,
                 TotalCageMortgageAmount = clientTransaction.TotalCageMortgageAmount,
-                //TotalCageMortgageAmountPaid = clientTransaction.TotalCageMortgageAmountPaid,
-                //RemainingMortgageAmount = clientTransaction.RemainingMortgageAmount,
                 ClientTransactionFruits = clientTransaction.ClientTransactionFruits.Select(clientTransactionFruit => new RClientTFruitDto
                 {
                     FruitName = clientTransactionFruit.Fruit.FruitName,
@@ -56,7 +50,7 @@ namespace Shader.Mapping
         public static ClientTransaction MapToClientTransaction(this WClientTDto ctDto, ClientTransaction? transaction = null)
         {
             transaction ??= new ClientTransaction();
-            
+            transaction.DiscountAmount = ctDto.DiscountAmount;
             transaction.Description = ctDto.Description;
             transaction.ClientId = ctDto.ClientId;
             if (transaction.Date == default)
@@ -73,8 +67,6 @@ namespace Shader.Mapping
                 WeightInKilograms = clientTransactionFruitDto.WeightInKilograms,
                 PriceOfKiloGram = clientTransactionFruitDto.PriceOfKiloGram
             }).ToList();
-            //transaction.RemainingAmount = transaction.TotalAmount - transaction.AmountPaid;
-
             return transaction;
         }
 

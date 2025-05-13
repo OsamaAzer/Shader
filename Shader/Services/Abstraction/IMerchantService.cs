@@ -11,6 +11,7 @@ namespace Shader.Services.Abstraction
         Task<Merchant> GetMerchantByIdAsync(int id);
         Task<RMerchantDto> CreateMerchantAsync(WMerchantDto sellerDto);
         Task<RMerchantDto> UpdateMerchantAsync(int id, WMerchantDto sellerDto);
+        Task<Merchant> UpdateMerchantAggregatesAsync(Merchant merchant);
         Task<bool> DeleteMerchantAsync(int id); // for hard delete
     }
 }

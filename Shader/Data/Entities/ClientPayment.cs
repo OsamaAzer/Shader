@@ -1,6 +1,6 @@
 ﻿namespace Shader.Data.Entities
 {
-    public class ClientPayments
+    public class ClientPayment
     {
         public int Id { get; set; }
         public DateTime Date { get; set; } = DateTime.Now;

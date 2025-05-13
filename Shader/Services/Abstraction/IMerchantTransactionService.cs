@@ -7,8 +7,8 @@ namespace Shader.Services.Abstraction
         Task<IEnumerable<RMerchantTDto>> GetAllTransactionsAsync();
         Task<IEnumerable<RMerchantTDto>> GetAllTransactionsByDateAsync(DateOnly date);
         Task<IEnumerable<RMerchantTDto>> GetAllTransactionsByDateRangeAsync(DateOnly startDate, DateOnly endDate);
+        Task<IEnumerable<RMerchantTDto>> GetTransactionsByMerchantIdAsync(int MerchantId);
         Task<RMerchantTDetailsDto> GetTransactionByIdAsync(int id);
-        Task<IEnumerable<RMerchantTDto>> GetTransactionsByShaderIdAsync(int shaderId);
         Task<RMerchantTDetailsDto> CreateTransactionAsync(WMerchantTDto transactionDto);
         Task<RMerchantTDetailsDto> UpdateTransactionAsync(int id, WMerchantTDto transactionDto);
         Task<bool> DeleteTransactionAsync(int id); 

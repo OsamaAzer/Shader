@@ -11,14 +11,14 @@ namespace Shader.Services.Implementation
 {
     public class FruitService(ShaderContext context) : IFruitService
     {
-        public async Task<IEnumerable<RFruitDto>> GetAllFruitsAsync()
+        public async Task<IEnumerable<RFruitsDto>> GetAllFruitsAsync()
         {
             var fruits = await context.Fruits
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<IEnumerable<Fruit>> GetSupplierFruitsToBeBilledAsync(int supplierId)
+        public async Task<IEnumerable<RFruitsDto>> GetSupplierFruitsToBeBilledAsync(int supplierId)
         {
             var supplier = await context.Suppliers
                 .Where(s => !s.IsDeleted)
@@ -26,22 +26,22 @@ namespace Shader.Services.Implementation
                 throw new Exception($"Supplier with id:({supplierId}) does not exist!");
 
             var fruits = await context.Fruits
-                .Where(f => f.SupplierId == supplierId)
+                .Where(f => f.SupplierId == supplierId && !f.Supplier.IsMerchant)
                 .Where(f => !f.IsBilled && !f.IsDeleted)
                 .Where(f => f.Status == FruitStatus.NotAvailabe)
                 .ToListAsync();
-            return fruits;
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<IEnumerable<RFruitDto>> GetInStockFruitsAsync()
+        public async Task<IEnumerable<RFruitsDto>> GetInStockFruitsAsync()
         {
             var fruits = await context.Fruits
                 .Where(f => f.Status == FruitStatus.InStock)
                 .Where(f => !f.IsDeleted)
                 .OrderByDescending(f => f.RemainingCages)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<IEnumerable<RFruitDto>> GetInStockSupplierFruitsAsync(int supplierId)
+        public async Task<IEnumerable<RFruitsDto>> GetInStockSupplierFruitsAsync(int supplierId)
         {
             var supplier = await context.Suppliers
                 .Where(s => s.Id == supplierId && !s.IsDeleted)
@@ -54,17 +54,17 @@ namespace Shader.Services.Implementation
                 .Where (f => !f.IsDeleted)
                 .OrderByDescending(f => f.RemainingCages)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<IEnumerable<RFruitDto>> GetUnAvailableFruitsAsync()
+        public async Task<IEnumerable<RFruitsDto>> GetUnAvailableFruitsAsync()
         {
             var fruits = await context.Fruits
                 .Where(f => f.Status == FruitStatus.NotAvailabe)
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<IEnumerable<RFruitDto>> GetAllSupplierFruitsAsync(int supplierId)
+        public async Task<IEnumerable<RFruitsDto>> GetAllSupplierFruitsAsync(int supplierId)
         {
             var supplier = await context.Suppliers
                 .Where(s => s.Id == supplierId && !s.IsDeleted)
@@ -75,29 +75,31 @@ namespace Shader.Services.Implementation
                 .Where(f => f.SupplierId == supplierId)
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<IEnumerable<RFruitDto>> SearchWithFruitNameAsync(string fruitName)
+        public async Task<IEnumerable<RFruitsDto>> SearchWithFruitNameAsync(string fruitName)
         {
             var fruits = await context.Fruits
                 .Where(f => f.FruitName.ToLower().Contains(fruitName.ToLower()))
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<RFruitDto> GetFruitByIdAsync(int id)
+        public async Task<RFruitDetailsDto> GetFruitByIdAsync(int id)
         {
             var fruit = await context.Fruits
+                .Include(f => f.Supplier)
                 .Where(f => f.Id == id && !f.IsDeleted)
                 .FirstOrDefaultAsync() ??
                 throw new Exception($"Fruit with id:({id}) does not exist!");
 
-            return fruit.Map<Fruit, RFruitDto>();
+            return fruit.ToRFruitDetailsDto();
         }
-        public async Task<RFruitDto> AddFruitCagesAsync(int id, int numberOfCages)
+        public async Task<RFruitDetailsDto> AddFruitCagesAsync(int id, int numberOfCages)
         {
             var fruit = await context.Fruits
+                .Include(f => f.Supplier)
                 .Where(s => s.Id == id && !s.IsDeleted)
                 .FirstOrDefaultAsync() ?? throw new Exception($"Fruit with id:({id}) does not exist!");
 
@@ -113,14 +115,15 @@ namespace Shader.Services.Implementation
 
             context.Fruits.Update(fruit);
             await context.SaveChangesAsync();
-            return fruit.Map<Fruit, RFruitDto>();
+            return fruit.ToRFruitDetailsDto();
         }
-        public async Task<IEnumerable<RFruitDto>> AddFruitsAsync(int supplierId, List<WRangeFruitDto> fruitDtos)
+        public async Task<IEnumerable<RFruitsDto>> AddFruitsAsync(int supplierId, List<WRangeFruitDto> fruitDtos)
         {
             var supplier = await context.Suppliers
-                .Where(s => s.Id == supplierId && !s.IsDeleted)
-                .FirstOrDefaultAsync();
-            if (supplier == null) throw new Exception($"Supplier with id:({supplierId}) does not exist!");
+                .Include(s => s.Merchant)
+                .Where(s => !s.IsDeleted)
+                .FirstOrDefaultAsync(s => s.Id == supplierId)??
+                throw new Exception($"Supplier with id:({supplierId}) does not exist!");
 
             var fruits = fruitDtos.Map<WRangeFruitDto, Fruit>().ToList();
             foreach (var fruit in fruits)
@@ -134,24 +137,70 @@ namespace Shader.Services.Implementation
                     fruit.Status = FruitStatus.InStock;
                 else
                     fruit.Status = FruitStatus.NotAvailabe;
+
+                if (supplier.Merchant is not null && supplier.IsMerchant)
+                {
+                    supplier.Merchant.SellPrice += fruit.MerchantPurchasePrice;
+                    supplier.Merchant.SellTotalAmount += fruit.MerchantPurchasePrice;
+                    supplier.Merchant.SellTotalRemainingAmount = supplier.Merchant.SellTotalAmount - supplier.Merchant.SellAmountPaid;
+                    supplier.Merchant.CurrentAmountBalance = 
+                        supplier.Merchant.SellTotalRemainingAmount - supplier.Merchant.PurchaseTotalRemainingAmount;
+                    context.Merchants.Update(supplier.Merchant);
+                }
             }
             await context.Fruits.AddRangeAsync(fruits);
             await context.SaveChangesAsync();
-            return fruits.Map<Fruit, RFruitDto>();
+            return fruits.Map<Fruit, RFruitsDto>();
         }
-        public async Task<RFruitDto> UpdateFruitAsync(int id, UFruitDto dto)
+        public async Task<RFruitDetailsDto> UpdateFruitAsync(int id, UFruitDto dto)
         {
             var fruit = await context.Fruits
+                .Include(f => f.Supplier)
                 .Where(f => !f.IsDeleted)
                 .FirstOrDefaultAsync(f => f.Id == id) ?? 
                 throw new Exception($"Fruit with id:({id}) does not exist!");
 
             var supplier = await context.Suppliers
-                .Where(f => !f.IsDeleted)
-                .FirstOrDefaultAsync(f => f.Id == fruit.SupplierId) ?? 
-                throw new Exception($"Supplier with id:({fruit.SupplierId}) does not exist!");
+                    .Include(s => s.Merchant)
+                    .Where(f => !f.IsDeleted)
+                    .FirstOrDefaultAsync(f => f.Id == dto.SupplierId) ??
+                    throw new Exception($"Supplier with id:({dto.SupplierId}) does not exist!");
 
-            dto.Map(fruit);
+            if (fruit.SupplierId != dto.SupplierId)
+            {
+                var oldSupplier = await context.Suppliers
+                .Include(s => s.Merchant)
+                .Where(s => !s.IsDeleted)
+                .FirstOrDefaultAsync(s => s.Id == fruit.SupplierId);
+
+                if (oldSupplier is not null && oldSupplier.IsMerchant && oldSupplier.Merchant is not null)
+                {
+                    oldSupplier.Merchant.SellPrice -= fruit.MerchantPurchasePrice;
+                    oldSupplier.Merchant.SellTotalAmount -= fruit.MerchantPurchasePrice;
+                    oldSupplier.Merchant.SellTotalRemainingAmount = oldSupplier.Merchant.SellTotalAmount - oldSupplier.Merchant.SellAmountPaid;
+                    oldSupplier.Merchant.CurrentAmountBalance =
+                    oldSupplier.Merchant.SellTotalRemainingAmount - oldSupplier.Merchant.PurchaseTotalRemainingAmount;
+                    context.Merchants.Update(oldSupplier.Merchant);
+                }
+            }
+            if (supplier.IsMerchant && supplier.Merchant is not null)
+            {
+                supplier.Merchant.SellPrice -= fruit.MerchantPurchasePrice;
+                supplier.Merchant.SellTotalAmount -= fruit.MerchantPurchasePrice;
+                supplier.Merchant.SellTotalRemainingAmount = supplier.Merchant.SellTotalAmount - supplier.Merchant.SellAmountPaid;
+                supplier.Merchant.CurrentAmountBalance =
+                supplier.Merchant.SellTotalRemainingAmount - supplier.Merchant.PurchaseTotalRemainingAmount;
+
+                dto.Map(fruit);
+
+                supplier.Merchant.SellPrice += fruit.MerchantPurchasePrice;
+                supplier.Merchant.SellTotalAmount += fruit.MerchantPurchasePrice;
+                supplier.Merchant.SellTotalRemainingAmount = supplier.Merchant.SellTotalAmount - supplier.Merchant.SellAmountPaid;
+                supplier.Merchant.CurrentAmountBalance =
+                supplier.Merchant.SellTotalRemainingAmount - supplier.Merchant.PurchaseTotalRemainingAmount;
+                context.Merchants.Update(supplier.Merchant);
+            }
+            //dto.Map(fruit);
             fruit.SupplierId = supplier.Id;
             fruit.Supplier = supplier;
             fruit.RemainingCages = fruit.TotalCages - fruit.SoldCages;
@@ -166,13 +215,24 @@ namespace Shader.Services.Implementation
 
             context.Fruits.Update(fruit);
             await context.SaveChangesAsync();
-            return fruit.Map<Fruit, RFruitDto>();//ToDo NestedObjects
+            return fruit.ToRFruitDetailsDto();
         }
         public async Task<bool> DeleteFruitAsync(int id)
         {
-            var fruit = await context.Fruits.FindAsync(id);
-            if (fruit is null) throw new Exception($"Fruit with id:({id}) does not exist!");
-            fruit.Status = FruitStatus.NotAvailabe;
+            var fruit = await context.Fruits
+                .Include(f => f.Supplier)
+                .Where(f => !f.IsDeleted )
+                .FirstOrDefaultAsync(f => f.Id == id) ??
+                throw new Exception($"Fruit with id:({id}) does not exist!");
+
+            //var supplier = await context.Suppliers
+            //    .Include(s => s.Merchant)
+            //    .Where(s => !s.IsDeleted)
+            //    .FirstOrDefaultAsync(s => s.Id == fruit.SupplierId);
+
+            if (fruit.RemainingCages > 0)
+                throw new Exception($"There is still a stock of fruit in the store.");
+
             fruit.IsDeleted = true;
             context.Fruits.Update(fruit);
             return await context.SaveChangesAsync() > 0;

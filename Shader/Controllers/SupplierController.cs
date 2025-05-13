@@ -23,6 +23,12 @@ namespace Shader.Controllers
             var suppliers = await _supplierService.GetAllSuppliersAsync();
             return Ok(suppliers);
         }
+        [HttpGet("merchant-suppliers")]
+        public async Task<IActionResult> GetAllMerchantSuppliers()
+        {
+            var suppliers = await _supplierService.GetAllMerchantSuppliersAsync();
+            return Ok(suppliers);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSupplierById(int id)
@@ -53,6 +59,35 @@ namespace Shader.Controllers
             var result = await _supplierService.AddSupplierAsync(supplierDto);
             if (result is null) return StatusCode(500, "An error occurred while adding the supplier.");
             return Ok(result);
+        }
+
+        [HttpPost("merchnat-supplier")]
+        public async Task<IActionResult> AddMerchantSupplier(int merchantId)
+        {
+            try
+            {
+                var result = await _supplierService.AddMerchantAsSupplierAsync(merchantId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("merchnat-supplier/{id}")]
+        public async Task<IActionResult> UpdateMerchantSupplier(int id, int merchantId)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var result = await _supplierService.UpdateMerchantAsSupplierAsync(id, merchantId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
