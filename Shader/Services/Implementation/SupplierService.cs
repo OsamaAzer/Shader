@@ -2,6 +2,7 @@
 using Shader.Data;
 using Shader.Data.Dtos.Supplier;
 using Shader.Data.Entities;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 using System.Collections.Generic;
@@ -10,23 +11,23 @@ namespace Shader.Services.Implementation
 {
     public class SupplierService(ShaderContext context) : ISupplierService
     {
-        public async Task<IEnumerable<RSupplierDto>> GetAllSuppliersAsync()
+        public async Task<PagedResponse<RSupplierDto>> GetAllSuppliersAsync(int pageNumber, int pageSize)
         {
             var suppliers = await context.Suppliers
                 .Where(s=> !s.IsDeleted)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
-            return suppliers.Map<Supplier, RSupplierDto>().ToList();
+            return suppliers.Map<Supplier, RSupplierDto>().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RSupplierDto>> GetAllMerchantSuppliersAsync()
+        public async Task<PagedResponse<RSupplierDto>> GetAllMerchantSuppliersAsync(int pageNumber, int pageSize)
         {
             var suppliers = await context.Suppliers
                 .Where(s => !s.IsDeleted && s.IsMerchant)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
-            return suppliers.Map<Supplier, RSupplierDto>().ToList();
+            return suppliers.Map<Supplier, RSupplierDto>().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RSupplierDto>> GetAllSuppliersWithNameAsync(string name)
+        public async Task<PagedResponse<RSupplierDto>> GetAllSuppliersWithNameAsync(string name, int pageNumber, int pageSize)
         {
             var suppliers = await context.Suppliers
                 .Where(s => !s.IsDeleted)
@@ -34,7 +35,7 @@ namespace Shader.Services.Implementation
                 .OrderBy(s => s.Name)
                 .ToListAsync();
 
-            return suppliers.Map<Supplier, RSupplierDto>().ToList();  
+            return suppliers.Map<Supplier, RSupplierDto>().CreatePagedResponse(pageNumber, pageSize);  
         }
         public async Task<RSupplierDto> GetSupplierByIdAsync(int id)
         {

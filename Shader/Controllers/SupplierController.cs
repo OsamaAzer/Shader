@@ -18,15 +18,22 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSuppliers()
+        public async Task<IActionResult> GetAllSuppliers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var suppliers = await _supplierService.GetAllSuppliersAsync();
+            var suppliers = await _supplierService.GetAllSuppliersAsync(pageNumber, pageSize);
             return Ok(suppliers);
         }
         [HttpGet("merchant-suppliers")]
-        public async Task<IActionResult> GetAllMerchantSuppliers()
+        public async Task<IActionResult> GetAllMerchantSuppliers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var suppliers = await _supplierService.GetAllMerchantSuppliersAsync();
+            var suppliers = await _supplierService.GetAllMerchantSuppliersAsync(pageNumber, pageSize);
+            return Ok(suppliers);
+        }
+
+        [HttpGet("name")]
+        public async Task<IActionResult> GetSuppliersWithName(string name, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var suppliers = await _supplierService.GetAllSuppliersWithNameAsync(name, pageNumber, pageSize);
             return Ok(suppliers);
         }
 
@@ -42,16 +49,8 @@ namespace Shader.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            
-        }
 
-        [HttpGet("name")]
-        public async Task<IActionResult> GetSuppliersWithName(string name)
-        {
-            var suppliers = await _supplierService.GetAllSuppliersWithNameAsync(name);
-            return Ok(suppliers);
         }
-
         [HttpPost]
         public async Task<IActionResult> AddSupplier([FromBody] WSupplierDto supplierDto)
         {

@@ -32,16 +32,16 @@ namespace Shader.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> GetClientsWithName(string name)
+        public async Task<IActionResult> GetClientsWithName(string name, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var clients = await _clientService.GetAllClientsWithNameAsync(name);
+            var clients = await _clientService.GetAllClientsWithNameAsync(name, pageNumber, pageSize);
             return Ok(clients);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllClients()
+        public async Task<IActionResult> GetAllClients([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var clients = await _clientService.GetAllClientsAsync();
+            var clients = await _clientService.GetAllClientsAsync(pageNumber, pageSize);
             return Ok(clients);
         }
 

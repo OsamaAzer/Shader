@@ -3,6 +3,7 @@ using Shader.Data;
 using Shader.Data.DTOs.ShaderTransaction;
 using Shader.Data.Entities;
 using Shader.Enums;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -10,7 +11,7 @@ namespace Shader.Services.Implementation
 {
     public class MerchantTransactionService(ShaderContext context) : IMerchantTransactionService
     {
-        public async Task<IEnumerable<RMerchantTDto>> GetAllTransactionsAsync()
+        public async Task<PagedResponse<RMerchantTDto>> GetAllTransactionsAsync(int pageNumber, int pageSize)
         {
             var transactions = await context.MerchantTransactions
                 .Include(c => c.MerchantTransactionFruits)
@@ -19,9 +20,9 @@ namespace Shader.Services.Implementation
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
-            return transactions.MapToRMerchantTDto();
+            return transactions.MapToRMerchantTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMerchantTDto>> GetAllTransactionsByDateAsync(DateOnly date)
+        public async Task<PagedResponse<RMerchantTDto>> GetAllTransactionsByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
             var transactions = await context.MerchantTransactions
                 .Include(c => c.MerchantTransactionFruits)
@@ -30,9 +31,10 @@ namespace Shader.Services.Implementation
                 .Where(c => DateOnly.FromDateTime(c.Date) == date && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
-            return transactions.MapToRMerchantTDto();
+            return transactions.MapToRMerchantTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMerchantTDto>> GetAllTransactionsByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+        public async Task<PagedResponse<RMerchantTDto>> GetAllTransactionsByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
@@ -46,19 +48,9 @@ namespace Shader.Services.Implementation
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
 
-            return transactions.MapToRMerchantTDto();
+            return transactions.MapToRMerchantTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<RMerchantTDetailsDto> GetTransactionByIdAsync(int id)
-        {
-            var transaction = await context.MerchantTransactions
-                .Where(c => !c.IsDeleted)
-                .Include(c => c.MerchantTransactionFruits)
-                .ThenInclude(ctf => ctf.Fruit)
-                .Include(c => c.Merchant)
-                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("This merchant transacttion dosen't exist");
-            return transaction.MapToRMerchantTDetailsDto();
-        }
-        public async Task<IEnumerable<RMerchantTDto>> GetTransactionsByMerchantIdAsync(int merchantId)
+        public async Task<PagedResponse<RMerchantTDto>> GetTransactionsByMerchantIdAsync(int merchantId, int pageNumber, int pageSize)
         {
             var merchant = await context.Merchants
             .Where(c => !c.IsDeleted)
@@ -72,7 +64,17 @@ namespace Shader.Services.Implementation
                 .Where(c => c.MerchantId == merchantId && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
-            return transactions.MapToRMerchantTDto();
+            return transactions.MapToRMerchantTDto().CreatePagedResponse(pageNumber, pageSize);
+        }
+        public async Task<RMerchantTDetailsDto> GetTransactionByIdAsync(int id)
+        {
+            var transaction = await context.MerchantTransactions
+                .Where(c => !c.IsDeleted)
+                .Include(c => c.MerchantTransactionFruits)
+                .ThenInclude(ctf => ctf.Fruit)
+                .Include(c => c.Merchant)
+                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("This merchant transacttion dosen't exist");
+            return transaction.MapToRMerchantTDetailsDto();
         }
         public async Task<RMerchantTDetailsDto> CreateTransactionAsync(WMerchantTDto mtDto)
         {

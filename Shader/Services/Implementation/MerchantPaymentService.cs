@@ -2,6 +2,7 @@
 using Shader.Data;
 using Shader.Data.DTOs.MerchantPayment;
 using Shader.Enums;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -9,16 +10,16 @@ namespace Shader.Services.Implementation
 {
     public class MerchantPaymentService(ShaderContext context) : IMerchantPaymentService
     {
-        public async Task<IEnumerable<RMerchantPaymentDto>> GetAllPaymentsAsync()
+        public async Task<PagedResponse<RMerchantPaymentDto>> GetAllPaymentsAsync(int pageNumber, int pageSize)
         {
             var payments = await context.MerchantPayments
                 .Include(payment => payment.Merchant)
                 .Where(p => !p.IsDeleted)
                 .OrderByDescending(p => p.Date)
                 .ToListAsync();
-            return payments.ToRMerchantPayments();
+            return payments.ToRMerchantPayments().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMerchantPaymentDto>> GetAllPaymentsByDateAsync(DateOnly date)
+        public async Task<PagedResponse<RMerchantPaymentDto>> GetAllPaymentsByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
             var payments = await context.MerchantPayments
                 .Include(payment => payment.Merchant)
@@ -26,9 +27,10 @@ namespace Shader.Services.Implementation
                 .Where(p => DateOnly.FromDateTime(p.Date) == date)
                 .OrderByDescending(p => p.Date)
                 .ToListAsync();
-            return payments.ToRMerchantPayments();
+            return payments.ToRMerchantPayments().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMerchantPaymentDto>> GetAllPaymentsByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+        public async Task<PagedResponse<RMerchantPaymentDto>> GetAllPaymentsByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             var payments = await context.MerchantPayments
                 .Include(payment => payment.Merchant)
@@ -36,9 +38,9 @@ namespace Shader.Services.Implementation
                 .Where(p => DateOnly.FromDateTime(p.Date) >= startDate && DateOnly.FromDateTime(p.Date) <= endDate)
                 .OrderByDescending(p => p.Date)
                 .ToListAsync();
-            return payments.ToRMerchantPayments();
+            return payments.ToRMerchantPayments().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMerchantPaymentDto>> GetPaymentsByMerchantIdAsync(int merchantId)
+        public async Task<PagedResponse<RMerchantPaymentDto>> GetPaymentsByMerchantIdAsync(int merchantId, int pageNumber, int pageSize)
         {
             var payments = await context.MerchantPayments
                 .Include(payment => payment.Merchant)
@@ -46,7 +48,7 @@ namespace Shader.Services.Implementation
                 .OrderByDescending(p => p.Date)
                 .ToListAsync() ??
             throw new Exception($"Payment with Merchant ID {merchantId} not found.");
-            return payments.ToRMerchantPayments().ToList();
+            return payments.ToRMerchantPayments().CreatePagedResponse(pageNumber, pageSize);
         }
         public async Task<RMerchantPaymentDto> GetPaymentByIdAsync(int id)
         {

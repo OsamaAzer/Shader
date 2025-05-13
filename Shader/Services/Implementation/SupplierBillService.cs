@@ -2,6 +2,7 @@
 using Shader.Data;
 using Shader.Data.DTOs.SupplierBill;
 using Shader.Data.Entities;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -9,21 +10,23 @@ namespace Shader.Services.Implementation
 {
     public class SupplierBillService(ShaderContext context) : ISupplierBillService
     {
-        public async Task<IEnumerable<SupplierBill>> GetAllSupplierBillsAsync()
+        public async Task<PagedResponse<SupplierBill>> GetAllSupplierBillsAsync(int pageNumber, int pageSize)
         {
-            return await context.SupplierBills
+            var bills =  await context.SupplierBills
                 .Include(sb => sb.Fruits)
                 .Where(sb => !sb.IsDeleted)
                 .OrderByDescending(sb => sb.Date)
                 .ToListAsync();
+            return bills.CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<SupplierBill>> GetSupplierBillsBySupplierIdAsync(int supplierId)
+        public async Task<PagedResponse<SupplierBill>> GetSupplierBillsBySupplierIdAsync(int supplierId, int pageNumber, int pageSize)
         {
-            return await context.SupplierBills
+            var bills = await context.SupplierBills
                 .Include(sb => sb.Fruits)
                 .Where(sb => sb.SupplierId == supplierId && !sb.IsDeleted)
                 .OrderByDescending(sb => sb.Date)
                 .ToListAsync();
+            return bills.CreatePagedResponse(pageNumber, pageSize);
         }
         public async Task<SupplierBill> GetSupplierBillByIdAsync(int id)
         {

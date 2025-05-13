@@ -4,6 +4,7 @@ using Shader.Data;
 using Shader.Data.Dtos.CashTransaction;
 using Shader.Data.Entities;
 using Shader.Enums;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 using static System.TimeZoneInfo;
@@ -12,7 +13,7 @@ namespace Shader.Services.Implementation
 {
     public class CashTransactionService(ShaderContext context) : ICashTransactionService
     {
-        public async Task<IEnumerable<RCashTDto>> GetCashTransactionsByDateAsync(DateOnly date)
+        public async Task<PagedResponse<RCashTDto>> GetCashTransactionsByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
             var transactions = await context.CashTransactions
                 .Include(c => c.CashTransactionFruits)
@@ -21,9 +22,9 @@ namespace Shader.Services.Implementation
                 .OrderByDescending(c => c.Date)
                 .OrderByDescending(c => c.Date.Hour)
                 .ToListAsync();
-            return transactions.MapToRCashTDto();
+            return transactions.MapToRCashTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RCashTDto>> GetAllCashTransactionsAsync()
+        public async Task<PagedResponse<RCashTDto>> GetAllCashTransactionsAsync(int pageNumber, int pageSize)
         {
             var transactions = await context.CashTransactions
                 .Include(c => c.CashTransactionFruits)
@@ -33,7 +34,7 @@ namespace Shader.Services.Implementation
                 .OrderByDescending(c => c.Date.Hour)
                 .OrderDescending()
                 .ToListAsync();
-            return transactions.MapToRCashTDto();
+            return transactions.MapToRCashTDto().CreatePagedResponse(pageNumber, pageSize);
         }
         public async Task<RCashTDto> GetCashTransactionByIdAsync(int id)
         {
@@ -46,8 +47,8 @@ namespace Shader.Services.Implementation
 
             return transaction.MapToRCashTDto();
         }
-        public async Task<IEnumerable<RCashTDto>> GetCashTransactionsByDateRangeAsync
-            (DateOnly startDate, DateOnly endDate)
+        public async Task<PagedResponse<RCashTDto>> GetCashTransactionsByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
@@ -61,7 +62,7 @@ namespace Shader.Services.Implementation
                 .OrderByDescending(c => c.Date.Hour)
                 .ToListAsync();
 
-            return transactions.MapToRCashTDto();
+            return transactions.MapToRCashTDto().CreatePagedResponse(pageNumber, pageSize);
         }
         public async Task<RCashTDto> AddCashTransactionAsync(WCashTDto ctDto)
         {

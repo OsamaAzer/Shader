@@ -2,6 +2,7 @@
 using Shader.Data;
 using Shader.Data.Dtos.Expense;
 using Shader.Data.Entities;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -10,34 +11,33 @@ namespace Shader.Services.Implementation
 {
     public class ExpenseService(ShaderContext context) : IExpenseService
     {
-        public async Task<IEnumerable<RExpenseDto>> GetExpensesByDateAndTimeRangeAsync
-            (DateOnly startDate, DateOnly endDate)
+        public async Task<PagedResponse<RExpenseDto>> GetExpensesByDateAndTimeRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
             
-            var expensesDto =  context.Expenses
+            var expensesDto = context.Expenses
                 .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) >= startDate && DateOnly.FromDateTime(e.Date) <= endDate)
                 .OrderByDescending(e => e.Date)
                 .Map<Expense, RExpenseDto>().ToList();
-
-            return await Task.FromResult<IEnumerable<RExpenseDto>>(expensesDto);
+            return  await Task.FromResult(expensesDto.CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RExpenseDto>> GetExpensesByDateAsync(DateOnly date)
+        public async Task<PagedResponse<RExpenseDto>> GetExpensesByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
-            var expenseDto = context.Expenses
+            var expensesDto = context.Expenses
                 .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) == date)
                 .OrderByDescending(e => e.Date)
                 .Map<Expense, RExpenseDto>().ToList();
-            return await Task.FromResult<IEnumerable<RExpenseDto>>(expenseDto);
+            return await Task.FromResult(expensesDto.CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RExpenseDto>> GetAllExpensesAsync()
+        public async Task<PagedResponse<RExpenseDto>> GetAllExpensesAsync(int pageNumber, int pageSize)
         {
             var expensesDto = context.Expenses
                 .Where (e => !e.IsDeleted)
                 .OrderByDescending(e => e.Date)
                 .Map<Expense, RExpenseDto>().ToList();
-            return await Task.FromResult<IEnumerable<RExpenseDto>>(expensesDto);
+            return  await Task.FromResult(expensesDto.CreatePagedResponse(pageNumber, pageSize));
         }
         public async Task<RExpenseDto> GetExpenseByIdAsync(int id)
         {

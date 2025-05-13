@@ -16,39 +16,40 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPayments()
+        public async Task<IActionResult> GetAllPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsAsync();
+            var payments = await _clientPaymentService.GetAllPaymentsAsync(pageNumber, pageSize);
             return Ok(payments);
         }
 
         [HttpGet("date/{date}")]
-        public async Task<IActionResult> GetPaymentsByDate([FromRoute] DateOnly date)
+        public async Task<IActionResult> GetPaymentsByDate([FromRoute] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(date);
+            var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(date, pageNumber, pageSize);
             return Ok(payments);
         }
 
         [HttpGet("today")]
-        public async Task<IActionResult> GetTodayPayments()
+        public async Task<IActionResult> GetTodayPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(DateOnly.FromDateTime(DateTime.Now));
+            var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(DateOnly.FromDateTime(DateTime.Now), pageNumber, pageSize);
             return Ok(payments);
         }
 
         [HttpGet("date-range")]
-        public async Task<IActionResult> GetPaymentsByDateRange([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        public async Task<IActionResult> GetPaymentsByDateRange
+            ([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsByDateRangeAsync(startDate, endDate);
+            var payments = await _clientPaymentService.GetAllPaymentsByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
             return Ok(payments);
         }
 
         [HttpGet("client/{clientId}")]
-        public async Task<IActionResult> GetPaymentsByClientId([FromRoute] int clientId)
+        public async Task<IActionResult> GetPaymentsByClientId([FromRoute] int clientId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var payments = await _clientPaymentService.GetPaymentsByClientIdAsync(clientId);
+                var payments = await _clientPaymentService.GetPaymentsByClientIdAsync(clientId, pageNumber, pageSize);
                 return Ok(payments);
             }
             catch (Exception ex)

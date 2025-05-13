@@ -17,39 +17,39 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllFruits()
+        public async Task<IActionResult> GetAllFruits([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var fruits = await _fruitService.GetAllFruitsAsync();
+            var fruits = await _fruitService.GetAllFruitsAsync(pageNumber, pageSize);
             return Ok(fruits);
         }
 
         [HttpGet("in-stock")]
-        public async Task<IActionResult> GetInStockFruits()
+        public async Task<IActionResult> GetInStockFruits([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var fruits = await _fruitService.GetInStockFruitsAsync();
+            var fruits = await _fruitService.GetInStockFruitsAsync(pageNumber, pageSize);
             return Ok(fruits);
         }
 
         [HttpGet("unavailable")]
-        public async Task<IActionResult> GetUnavailableFruits()
+        public async Task<IActionResult> GetUnavailableFruits([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var fruits = await _fruitService.GetUnAvailableFruitsAsync();
+            var fruits = await _fruitService.GetUnAvailableFruitsAsync(pageNumber, pageSize);
             return Ok(fruits);
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchFruits([FromQuery] string fruitName)
+        public async Task<IActionResult> SearchFruits([FromQuery] string fruitName, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var fruits = await _fruitService.SearchWithFruitNameAsync(fruitName);
+            var fruits = await _fruitService.SearchWithFruitNameAsync(fruitName, pageNumber, pageSize);
             return Ok(fruits);
         }
 
         [HttpGet("supplier-bill/{supplierId}")]
-        public async Task<IActionResult> GetSupplierFruitsToBeBilled(int supplierId)
+        public async Task<IActionResult> GetSupplierFruitsToBeBilled(int supplierId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var fruits = await _fruitService.GetSupplierFruitsToBeBilledAsync(supplierId);
+                var fruits = await _fruitService.GetSupplierFruitsToBeBilledAsync(supplierId, pageNumber, pageSize);
                 return Ok(fruits);
             }
             catch (Exception ex)
@@ -59,11 +59,11 @@ namespace Shader.Controllers
         }
 
         [HttpGet("in-stock/supplier/{supplierId}")]
-        public async Task<IActionResult> GetInStockSupplierFruits(int supplierId)
+        public async Task<IActionResult> GetInStockSupplierFruits(int supplierId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var fruits = await _fruitService.GetInStockSupplierFruitsAsync(supplierId);
+                var fruits = await _fruitService.GetInStockSupplierFruitsAsync(supplierId, pageNumber, pageSize);
                 return Ok(fruits);
             }
             catch (Exception ex)
@@ -73,11 +73,11 @@ namespace Shader.Controllers
         }
 
         [HttpGet("supplier/{supplierId}")]
-        public async Task<IActionResult> GetAllSupplierFruits(int supplierId)
+        public async Task<IActionResult> GetAllSupplierFruits(int supplierId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var fruits = await _fruitService.GetAllSupplierFruitsAsync(supplierId);
+                var fruits = await _fruitService.GetAllSupplierFruitsAsync(supplierId, pageNumber, pageSize);
                 return Ok(fruits);
             }
             catch (Exception ex)

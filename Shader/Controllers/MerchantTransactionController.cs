@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Shader.Services.Abstraction;
 using Shader.Data.DTOs.ShaderTransaction;
+using System.Drawing.Printing;
 
 namespace Shader.Controllers
 {
@@ -16,37 +17,52 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllTransactions()
+        public async Task<IActionResult> GetAllTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _merchantTransactionService.GetAllTransactionsAsync();
+            var transactions = await _merchantTransactionService.GetAllTransactionsAsync(pageNumber, pageSize);
             return Ok(transactions);
         }
 
         [HttpGet("date/{date}")]
-        public async Task<IActionResult> GetTransactionsByDate([FromRoute] DateOnly date)
+        public async Task<IActionResult> GetTransactionsByDate([FromRoute] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(date);
+            var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(date, pageNumber, pageSize);
             return Ok(transactions);
         }
 
         [HttpGet("today")]
-        public async Task<IActionResult> GetTodayTransactions()
+        public async Task<IActionResult> GetTodayTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(DateOnly.FromDateTime(DateTime.Now));
+            var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(DateOnly.FromDateTime(DateTime.Now), pageNumber, pageSize);
             return Ok(transactions);
         }
 
         [HttpGet("date-range")]
-        public async Task<IActionResult> GetTransactionsByDateRange([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        public async Task<IActionResult> GetTransactionsByDateRange
+            ([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var transactions = await _merchantTransactionService.GetAllTransactionsByDateRangeAsync(startDate, endDate);
+                var transactions = await _merchantTransactionService.GetAllTransactionsByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
                 return Ok(transactions);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("merchant/{merchantId}")]
+        public async Task<IActionResult> GetTransactionsByMerchantId([FromRoute] int merchantId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var transactions = await _merchantTransactionService.GetTransactionsByMerchantIdAsync(merchantId, pageNumber, pageSize);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
             }
         }
 
@@ -64,19 +80,7 @@ namespace Shader.Controllers
             }
         }
 
-        [HttpGet("merchant/{merchantId}")]
-        public async Task<IActionResult> GetTransactionsByMerchantId([FromRoute] int merchantId)
-        {
-            try
-            {
-                var transactions = await _merchantTransactionService.GetTransactionsByMerchantIdAsync(merchantId);
-                return Ok(transactions);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+        
 
         [HttpPost]
         public async Task<IActionResult> CreateTransaction([FromBody] WMerchantTDto transactionDto)

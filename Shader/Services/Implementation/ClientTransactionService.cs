@@ -6,6 +6,7 @@ using Shader.Data.Dtos.Client;
 using Shader.Data.Dtos.ClientTransaction;
 using Shader.Data.Entities;
 using Shader.Enums;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 using System.ComponentModel.DataAnnotations;
@@ -15,7 +16,7 @@ namespace Shader.Services.Implementation
 {
     public class ClientTransactionService(ShaderContext context, IClientService clientService) : IClientTransactionService
     {
-        public async Task<IEnumerable<RClientTDto>> GetUnPaidClientTransactionsByClientIdAsync(int clientId)
+        public async Task<PagedResponse<RClientTDto>> GetUnPaidClientTransactionsByClientIdAsync(int clientId, int pageNumber, int pageSize)
         {
             var client = await context.Clients
                 .Where(c => !c.IsDeleted)
@@ -29,9 +30,9 @@ namespace Shader.Services.Implementation
                 .Where(c => c.ClientId == clientId && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
-            return transactions.MapToRClientTDto();
+            return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RClientTDto>> GetClientTransactionsByClientIdAsync(int clientId)
+        public async Task<PagedResponse<RClientTDto>> GetClientTransactionsByClientIdAsync(int clientId, int pageNumber, int pageSize)
         {
             var client = await context.Clients
                 .Where(c => !c.IsDeleted)
@@ -45,9 +46,9 @@ namespace Shader.Services.Implementation
                 .Where(c => c.ClientId == clientId && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
-            return transactions.MapToRClientTDto();
+            return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RClientTDto>> GetClientTransactionsByDateAsync(DateOnly date)
+        public async Task<PagedResponse<RClientTDto>> GetClientTransactionsByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
             var transactions = await context.ClientTransactions
                 .Include(c => c.ClientTransactionFruits)
@@ -56,9 +57,9 @@ namespace Shader.Services.Implementation
                 .Where(c => DateOnly.FromDateTime(c.Date) == date && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
-            return transactions.MapToRClientTDto();
+            return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RClientTDto>> GetAllClientTransactionsAsync()
+        public async Task<PagedResponse<RClientTDto>> GetAllClientTransactionsAsync(int pageNumber, int pageSize)
         {
             var transactions = await context.ClientTransactions
                 .Include(c => c.ClientTransactionFruits)
@@ -67,10 +68,10 @@ namespace Shader.Services.Implementation
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
-            return transactions.MapToRClientTDto();
+            return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RClientTDto>> GetClientTransactionsByDateRangeAsync
-            (DateOnly startDate, DateOnly endDate)
+        public async Task<PagedResponse<RClientTDto>> GetClientTransactionsByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
@@ -84,7 +85,7 @@ namespace Shader.Services.Implementation
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
 
-            return transactions.MapToRClientTDto();
+            return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
         public async Task<RClientTDetailsDto> GetClientTransactionByIdAsync(int id)
         {

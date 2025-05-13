@@ -4,6 +4,7 @@ using Shader.Data;
 using Shader.Data.Dtos.Fruit;
 using Shader.Data.Entities;
 using Shader.Enums;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -11,14 +12,14 @@ namespace Shader.Services.Implementation
 {
     public class FruitService(ShaderContext context) : IFruitService
     {
-        public async Task<IEnumerable<RFruitsDto>> GetAllFruitsAsync()
+        public async Task<PagedResponse<RFruitsDto>> GetAllFruitsAsync(int pageNumber, int pageSize)
         {
             var fruits = await context.Fruits
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RFruitsDto>> GetSupplierFruitsToBeBilledAsync(int supplierId)
+        public async Task<PagedResponse<RFruitsDto>> GetSupplierFruitsToBeBilledAsync(int supplierId, int pageNumber, int pageSize)
         {
             var supplier = await context.Suppliers
                 .Where(s => !s.IsDeleted)
@@ -30,18 +31,18 @@ namespace Shader.Services.Implementation
                 .Where(f => !f.IsBilled && !f.IsDeleted)
                 .Where(f => f.Status == FruitStatus.NotAvailabe)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RFruitsDto>> GetInStockFruitsAsync()
+        public async Task<PagedResponse<RFruitsDto>> GetInStockFruitsAsync(int pageNumber, int pageSize)
         {
             var fruits = await context.Fruits
                 .Where(f => f.Status == FruitStatus.InStock)
                 .Where(f => !f.IsDeleted)
                 .OrderByDescending(f => f.RemainingCages)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RFruitsDto>> GetInStockSupplierFruitsAsync(int supplierId)
+        public async Task<PagedResponse<RFruitsDto>> GetInStockSupplierFruitsAsync(int supplierId, int pageNumber, int pageSize)
         {
             var supplier = await context.Suppliers
                 .Where(s => s.Id == supplierId && !s.IsDeleted)
@@ -54,17 +55,17 @@ namespace Shader.Services.Implementation
                 .Where (f => !f.IsDeleted)
                 .OrderByDescending(f => f.RemainingCages)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RFruitsDto>> GetUnAvailableFruitsAsync()
+        public async Task<PagedResponse<RFruitsDto>> GetUnAvailableFruitsAsync(int pageNumber, int pageSize)
         {
             var fruits = await context.Fruits
                 .Where(f => f.Status == FruitStatus.NotAvailabe)
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RFruitsDto>> GetAllSupplierFruitsAsync(int supplierId)
+        public async Task<PagedResponse<RFruitsDto>> GetAllSupplierFruitsAsync(int supplierId, int pageNumber, int pageSize)
         {
             var supplier = await context.Suppliers
                 .Where(s => s.Id == supplierId && !s.IsDeleted)
@@ -75,16 +76,16 @@ namespace Shader.Services.Implementation
                 .Where(f => f.SupplierId == supplierId)
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RFruitsDto>> SearchWithFruitNameAsync(string fruitName)
+        public async Task<PagedResponse<RFruitsDto>> SearchWithFruitNameAsync(string fruitName, int pageNumber, int pageSize)
         {
             var fruits = await context.Fruits
                 .Where(f => f.FruitName.ToLower().Contains(fruitName.ToLower()))
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
         public async Task<RFruitDetailsDto> GetFruitByIdAsync(int id)
         {

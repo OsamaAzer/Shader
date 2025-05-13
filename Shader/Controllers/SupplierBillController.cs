@@ -16,16 +16,16 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSupplierBills()
+        public async Task<IActionResult> GetAllSupplierBills([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var bills = await _supplierBillService.GetAllSupplierBillsAsync();
+            var bills = await _supplierBillService.GetAllSupplierBillsAsync(pageNumber, pageSize);
             return Ok(bills);
         }
 
         [HttpGet("supplier/{supplierId}")]
-        public async Task<IActionResult> GetSupplierBillsBySupplierId(int supplierId)
+        public async Task<IActionResult> GetSupplierBillsBySupplierId(int supplierId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var bills = await _supplierBillService.GetSupplierBillsBySupplierIdAsync(supplierId);
+            var bills = await _supplierBillService.GetSupplierBillsBySupplierIdAsync(supplierId, pageNumber, pageSize);
             return Ok(bills);
         }
 

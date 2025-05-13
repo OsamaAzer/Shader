@@ -10,39 +10,40 @@ namespace Shader.Controllers
     public class MerchantPaymentController(IMerchantPaymentService merchantPaymentService) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPayments()
+        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await merchantPaymentService.GetAllPaymentsAsync();
+            var result = await merchantPaymentService.GetAllPaymentsAsync(pageNumber, pageSize);
             return Ok(result);
         }
 
         [HttpGet("by-date")]
-        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPaymentsByDate([FromQuery] DateOnly date)
+        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPaymentsByDate([FromQuery] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await merchantPaymentService.GetAllPaymentsByDateAsync(date);
+            var result = await merchantPaymentService.GetAllPaymentsByDateAsync(date, pageNumber, pageSize);
             return Ok(result);
         }
 
         [HttpGet("today")]
-        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPaymentsToday()
+        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPaymentsToday([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await merchantPaymentService.GetAllPaymentsByDateAsync(DateOnly.FromDateTime(DateTime.Today));
+            var result = await merchantPaymentService.GetAllPaymentsByDateAsync(DateOnly.FromDateTime(DateTime.Today), pageNumber, pageSize);
             return Ok(result);
         }
 
         [HttpGet("by-date-range")]
-        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPaymentsByDateRange([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetAllPaymentsByDateRange
+            ([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await merchantPaymentService.GetAllPaymentsByDateRangeAsync(startDate, endDate);
+            var result = await merchantPaymentService.GetAllPaymentsByDateRangeAsync(startDate, endDate,pageNumber, pageSize);
             return Ok(result);
         }
 
         [HttpGet("by-merchant/{merchantId:int}")]
-        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetPaymentsByMerchantId(int merchantId)
+        public async Task<ActionResult<IEnumerable<RMerchantPaymentDto>>> GetPaymentsByMerchantId(int merchantId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var result = await merchantPaymentService.GetPaymentsByMerchantIdAsync(merchantId);
+                var result = await merchantPaymentService.GetPaymentsByMerchantIdAsync(merchantId,pageNumber, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)

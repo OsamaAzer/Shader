@@ -1,5 +1,6 @@
 ﻿using Shader.Data.Dtos.CashTransaction;
 using Shader.Data.Entities;
+using Shader.Helpers;
 
 namespace Shader.Services.Abstraction
 {
@@ -9,9 +10,9 @@ namespace Shader.Services.Abstraction
         Task<RCashTDto> UpdateCashTransactionAsync(int id, WCashTDto cashTransactionDto);
         Task<bool> DeleteCashTransactionAsync(int id);
         Task<RCashTDto> GetCashTransactionByIdAsync(int id);
-        Task<IEnumerable<RCashTDto>> GetAllCashTransactionsAsync();
-        Task<IEnumerable<RCashTDto>> GetCashTransactionsByDateAsync(DateOnly date);
-        Task<IEnumerable<RCashTDto>> GetCashTransactionsByDateRangeAsync
-            (DateOnly startDate, DateOnly endDate);
+        Task<PagedResponse<RCashTDto>> GetAllCashTransactionsAsync(int pageNumber, int pageSize);
+        Task<PagedResponse<RCashTDto>> GetCashTransactionsByDateAsync(DateOnly date, int pageNumber, int pageSize);
+        Task<PagedResponse<RCashTDto>> GetCashTransactionsByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize);
     }
 }

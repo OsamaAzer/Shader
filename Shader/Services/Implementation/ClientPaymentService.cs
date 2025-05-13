@@ -2,6 +2,7 @@
 using Shader.Data;
 using Shader.Data.DTOs.ClientPayment;
 using Shader.Data.Entities;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -9,41 +10,42 @@ namespace Shader.Services.Implementation
 {
     public class ClientPaymentService(ShaderContext context) : IClientPaymentService
     {
-       public async Task<IEnumerable<RClientPaymentDto>> GetAllPaymentsAsync()
+       public async Task<PagedResponse<RClientPaymentDto>> GetAllPaymentsAsync(int pageNumber, int pageSize)
        {
             var payments = await context.ClientPayments
                 .Include(payment => payment.Client)
                 .Where(p => !p.IsDeleted)
                 .ToListAsync();
-            return payments.ToRClientPayments();
+            return payments.ToRClientPayments().CreatePagedResponse(pageNumber, pageSize);
        }
-       public async Task<IEnumerable<RClientPaymentDto>> GetAllPaymentsByDateAsync(DateOnly date)
+       public async Task<PagedResponse<RClientPaymentDto>> GetAllPaymentsByDateAsync(DateOnly date, int pageNumber, int pageSize)
        {
             var payments = await context.ClientPayments
                 .Include(payment => payment.Client)
                 .Where(p => !p.IsDeleted)
                 .Where(p => DateOnly.FromDateTime(p.Date) == date)
                 .ToListAsync();
-            return payments.ToRClientPayments();
-        }
-       public async Task<IEnumerable<RClientPaymentDto>> GetAllPaymentsByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+            return payments.ToRClientPayments().CreatePagedResponse(pageNumber, pageSize);
+       }
+       public async Task<PagedResponse<RClientPaymentDto>> GetAllPaymentsByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
        {
             var payments = await context.ClientPayments
                 .Include(payment => payment.Client)
                 .Where(p => !p.IsDeleted)
                 .Where(p => DateOnly.FromDateTime(p.Date) >= startDate && DateOnly.FromDateTime(p.Date) <= endDate)
                 .ToListAsync();
-            return payments.ToRClientPayments();
-        }
-       public async Task<IEnumerable<RClientPaymentDto>> GetPaymentsByClientIdAsync(int clientId)
-        {
+            return payments.ToRClientPayments().CreatePagedResponse(pageNumber, pageSize);
+       }
+       public async Task<PagedResponse<RClientPaymentDto>> GetPaymentsByClientIdAsync(int clientId, int pageNumber, int pageSize)
+       {
             var payment = await context.ClientPayments
                 .Include(payment => payment.Client)
                     .Where(p => !p.IsDeleted && p.ClientId == clientId)
                     .ToListAsync() ??
                 throw new Exception($"Payment with Client ID {clientId} not found.");
-            return payment.ToRClientPayments().ToList();
-        }
+            return payment.ToRClientPayments().CreatePagedResponse(pageNumber, pageSize);
+       }
        public async Task<RClientPaymentDto> GetPaymentByIdAsync(int id)
         {
             var payment = await context.ClientPayments

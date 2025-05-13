@@ -16,16 +16,16 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllMerchants()
+        public async Task<IActionResult> GetAllMerchants([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var merchants = await _merchantService.GetAllMerchantsAsync();
+            var merchants = await _merchantService.GetAllMerchantsAsync(pageNumber, pageSize);
             return Ok(merchants);
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> GetMerchantsByName([FromQuery] string name)
+        public async Task<IActionResult> GetMerchantsByName([FromQuery] string name, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var merchants = await _merchantService.GetAllMerchantsWithNameAsync(name);
+            var merchants = await _merchantService.GetAllMerchantsWithNameAsync(name, pageNumber, pageSize);
             return Ok(merchants);
         }
 

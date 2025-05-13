@@ -3,6 +3,7 @@ using Shader.Data;
 using Shader.Data.Dtos.Client;
 using Shader.Data.Entities;
 using Shader.Enums;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -19,14 +20,14 @@ namespace Shader.Services.Implementation
 
             return client.Map<Client, RClientDto>();
         }
-        public async Task<IEnumerable<RAllClientsDto>> GetAllClientsAsync()
+        public async Task<PagedResponse<RAllClientsDto>> GetAllClientsAsync(int pageNumber, int pageSize)
         {
             var clientsDto =  context.Clients
                             .Where(c => !c.IsDeleted)
                             .OrderBy(c => c.Name);
-            return await Task.FromResult(clientsDto.Map<Client, RAllClientsDto>());
+            return await Task.FromResult(clientsDto.Map<Client, RAllClientsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
-        public async Task<IEnumerable<RAllClientsDto>> GetAllClientsWithNameAsync(string name)
+        public async Task<PagedResponse<RAllClientsDto>> GetAllClientsWithNameAsync(string name, int pageNumber, int pageSize)
         {
             var clients = await context.Clients
                         .Where(c => !c.IsDeleted)
@@ -34,7 +35,7 @@ namespace Shader.Services.Implementation
                         .OrderBy(c => c.Name)
                         .ToListAsync();
 
-            return await Task.FromResult(clients.Map<Client, RAllClientsDto>());
+            return await Task.FromResult(clients.Map<Client, RAllClientsDto>().CreatePagedResponse(pageNumber, pageSize));
         }
         public async Task<RClientDto> AddClientAsync(WClientDto dto)
         {

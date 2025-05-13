@@ -2,6 +2,7 @@
 using Shader.Data;
 using Shader.Data.DTOs.ShaderSeller;
 using Shader.Data.Entities;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -9,21 +10,21 @@ namespace Shader.Services.Implementation
 {
     public class MerchantService(ShaderContext context) : IMerchantService
     {
-        public async Task<IEnumerable<RMerchantDto>> GetAllMerchantsAsync()
+        public async Task<PagedResponse<RMerchantDto>> GetAllMerchantsAsync(int pageNumber, int pageSize)
         {
             var sellers = await context.Merchants
                 .Where(s => !s.IsDeleted)
                 .ToListAsync();
 
-            return sellers.ToDtos<Merchant, RMerchantDto>().ToList();
+            return sellers.ToDtos<Merchant, RMerchantDto>().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMerchantDto>> GetAllMerchantsWithNameAsync(string name)
+        public async Task<PagedResponse<RMerchantDto>> GetAllMerchantsWithNameAsync(string name, int pageNumber, int pageSize)
         {
             var sellers = await context.Merchants
                 .Where(s => !s.IsDeleted)
                 .Where(s => s.Name.ToLower().Contains(name.ToLower()))
                 .ToListAsync();
-            return sellers.ToDtos<Merchant, RMerchantDto>().ToList();
+            return sellers.ToDtos<Merchant, RMerchantDto>().CreatePagedResponse(pageNumber, pageSize);    
         }
         public async Task<Merchant> GetMerchantByIdAsync(int id)
         {

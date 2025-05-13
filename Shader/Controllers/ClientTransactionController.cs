@@ -18,9 +18,9 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllClientTransactions()
+        public async Task<IActionResult> GetAllClientTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _clientTransactionService.GetAllClientTransactionsAsync();
+            var transactions = await _clientTransactionService.GetAllClientTransactionsAsync(pageNumber, pageSize);
             return Ok(transactions);
         }
 
@@ -40,11 +40,11 @@ namespace Shader.Controllers
         }
 
         [HttpGet("client/{id}")]
-        public async Task<IActionResult> GetClientTransactionsByClientId(int clientId)
+        public async Task<IActionResult> GetClientTransactionsByClientId(int clientId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var transactions = await _clientTransactionService.GetClientTransactionsByClientIdAsync(clientId);
+                var transactions = await _clientTransactionService.GetClientTransactionsByClientIdAsync(clientId, pageNumber, pageSize);
                 return Ok(transactions);
             }
             catch (Exception ex)
@@ -53,11 +53,11 @@ namespace Shader.Controllers
             }
         }
         [HttpGet("unpaid-client/{id}")]
-        public async Task<IActionResult> GetUnPaidClientTransactionsByClientId(int id)
+        public async Task<IActionResult> GetUnPaidClientTransactionsByClientId(int id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var transactions = await _clientTransactionService.GetUnPaidClientTransactionsByClientIdAsync(id);
+                var transactions = await _clientTransactionService.GetUnPaidClientTransactionsByClientIdAsync(id, pageNumber, pageSize);
                 return Ok(transactions);
             }
             catch (Exception ex)
@@ -66,27 +66,28 @@ namespace Shader.Controllers
             }
         }
         [HttpGet("today")]
-        public async Task<IActionResult> GetTodayClientTransactions()
+        public async Task<IActionResult> GetTodayClientTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var today = DateOnly.FromDateTime(DateTime.Now);
-            var transactions = await _clientTransactionService.GetClientTransactionsByDateAsync(today);
+            var transactions = await _clientTransactionService.GetClientTransactionsByDateAsync(today, pageNumber, pageSize);
             return Ok(transactions);
         }
         [HttpGet("date")]
-        public async Task<IActionResult> GetClientTransactionsByDate([FromQuery] DateOnly date)
+        public async Task<IActionResult> GetClientTransactionsByDate
+            ([FromQuery] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _clientTransactionService.GetClientTransactionsByDateAsync(date);
+            var transactions = await _clientTransactionService.GetClientTransactionsByDateAsync(date, pageNumber, pageSize);
             return Ok(transactions);
         }
 
         [HttpGet("range")]
         public async Task<IActionResult> GetClientTransactionsByDateAndTimeRange(
-            [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+            [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
                 var transactions = await _clientTransactionService
-                .GetClientTransactionsByDateRangeAsync(startDate, endDate);
+                .GetClientTransactionsByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
                 return Ok(transactions);
             }
             catch (Exception ex)

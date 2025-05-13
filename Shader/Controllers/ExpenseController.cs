@@ -17,11 +17,11 @@ namespace Shader.Controllers
 
         [HttpGet("range")]
         public async Task<IActionResult> GetExpensesByDateRange
-            ([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+            ([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var expenses = await _expenseService.GetExpensesByDateAndTimeRangeAsync(startDate, endDate);
+                var expenses = await _expenseService.GetExpensesByDateAndTimeRangeAsync(startDate, endDate, pageNumber, pageSize);
                 return Ok(expenses);
             }
             catch (Exception ex) 
@@ -32,22 +32,22 @@ namespace Shader.Controllers
         }
 
         [HttpGet("date")]
-        public async Task<IActionResult> GetExpensesByDate([FromQuery] DateOnly date)
+        public async Task<IActionResult> GetExpensesByDate([FromQuery] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var expenses = await _expenseService.GetExpensesByDateAsync(date);
+            var expenses = await _expenseService.GetExpensesByDateAsync(date, pageNumber, pageSize);
             return Ok(expenses);
         }
         [HttpGet("today")]
-        public async Task<IActionResult> GetTodayExpenses()
+        public async Task<IActionResult> GetTodayExpenses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var today = DateOnly.FromDateTime(DateTime.Now);
-            var expenses = await _expenseService.GetExpensesByDateAsync(today);
+            var expenses = await _expenseService.GetExpensesByDateAsync(today, pageNumber, pageSize);
             return Ok(expenses);
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllExpenses()
+        public async Task<IActionResult> GetAllExpenses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var expenses = await _expenseService.GetAllExpensesAsync();
+            var expenses = await _expenseService.GetAllExpensesAsync(pageNumber, pageSize);
             return Ok(expenses);
         }
 
