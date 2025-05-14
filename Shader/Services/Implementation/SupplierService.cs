@@ -58,6 +58,7 @@ namespace Shader.Services.Implementation
                 .Where(m =>  !m.IsDeleted)
                 .FirstOrDefaultAsync(m => m.Id == merchantId) ??
                 throw new Exception($"Merchant with id:({merchantId}) does not exist!");
+
             var supplier = new Supplier
             {
                 Name = existingMerchant.Name,

@@ -40,6 +40,17 @@ namespace Shader.Services.Implementation
         }
         public async Task<RSupplierBillDto> CreateSupplierBillAsync(WSupplierBillDto billDto)
         {
+            if (billDto.SupplierId == 0) 
+                throw new Exception("SupplierId cannot be 0");
+            if (billDto.Fruits == null || billDto.Fruits.Count == 0 || billDto.Fruits.Any(f => f == 0))
+                throw new Exception("You must select a fruit to be billed!");
+            if (billDto.CommissionRate <= 0)
+                throw new Exception("Commission rate should be greater than Zero!!");
+            if (billDto.MshalValue < 0)
+                throw new Exception("Mshal value cannot be less than Zero");
+            if (billDto.NylonValue < 0)
+                throw new Exception("Nylon value cannot be less than Zero");
+
             var bill = billDto.MapToSupplierBill();
             bill.Fruits = context.Fruits
                 .Where(f => billDto.Fruits
@@ -67,6 +78,17 @@ namespace Shader.Services.Implementation
         }
         public async Task<RSupplierBillDto> UpdateSupplierBillAsync(int id, WSupplierBillDto billDto)
         {
+            if (billDto.SupplierId == 0)
+                throw new Exception("SupplierId cannot be 0");
+            if (billDto.Fruits == null || billDto.Fruits.Count == 0 || billDto.Fruits.Any(f => f == 0))
+                throw new Exception("You must select a fruit to be billed!");
+            if (billDto.CommissionRate <= 0)
+                throw new Exception("Commission rate should be greater than Zero!!");
+            if (billDto.MshalValue < 0)
+                throw new Exception("Mshal value cannot be less than Zero");
+            if (billDto.NylonValue < 0)
+                throw new Exception("Nylon value cannot be less than Zero");
+
             var supplierBill = await GetSupplierBillByIdAsync(id) ??
                 throw new Exception("This supplier bill does not exist!");
 

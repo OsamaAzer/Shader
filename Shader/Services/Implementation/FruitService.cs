@@ -132,12 +132,12 @@ namespace Shader.Services.Implementation
             {
                 if (context.Fruits.Where(f => !f.IsDeleted).Any(f => f.FruitName == fruit.FruitName))
                     throw new Exception($"There is a fruit with the same Name!!");
-
                 if (fruit.TotalCages <= 0)
-                    throw new Exception($"Please Enter a valid number of cages!!");
-
+                    throw new Exception($"Total cages must be greater than zero!!");
                 if (fruit.CageMortgageValue < 0)
                     throw new Exception($"Please enter a valid Cage mortgage amound");
+                if (fruit.MerchantPurchasePrice < 0)
+                    throw new Exception($"Please enter a valid Merchant purchase price");
 
                 if (fruit.CageMortgageValue == 0)
                     fruit.IsCageHasMortgage = false;
@@ -188,11 +188,12 @@ namespace Shader.Services.Implementation
 
             if (dto.TotalCages <= 0)
                 throw new Exception($"Please Enter a valid number of cages!!");
-
             if (dto.CageMortgageValue < 0)
                 throw new Exception($"Please enter a valid Cage mortgage amound");
+            if (dto.MerchantPurchasePrice < 0)
+                throw new Exception($"Please enter a valid Merchant purchase price");
 
-            if (context.Fruits.Where(f => !f.IsDeleted && f.FruitName == fruit.FruitName).Count() >= 1) // TODO : Handle Repeated fruit names
+            if (context.Fruits.Where(f => !f.IsDeleted && f.FruitName == fruit.FruitName).Count() >= 1 && fruit.FruitName != dto.FruitName) // TODO : Handle Repeated fruit names
                 throw new Exception($"There is a fruit with the same Name!!");
 
             if (fruit.SupplierId != dto.SupplierId)

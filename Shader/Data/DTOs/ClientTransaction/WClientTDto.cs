@@ -9,6 +9,7 @@ namespace Shader.Data.Dtos.ClientTransaction
         public decimal DiscountAmount { get; set; }
         [Required]
         public int ClientId { get; set; }
+        [Required]
         public List<WClientTFruitDto> ClientTransactionFruits { get; set; }
     }
 }

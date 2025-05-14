@@ -2,17 +2,22 @@
 using Shader.Data;
 using Shader.Data.Dtos.Expense;
 using Shader.Data.Entities;
+using Shader.Enums;
 using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
+using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Shader.Services.Implementation
 {
     public class ExpenseService(ShaderContext context) : IExpenseService
     {
+        List<ExpenseType> expenses = 
+            [ExpenseType.Rent, ExpenseType.Maintenance, ExpenseType.Transportation, ExpenseType.MonthlySalaries,
+            ExpenseType.DailySalaries, ExpenseType.Drinks, ExpenseType.Electricity, ExpenseType.Food, ExpenseType.Other]; 
         public async Task<PagedResponse<RExpenseDto>> GetExpensesByDateAndTimeRangeAsync
-            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
+        (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
@@ -49,7 +54,13 @@ namespace Shader.Services.Implementation
         }
         public async Task<RExpenseDto> AddExpenseAsync(WExpenseDto dto)
         {
+            if (dto.Amount <= 0) 
+                throw new Exception("Amount must be greater than zero.");
             var expense = dto.Map<WExpenseDto, Expense>();
+            if (expenses.Any(e => e != dto.Type))
+            {
+                expense.Type = ExpenseType.Other;
+            }
             expense.Date = DateTime.Now;
             await context.Expenses.AddAsync(expense);
             await context.SaveChangesAsync();
@@ -57,7 +68,8 @@ namespace Shader.Services.Implementation
         }
         public async Task<RExpenseDto> UpdateExpenseAsync(int id, WExpenseDto dto)
         {
-            if (dto.Amount <= 0) throw new Exception("Amount must be greater than zero.");
+            if (dto.Amount <= 0) 
+                throw new Exception("Amount must be greater than zero.");
 
             var existingExpense = await context.Expenses
                 .Where(e => e.Id == id && !e.IsDeleted)
@@ -65,6 +77,10 @@ namespace Shader.Services.Implementation
                 throw new Exception("This expense does not exist!");
 
             dto.Map(existingExpense);
+            if (expenses.Any(e => e != dto.Type))
+            {
+                existingExpense.Type = ExpenseType.Other;
+            }
             context.Expenses.Update(existingExpense);
             await context.SaveChangesAsync();
             return existingExpense.Map<Expense, RExpenseDto>();

@@ -2,7 +2,7 @@
 {
     public enum TransactionType
     {
-        PayingMoney = 1,
-        ReceivingMoney,
+        PayingMoney = 1, // دفع أموال
+        ReceivingMoney, // استلام أموال
     }
 }

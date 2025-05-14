@@ -20,7 +20,8 @@ namespace Shader.Mapping
             bill.NylonValue = billDto.NylonValue;
             bill.MshalValue = billDto.MshalValue;
             bill.CommissionRate = billDto.CommissionRate;
-            if (billDto.Fruits.Any() == false || billDto.Fruits.Any(f => f == 0))  throw new Exception("Fruits cannot be empty");
+            if (billDto.Fruits.Any() == false || billDto.Fruits.Any(f => f == 0)) 
+                throw new Exception("You must select a fruit to be billed!");
             bill.Description = billDto.Description;
             
             return bill;

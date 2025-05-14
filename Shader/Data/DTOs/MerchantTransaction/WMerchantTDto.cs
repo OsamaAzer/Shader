@@ -10,6 +10,7 @@ namespace Shader.Data.DTOs.ShaderTransaction
         public decimal DiscountAmount { get; set; }
         [Required]
         public int MerchantId { get; set; }
+        [Required]
         public List<WMerchantTFruitDto> MerchantTransactionFruits { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 {
     public enum FruitStatus
     {
-        InStock = 1,
-        NotAvailabe
+        InStock = 1,// الفاكهة متوفرة
+        NotAvailabe // الفاكهة غير متوفرة
     }
 }

@@ -83,7 +83,8 @@ namespace Shader.Services.Implementation
                 .FirstOrDefaultAsync(c => c.Id == mtDto.MerchantId) ??
                 throw new Exception($"The merchant with Id:({mtDto.MerchantId}) dosen't exist!!");
 
-            if (mtDto.MerchantTransactionFruits.All(c => c.FruitId == 0)) throw new Exception("You must select a fruit!!");
+            if (mtDto.MerchantTransactionFruits.All(c => c.FruitId == 0)) 
+                throw new Exception("You must select a fruit!!");
 
             var transaction = mtDto.MapToMerchantTransaction();
 
@@ -94,10 +95,18 @@ namespace Shader.Services.Implementation
 
                 var fruit = await context.Fruits
                     .Where(f => !f.IsDeleted)
-                    .FirstOrDefaultAsync(f => f.Id == mtf.FruitId) ?? throw new Exception("This fruit dosen't exist");
+                    .FirstOrDefaultAsync(f => f.Id == mtf.FruitId) ?? 
+                    throw new Exception("This fruit dosen't exist");
 
+                if (mtf.NumberOfCages <= 0)
+                    throw new Exception("The number of cages must be greater than Zero");
+                if (mtf.WeightInKilograms <= 0)
+                    throw new Exception("The Weight must be greater than Zero");
+                if (mtf.PriceOfKiloGram <= 0)
+                    throw new Exception("The price of kilogrammust be greater than Zero");
                 if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
                     throw new Exception("The number of cages is not enough");
+
                 fruit.NumberOfKilogramsSold += mtf.WeightInKilograms;
                 fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
                 fruit.PriceOfKilogramsSold += mtf.PriceOfKiloGram * mtf.WeightInKilograms;
@@ -182,6 +191,13 @@ namespace Shader.Services.Implementation
                         var fruit = await context.Fruits
                             .Where(f => !f.IsDeleted)
                             .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId);
+
+                        if (mtf.NumberOfCages <= 0)
+                            throw new Exception("The number of cages must be greater than Zero");
+                        if (mtf.WeightInKilograms <= 0)
+                            throw new Exception("The Weight must be greater than Zero");
+                        if (mtf.PriceOfKiloGram <= 0)
+                            throw new Exception("The price of kilogrammust be greater than Zero");
 
                         if (fruit is not null)
                         {

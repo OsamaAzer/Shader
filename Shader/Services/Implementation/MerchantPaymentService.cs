@@ -111,11 +111,19 @@ namespace Shader.Services.Implementation
                 .Include(payment => payment.Merchant)
                 .Where(p => !p.IsDeleted)
                 .FirstOrDefaultAsync(p => p.Id == id) ??
-            throw new Exception($"Payment with ID {id} not found.");
+                throw new Exception($"Payment with ID {id} not found.");
 
             var existingMerchant = await context.Merchants
                     .Where(c => !c.IsDeleted)
-                    .FirstOrDefaultAsync(c => c.Id == paymentDto.MerchantId);
+                    .FirstOrDefaultAsync(c => c.Id == paymentDto.MerchantId)??
+                    throw new Exception($"Merchant with ID {paymentDto.MerchantId} not found.");
+
+            if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
+                throw new Exception($"Payment amount or mortgage amount can't be negative.");
+            if (existingMerchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
+                throw new Exception($"Merchant current balance equal {existingMerchant.CurrentAmountBalance}.");
+            if (existingMerchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
+                throw new Exception($"Merchant current mortgage balance equal {existingMerchant.CurrentMortgageAmountBalance}.");
 
             var oldPaymentTransactionType = existingPayment.TransactionType;
             var oldMerchantId = existingPayment.MerchantId;
