@@ -46,19 +46,22 @@ namespace Shader.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMerchant([FromBody] WMerchantDto merchantDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var createdMerchant = await _merchantService.CreateMerchantAsync(merchantDto);
-            return Ok(createdMerchant);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            try
+            {
+                var createdMerchant = await _merchantService.CreateMerchantAsync(merchantDto);
+                return Ok(createdMerchant);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMerchant(int id, [FromBody] WMerchantDto merchantDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
                 var updatedMerchant = await _merchantService.UpdateMerchantAsync(id, merchantDto);

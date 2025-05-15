@@ -69,18 +69,24 @@ namespace Shader.Controllers
         public async Task<IActionResult> AddExpense([FromBody] WExpenseDto expenseDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (expenseDto.Amount <= 0) return BadRequest("Amount must be greater than zero.");
-            var result = await _expenseService.AddExpenseAsync(expenseDto);
-            if (result is null) return StatusCode(500, "An error occurred while adding the expense.");
-            return Ok(result);
+            try
+            {
+                var result = await _expenseService.AddExpenseAsync(expenseDto);
+                if (result is null) return StatusCode(500, "An error occurred while adding the expense.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateExpense(int id, [FromBody] WExpenseDto expenseDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var result = await _expenseService.UpdateExpenseAsync(id, expenseDto);
                 return Ok(result);
             }

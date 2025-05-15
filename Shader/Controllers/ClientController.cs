@@ -49,26 +49,18 @@ namespace Shader.Controllers
         public async Task<IActionResult> AddClient([FromBody] WClientDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await _clientService.AddClientAsync(dto);
-            if (result is null) return StatusCode(500, "An error occurred while adding the client.");
-            return Ok(result);
-        }
+            try
+            {
+                var result = await _clientService.AddClientAsync(dto);
+                if (result is null) return StatusCode(500, "An error occurred while adding the client.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
-        //[HttpPut("update-payments/{clientId}")]
-        //public async Task<IActionResult> UpdateTransactionWithPaymentOfAnAmount(int clientId, decimal paidAmount, decimal mortgageAmount)
-        //{
-        //    if (!ModelState.IsValid) return BadRequest(ModelState);
-        //    try
-        //    {
-        //        var updatedTransaction = await _clientService.UpdateClientTransactionPayments(clientId, paidAmount, mortgageAmount);
-        //        if (updatedTransaction == null) return BadRequest("Something went wrong while updating the client data!");
-        //        return Ok(updatedTransaction);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { message = ex.Message });
-        //    }
-        //}
+        }
 
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateClient(int id, [FromBody] WClientDto dto)

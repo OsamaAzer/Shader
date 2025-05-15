@@ -121,9 +121,9 @@ namespace Shader.Controllers
         [HttpPost("bulk/{supplierId}")]
         public async Task<IActionResult> AddFruits(int supplierId, [FromBody] List<WRangeFruitDto> fruitDtos)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var fruits = await _fruitService.AddFruitsAsync(supplierId, fruitDtos);
                 if (fruits == null) return BadRequest("Something went wrong while adding fruit!");
                 return Ok(fruits);
@@ -137,9 +137,9 @@ namespace Shader.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFruit(int id, [FromBody] UFruitDto fruitDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var updatedFruit = await _fruitService.UpdateFruitAsync(id, fruitDto);
                 if (updatedFruit == null) return BadRequest($"Something went wrong while updating fruit with id: ({id})");
                 return Ok(updatedFruit);

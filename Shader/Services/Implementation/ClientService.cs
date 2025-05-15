@@ -39,6 +39,9 @@ namespace Shader.Services.Implementation
         }
         public async Task<RClientDto> AddClientAsync(WClientDto dto)
         {
+            if (await context.Clients.Where(c => !c.IsDeleted).AnyAsync(c => c.Name.ToLower() == dto.Name.ToLower()))
+                throw new Exception($"Client with name: ({dto.Name}) already exists!");
+
             var client = dto.Map<WClientDto, Client>();
             client.Status = Status.InActive;
             await context.Clients.AddAsync(client);
@@ -74,34 +77,17 @@ namespace Shader.Services.Implementation
 
             return client;
         }
-        public async Task<RClientDto> UpdateClientTransactionPayments(int clientId, decimal paidAmount, decimal mortgageAmount)
-        {
-            var client = context.Clients
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefault(c => c.Id == clientId) ?? throw new Exception("The client doesn't exist!");
-
-            if (client.AmountPaid == client.TotalAmount && client.TotalRemainingAmount == 0)
-                throw new Exception("The client's total amount was paid!");
-            if (client.TotalMortgageAmount == client.TotalMortgageAmountPaid && client.TotalRemainingMortgageAmount == 0)
-                throw new Exception("The client's total mortgage amount was paid!");
-            if (paidAmount > client.TotalRemainingAmount)
-                throw new Exception("The amount paid can't be greater than the remaining amount!");
-            if (mortgageAmount > client.TotalRemainingMortgageAmount)
-                throw new Exception("The mortgage amount can't be greater than the remaining mortgage amount!");
-
-            client.TotalRemainingAmount -= paidAmount;
-            client.AmountPaid += paidAmount;
-            client.TotalRemainingMortgageAmount -= mortgageAmount;
-            client.TotalMortgageAmountPaid += mortgageAmount;
-            context.Clients.Update(client);
-            await context.SaveChangesAsync();
-            return client.Map<Client, RClientDto>();
-        }
         public async Task<RClientDto> UpdateClientAsync(int id, WClientDto dto)
         {
             var existingClient = await context.Clients
                 .Where(c => !c.IsDeleted)
                 .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception($"Client with id:({id}) does not exist!");
+
+            var flagName = context.Clients
+                .Where(c => !c.IsDeleted && c.Name.ToLower() == dto.Name.ToLower())
+                .Count() >= 1  && existingClient.Name.ToLower() != dto.Name.ToLower();
+            if (flagName)
+                throw new Exception($"Client with name: ({dto.Name}) already exists!");
 
             dto.Map(existingClient);
             context.Clients.Update(existingClient);

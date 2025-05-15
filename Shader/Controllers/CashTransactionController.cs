@@ -73,9 +73,9 @@ namespace Shader.Controllers
         [HttpPost]
         public async Task<IActionResult> AddCashTransaction([FromBody] WCashTDto cashTransactionDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var result = await _cashTransactionService.AddCashTransactionAsync(cashTransactionDto);
                 return Ok(result);
             }
@@ -88,9 +88,9 @@ namespace Shader.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCashTransaction(int id, [FromBody] WCashTDto cashTransactionDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var result = await _cashTransactionService.UpdateCashTransactionAsync(id, cashTransactionDto);
                 if (result == null) return NotFound();
                 return Ok(result);

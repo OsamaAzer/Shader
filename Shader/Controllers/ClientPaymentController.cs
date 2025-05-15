@@ -75,8 +75,7 @@ namespace Shader.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePayment([FromBody] WClientPaymentDto payment)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid)  return BadRequest(ModelState);
             try
             {
                 var createdPayment = await _clientPaymentService.CreatePaymentAsync(payment);
@@ -91,8 +90,7 @@ namespace Shader.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePayment([FromRoute] int id, [FromBody] WClientPaymentDto payment)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
                 var updatedPayment = await _clientPaymentService.UpdatePaymentAsync(id, payment);

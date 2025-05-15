@@ -16,7 +16,7 @@ namespace Shader.Services.Implementation
 {
     public class ClientTransactionService(ShaderContext context, IClientService clientService) : IClientTransactionService
     {
-        public async Task<PagedResponse<RClientTDto>> GetUnPaidClientTransactionsByClientIdAsync(int clientId, int pageNumber, int pageSize)
+        public async Task<PagedResponse<RClientTDto>> GetTransactionsByClientIdAsync(int clientId, int pageNumber, int pageSize)
         {
             var client = await context.Clients
                 .Where(c => !c.IsDeleted)
@@ -32,23 +32,7 @@ namespace Shader.Services.Implementation
                 .ToListAsync();
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<PagedResponse<RClientTDto>> GetClientTransactionsByClientIdAsync(int clientId, int pageNumber, int pageSize)
-        {
-            var client = await context.Clients
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == clientId) ??
-                throw new Exception($"The client with Id: ({clientId}) doesn't exist!!");
-
-            var transactions = await context.ClientTransactions
-                .Include(c => c.ClientTransactionFruits)
-                .ThenInclude(c => c.Fruit)
-                .Include(c => c.Client)
-                .Where(c => c.ClientId == clientId && !c.IsDeleted)
-                .OrderByDescending(c => c.Date)
-                .ToListAsync();
-            return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
-        }
-        public async Task<PagedResponse<RClientTDto>> GetClientTransactionsByDateAsync(DateOnly date, int pageNumber, int pageSize)
+        public async Task<PagedResponse<RClientTDto>> GetTransactionsByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
             var transactions = await context.ClientTransactions
                 .Include(c => c.ClientTransactionFruits)
@@ -59,7 +43,7 @@ namespace Shader.Services.Implementation
                 .ToListAsync();
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<PagedResponse<RClientTDto>> GetAllClientTransactionsAsync(int pageNumber, int pageSize)
+        public async Task<PagedResponse<RClientTDto>> GetAllTransactionsAsync(int pageNumber, int pageSize)
         {
             var transactions = await context.ClientTransactions
                 .Include(c => c.ClientTransactionFruits)
@@ -70,7 +54,7 @@ namespace Shader.Services.Implementation
                 .ToListAsync();
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<PagedResponse<RClientTDto>> GetClientTransactionsByDateRangeAsync
+        public async Task<PagedResponse<RClientTDto>> GetTransactionsByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             if (startDate >= endDate)
@@ -87,7 +71,7 @@ namespace Shader.Services.Implementation
 
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<RClientTDetailsDto> GetClientTransactionByIdAsync(int id)
+        public async Task<RClientTDetailsDto> GetTransactionByIdAsync(int id)
         {
             var transaction = await context.ClientTransactions
                 .Where(c => !c.IsDeleted)
@@ -97,7 +81,7 @@ namespace Shader.Services.Implementation
                 .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("This client transacttion dosen't exist");
             return transaction.MapToRClientTDetailsDto();
         }
-        public async Task<RClientTDetailsDto> AddClientTransactionAsync(WClientTDto ctDto)
+        public async Task<RClientTDetailsDto> AddTransactionAsync(WClientTDto ctDto)
         {
             var client = await context.Clients
                 .Include(c => c.Transactions)
@@ -118,28 +102,33 @@ namespace Shader.Services.Implementation
                     .Where(f => !f.IsDeleted)
                     .FirstOrDefaultAsync(f => f.Id == ctf.FruitId) ?? throw new Exception("This fruit dosen't exist");
 
-                if (fruit is not null)
+                if (ctf.NumberOfCages <= 0)
+                    throw new Exception("The number of cages must be greater than Zero");
+                if (ctf.WeightInKilograms <= 0)
+                    throw new Exception("The Weight must be greater than Zero");
+                if (ctf.PriceOfKiloGram <= 0)
+                    throw new Exception("The price of kilogrammust be greater than Zero");
+                if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
+                    throw new Exception("The number of cages is not enough");
+
+                fruit.NumberOfKilogramsSold += ctf.WeightInKilograms;
+                fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
+                fruit.PriceOfKilogramsSold += ctf.PriceOfKiloGram * ctf.WeightInKilograms;
+                fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
+                fruit.RemainingCages -= ctf.NumberOfCages;
+                fruit.SoldCages += ctf.NumberOfCages;
+
+                if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
+                    fruit.Status = FruitStatus.NotAvailabe;
+                else
+                    fruit.Status = FruitStatus.InStock;
+
+                if (fruit.IsCageHasMortgage)
                 {
-                    if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
-                        throw new Exception("The number of cages is not enough");
-                    fruit.NumberOfKilogramsSold += ctf.WeightInKilograms;
-                    fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                    fruit.PriceOfKilogramsSold += ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                    fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                    fruit.RemainingCages -= ctf.NumberOfCages;
-                    fruit.SoldCages += ctf.NumberOfCages;
-
-                    if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                        fruit.Status = FruitStatus.NotAvailabe;
-                    else
-                        fruit.Status = FruitStatus.InStock;
-
-                    if (fruit.IsCageHasMortgage)
-                    {
-                        transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * ctf.NumberOfCages;
-                    }
-                    context.Fruits.Update(fruit);
+                    transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * ctf.NumberOfCages;
                 }
+                context.Fruits.Update(fruit);
+                
             }
 
             await context.ClientTransactions.AddAsync(transaction);
@@ -148,7 +137,7 @@ namespace Shader.Services.Implementation
             await context.SaveChangesAsync();
             return transaction.MapToRClientTDetailsDto();
         }
-        public async Task<RClientTDetailsDto> UpdateClientTransactionAsync(int id, WClientTDto ctDto)
+        public async Task<RClientTDetailsDto> UpdateTransactionAsync(int id, WClientTDto ctDto)
         {
             var client = await context.Clients
                 .Include(c => c.Transactions)
@@ -201,7 +190,17 @@ namespace Shader.Services.Implementation
 
                         var fruit = await context.Fruits
                             .Where(f => !f.IsDeleted)
-                            .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId);
+                            .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId)??
+                            throw new Exception("The selected fruit dosen't exist");
+
+                        if (ctf.NumberOfCages <= 0)
+                            throw new Exception("The number of cages must be greater than Zero");
+                        if (ctf.WeightInKilograms <= 0)
+                            throw new Exception("The Weight must be greater than Zero");
+                        if (ctf.PriceOfKiloGram <= 0)
+                            throw new Exception("The price of kilogrammust be greater than Zero");
+                        if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
+                            throw new Exception("The number of cages is not enough");
 
                         if (fruit is not null)
                         {
@@ -295,7 +294,7 @@ namespace Shader.Services.Implementation
             await context.SaveChangesAsync();
             return transaction.MapToRClientTDetailsDto();
         }
-        public async Task<RClientTDetailsDto> UpdateClientTransactionWithPayments
+        public async Task<RClientTDetailsDto> UpdateTransactionWithPayments
             (int id, decimal paidAmount, decimal discountAmount, decimal cageMortgageAmountPaid)
         {
 
@@ -339,7 +338,7 @@ namespace Shader.Services.Implementation
             await context.SaveChangesAsync();
             return transaction.MapToRClientTDetailsDto();
         }
-        public async Task<bool> DeleteClientTransactionAsync(int id)
+        public async Task<bool> DeleteTransactionAsync(int id)
         {
             var transaction = await context.ClientTransactions
                 .Include(c => c.ClientTransactionFruits)

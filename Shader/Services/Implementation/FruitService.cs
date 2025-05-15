@@ -130,7 +130,7 @@ namespace Shader.Services.Implementation
             var fruits = fruitDtos.Map<WRangeFruitDto, Fruit>().ToList();
             foreach (var fruit in fruits)
             {
-                if (context.Fruits.Where(f => !f.IsDeleted).Any(f => f.FruitName == fruit.FruitName))
+                if (await context.Fruits.Where(f => !f.IsDeleted).AnyAsync(f => f.FruitName.ToLower() == fruit.FruitName.ToLower()))
                     throw new Exception($"There is a fruit with the same Name!!");
                 if (fruit.TotalCages <= 0)
                     throw new Exception($"Total cages must be greater than zero!!");
@@ -193,8 +193,10 @@ namespace Shader.Services.Implementation
             if (dto.MerchantPurchasePrice < 0)
                 throw new Exception($"Please enter a valid Merchant purchase price");
 
-            if (context.Fruits.Where(f => !f.IsDeleted && f.FruitName == fruit.FruitName).Count() >= 1 && fruit.FruitName != dto.FruitName) // TODO : Handle Repeated fruit names
-                throw new Exception($"There is a fruit with the same Name!!");
+            var nameFlag = context.Fruits
+                .Where(f => !f.IsDeleted && f.FruitName.ToLower() == dto.FruitName.ToLower())
+                .Count() >= 1 && fruit.FruitName.ToLower() != dto.FruitName.ToLower();
+            if (nameFlag) throw new Exception($"Fruit with name {dto.FruitName} already exists!!");
 
             if (fruit.SupplierId != dto.SupplierId)
             {

@@ -11,7 +11,6 @@ namespace Shader.Services.Abstraction
         Task<PagedResponse<RAllClientsDto>> GetAllClientsWithNameAsync(string name, int pageNumber, int pageSize);
         Task<RClientDto> AddClientAsync(WClientDto dto);
         Task<RClientDto> UpdateClientAsync(int id, WClientDto dto);
-        Task<RClientDto> UpdateClientTransactionPayments(int clientId, decimal paidAmount, decimal mortgageAmount); 
         Task<Client> UpdateClientAggregatesAsync(Client client);
         Task<bool> DeleteClientAsync(int id);
     }

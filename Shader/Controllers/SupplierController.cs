@@ -55,9 +55,16 @@ namespace Shader.Controllers
         public async Task<IActionResult> AddSupplier([FromBody] WSupplierDto supplierDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await _supplierService.AddSupplierAsync(supplierDto);
-            if (result is null) return StatusCode(500, "An error occurred while adding the supplier.");
-            return Ok(result);
+            try
+            {
+                var result = await _supplierService.AddSupplierAsync(supplierDto);
+                if (result is null) return StatusCode(500, "An error occurred while adding the supplier.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("merchnat-supplier")]
@@ -92,9 +99,9 @@ namespace Shader.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSupplier(int id, [FromBody] WSupplierDto supplierDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var result = await _supplierService.UpdateSupplierAsync(id, supplierDto);
                 return Ok(result);
             }

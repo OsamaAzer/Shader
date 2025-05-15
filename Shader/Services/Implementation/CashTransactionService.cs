@@ -78,6 +78,14 @@ namespace Shader.Services.Implementation
                     .FirstOrDefaultAsync(f => f.Id == ctf.FruitId) ??
                     throw new Exception($"This fruit with id: ({ctf.FruitId}) dosen't exist");
 
+                if (ctf.NumberOfCages <= 0)
+                    throw new Exception("The number of cages must be greater than Zero");
+                if (ctf.WeightInKilograms <= 0)
+                    throw new Exception("The Weight must be greater than Zero");
+                if (ctf.PriceOfKiloGram <= 0)
+                    throw new Exception("The price of kilogrammust be greater than Zero");
+                if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
+                    throw new Exception("The number of cages is not enough");
                 if ((fruit.RemainingCages == 0) && (fruit.SoldCages == fruit.TotalCages) && (fruit.Status == FruitStatus.NotAvailabe))
                     throw new Exception($"This fruit with id: ({ctf.FruitId}) is not available");
 
@@ -96,10 +104,6 @@ namespace Shader.Services.Implementation
                 context.Fruits.Update(fruit);
             }
             var transaction = ctDto.MapToCashTransaction();
-            //transaction.Date = DateOnly.FromDateTime(DateTime.Now);
-            //transaction.Time = TimeOnly.FromDateTime(DateTime.Now);
-            //transaction.Price = ctDto.CashTransactionFruits
-            //        .Select(c => c.PriceOfKiloGram * c.WeightInKilograms).Sum();
             await context.CashTransactions.AddAsync(transaction);
             await context.SaveChangesAsync();
             return transaction.MapToRCashTDto();
@@ -108,8 +112,8 @@ namespace Shader.Services.Implementation
         {
             var transaction = await context.CashTransactions
                 .Include(c => c.CashTransactionFruits)
-                .Where(c => c.Id == id && !c.IsDeleted)
-                .FirstOrDefaultAsync() ?? throw new Exception($"This transaction with id: ({id}) dosen't exist");
+                .Where(c => !c.IsDeleted)
+                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception($"This transaction with id: ({id}) dosen't exist");
 
             foreach (var ctf in transaction.CashTransactionFruits)
             {
@@ -136,8 +140,22 @@ namespace Shader.Services.Implementation
             {
                 if (ctDto.CashTransactionFruits.Where(c => c.FruitId == ctfDto.FruitId).Count() > 1)
                     throw new Exception("You can't add the same fruit multible times in the same transaction!");
-                var fruit = await context.Fruits.Where(f => f.Id == ctfDto.FruitId).FirstOrDefaultAsync();
-                if (fruit is null) throw new Exception($"This fruit with id: ({ctfDto.FruitId}) dosen't exist");
+
+                var fruit = await context.Fruits.Where(f => !f.IsDeleted)
+                    .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId)??
+                    throw new Exception($"This fruit with id: ({ctfDto.FruitId}) dosen't exist");
+
+                if (ctfDto.NumberOfCages <= 0)
+                    throw new Exception("The number of cages must be greater than Zero");
+                if (ctfDto.WeightInKilograms <= 0)
+                    throw new Exception("The Weight must be greater than Zero");
+                if (ctfDto.PriceOfKiloGram <= 0)
+                    throw new Exception("The price of kilograms must be greater than Zero");
+                if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
+                    throw new Exception($"This fruit with id: ({ctfDto.FruitId}) is not available");
+                if ((fruit.RemainingCages == 0) && (fruit.SoldCages == fruit.TotalCages) && (fruit.Status == FruitStatus.NotAvailabe))
+                    throw new Exception($"This fruit with id: ({ctfDto.FruitId}) is not available");
+
                 fruit.NumberOfKilogramsSold += ctfDto.WeightInKilograms;
                 fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
                 fruit.PriceOfKilogramsSold += ctfDto.PriceOfKiloGram * ctfDto.WeightInKilograms;
@@ -152,11 +170,6 @@ namespace Shader.Services.Implementation
 
                 context.Fruits.Update(fruit);
             }
-            //transaction.Description = ctDto.Description;
-            //transaction.Price = ctDto.CashTransactionFruits
-            //   .Select(c => c.PriceOfKiloGram * c.WeightInKilograms).Sum();
-            //transaction.CashTransactionFruits = ctDto.CashTransactionFruits
-            //   .Select(c => c.ToEntity<WCashTFruitDto, CashTransactionFruit>()).ToList();
             transaction = ctDto.MapToCashTransaction(transaction);
             context.CashTransactions.Update(transaction);
             await context.SaveChangesAsync();

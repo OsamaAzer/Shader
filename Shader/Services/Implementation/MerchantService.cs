@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Humanizer;
+using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using Shader.Data;
 using Shader.Data.DTOs.ShaderSeller;
 using Shader.Data.Entities;
@@ -36,6 +38,9 @@ namespace Shader.Services.Implementation
         }
         public async Task<RMerchantDto> CreateMerchantAsync(WMerchantDto merchantDto)
         {
+            if (context.Merchants.Where(m => !m.IsDeleted).Any(m => m.Name.ToLower() == merchantDto.Name.ToLower()))
+                throw new Exception($"Merchant with name {merchantDto.Name} already exists!!");
+
             var merchant = merchantDto.ToEntity<WMerchantDto, Merchant>();
             await context.Merchants.AddAsync(merchant);
             await context.SaveChangesAsync();
@@ -46,7 +51,12 @@ namespace Shader.Services.Implementation
             var merchant = await context.Merchants
                 .Where(s => !s.IsDeleted)
                 .FirstOrDefaultAsync(s => s.Id == id) ??
-                throw new Exception($"Seller with ID {id} not found.");
+                throw new Exception($"Merchant with ID {id} not found.");
+
+            var nameFlag = context.Merchants
+                .Where(f => !f.IsDeleted && f.Name.ToLower() == merchantDto.Name.ToLower())
+                .Count() >= 1 && merchant.Name.ToLower() != merchantDto.Name.ToLower();
+            if (nameFlag) throw new Exception($"Merchant with name {merchantDto.Name} already exists!!");
 
             merchantDto.ToEntity(merchant);
             context.Merchants.Update(merchant);

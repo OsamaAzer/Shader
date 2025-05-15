@@ -46,19 +46,22 @@ namespace Shader.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSupplierBill([FromBody] WSupplierBillDto supplierBillDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var createdBill = await _supplierBillService.CreateSupplierBillAsync(supplierBillDto);
-            return Ok(createdBill);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            try
+            {
+                var createdBill = await _supplierBillService.CreateSupplierBillAsync(supplierBillDto);
+                return Ok(createdBill);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSupplierBill(int id, [FromBody] WSupplierBillDto supplierBillDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
+            if (!ModelState.IsValid)return BadRequest(ModelState);
             try
             {
                 var updatedBill = await _supplierBillService.UpdateSupplierBillAsync(id, supplierBillDto);
@@ -76,9 +79,7 @@ namespace Shader.Controllers
             try
             {
                 var result = await _supplierBillService.DeleteSupplierBillAsync(id);
-                if (result)
-                    return NoContent();
-
+                if (result) return NoContent();
                 return StatusCode(500, "An error occurred while deleting the supplier bill.");
             }
             catch (Exception ex)

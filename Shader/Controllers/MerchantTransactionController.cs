@@ -85,6 +85,7 @@ namespace Shader.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTransaction([FromBody] WMerchantTDto transactionDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
                 var createdTransaction = await _merchantTransactionService.CreateTransactionAsync(transactionDto);
@@ -99,6 +100,7 @@ namespace Shader.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTransaction([FromRoute] int id, [FromBody] WMerchantTDto transactionDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
                 var updatedTransaction = await _merchantTransactionService.UpdateTransactionAsync(id, transactionDto);

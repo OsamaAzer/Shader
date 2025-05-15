@@ -47,6 +47,8 @@ namespace Shader.Services.Implementation
         }
         public async Task<RSupplierDto> AddSupplierAsync(WSupplierDto dto)
         {
+            if (await context.Suppliers.Where(s => !s.IsDeleted).AnyAsync(s => s.Name.ToLower() == dto.Name.ToLower()))
+                throw new Exception($"Supplier with name:({dto.Name}) already exists!");
             Supplier supplier = dto.Map<WSupplierDto, Supplier>();
             await context.Suppliers.AddAsync(supplier);
             await context.SaveChangesAsync();
@@ -99,6 +101,12 @@ namespace Shader.Services.Implementation
                 .Where(s => !s.IsDeleted)
                 .FirstOrDefaultAsync(s => s.Id == id) ??
                 throw new Exception($"Supplier with id:({id}) does not exist!");
+
+            var nameFlag = context.Suppliers
+                .Where(s => !s.IsDeleted && s.Name.ToLower() == dto.Name.ToLower())
+                .Count() >= 1 && existingSupplier.Name.ToLower() != dto.Name.ToLower();
+            if (nameFlag)
+                throw new Exception($"Supplier with name:({dto.Name}) already exists!");
 
             dto.Map(existingSupplier);
             context.Suppliers.Update(existingSupplier);

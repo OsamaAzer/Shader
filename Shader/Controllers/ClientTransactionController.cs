@@ -20,7 +20,7 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllClientTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _clientTransactionService.GetAllClientTransactionsAsync(pageNumber, pageSize);
+            var transactions = await _clientTransactionService.GetAllTransactionsAsync(pageNumber, pageSize);
             return Ok(transactions);
         }
 
@@ -29,7 +29,7 @@ namespace Shader.Controllers
         {
             try
             {
-                var transaction = await _clientTransactionService.GetClientTransactionByIdAsync(id);
+                var transaction = await _clientTransactionService.GetTransactionByIdAsync(id);
                 return Ok(transaction);
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace Shader.Controllers
         {
             try
             {
-                var transactions = await _clientTransactionService.GetClientTransactionsByClientIdAsync(clientId, pageNumber, pageSize);
+                var transactions = await _clientTransactionService.GetTransactionsByClientIdAsync(clientId, pageNumber, pageSize);
                 return Ok(transactions);
             }
             catch (Exception ex)
@@ -52,31 +52,20 @@ namespace Shader.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpGet("unpaid-client/{id}")]
-        public async Task<IActionResult> GetUnPaidClientTransactionsByClientId(int id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            try
-            {
-                var transactions = await _clientTransactionService.GetUnPaidClientTransactionsByClientIdAsync(id, pageNumber, pageSize);
-                return Ok(transactions);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+
         [HttpGet("today")]
         public async Task<IActionResult> GetTodayClientTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var today = DateOnly.FromDateTime(DateTime.Now);
-            var transactions = await _clientTransactionService.GetClientTransactionsByDateAsync(today, pageNumber, pageSize);
+            var transactions = await _clientTransactionService.GetTransactionsByDateAsync(today, pageNumber, pageSize);
             return Ok(transactions);
         }
+
         [HttpGet("date")]
         public async Task<IActionResult> GetClientTransactionsByDate
             ([FromQuery] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _clientTransactionService.GetClientTransactionsByDateAsync(date, pageNumber, pageSize);
+            var transactions = await _clientTransactionService.GetTransactionsByDateAsync(date, pageNumber, pageSize);
             return Ok(transactions);
         }
 
@@ -87,7 +76,7 @@ namespace Shader.Controllers
             try
             {
                 var transactions = await _clientTransactionService
-                .GetClientTransactionsByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
+                .GetTransactionsByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
                 return Ok(transactions);
             }
             catch (Exception ex)
@@ -99,10 +88,10 @@ namespace Shader.Controllers
         [HttpPost]
         public async Task<IActionResult> AddClientTransaction([FromBody] WClientTDto clientTransactionDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                var transaction = await _clientTransactionService.AddClientTransactionAsync(clientTransactionDto);
+                var transaction = await _clientTransactionService.AddTransactionAsync(clientTransactionDto);
                 if(transaction == null) return BadRequest("Something went wrong while Adding the transaction!");
                 return Ok(transaction);
             }
@@ -116,10 +105,10 @@ namespace Shader.Controllers
         public async Task<IActionResult> UpdateClientTransaction(int id, [FromBody] WClientTDto clientTransactionDto)
         {
 
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                var updatedTransaction = await _clientTransactionService.UpdateClientTransactionAsync(id, clientTransactionDto);
+                var updatedTransaction = await _clientTransactionService.UpdateTransactionAsync(id, clientTransactionDto);
                 if (updatedTransaction == null) return BadRequest("Something went wrong while updating the transaction!");
                 return Ok(updatedTransaction);
             }
@@ -154,7 +143,7 @@ namespace Shader.Controllers
         {
             try
             {
-                var result = await _clientTransactionService.DeleteClientTransactionAsync(id);
+                var result = await _clientTransactionService.DeleteTransactionAsync(id);
                 if (!result) return BadRequest("Something went wrong while deleting the transaction!");
                 return NoContent();
             }
