@@ -67,6 +67,8 @@ namespace Shader.Services.Implementation
                 City = existingMerchant.City,
                 PhoneNumber = existingMerchant.PhoneNumber,
                 IsMerchant = true,
+                MerchantId = merchantId,
+                Merchant = existingMerchant
             };
             await context.Suppliers.AddAsync(supplier);
             await context.SaveChangesAsync();
@@ -84,6 +86,9 @@ namespace Shader.Services.Implementation
                 .Where(m => !m.IsDeleted)
                 .FirstOrDefaultAsync(m => m.Id == merchantId) ??
                 throw new Exception($"Merchant with id:({merchantId}) does not exist!");
+
+            if (await context.Suppliers.Where(s => !s.IsDeleted).AnyAsync( s => s.MerchantId == merchantId))
+                throw new Exception($"Merchant with name:({existingMerchant.Name}) already exists as a supplier!");
 
             existingSupplier.Name = existingMerchant.Name;
             existingSupplier.City = existingMerchant.City;

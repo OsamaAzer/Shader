@@ -40,37 +40,45 @@ namespace Shader.Services.Implementation
         }
         public async Task<RSupplierBillDto> CreateSupplierBillAsync(WSupplierBillDto billDto)
         {
-            if (billDto.SupplierId == 0) 
-                throw new Exception("SupplierId cannot be 0");
-            if (billDto.Fruits == null || billDto.Fruits.Count == 0 || billDto.Fruits.Any(f => f == 0))
-                throw new Exception("You must select a fruit to be billed!");
-            if (billDto.CommissionRate <= 0)
-                throw new Exception("Commission rate should be greater than Zero!!");
-            if (billDto.MshalValue < 0)
-                throw new Exception("Mshal value cannot be less than Zero");
-            if (billDto.NylonValue < 0)
-                throw new Exception("Nylon value cannot be less than Zero");
-
-            var bill = billDto.MapToSupplierBill();
-            bill.Fruits = context.Fruits
-                .Where(f => billDto.Fruits
-                .Contains(f.Id)).ToList();
-            bill.Price = bill.Fruits.Sum(fruit => fruit.PriceOfKilogramsSold);
-            bill.TotalAmount = bill.Price - (bill.NylonValue + bill.MshalValue);
-            bill.MyCommisionValue = bill.TotalAmount * (bill.CommissionRate / 100);
-            bill.ValueDueToSupplier = bill.TotalAmount - bill.MyCommisionValue;
-
-            foreach (var fruit in bill.Fruits)
-            {
-                fruit.IsBilled = true;
-            }
-
             var supplier = await context.Suppliers
                 .Where(s => !s.IsDeleted)
                 .FirstOrDefaultAsync(s => s.Id == billDto.SupplierId) ??
                 throw new Exception("This supplier does not exist!");
 
-            supplier.TotalAmountOfBills += bill.TotalAmount;
+            if (billDto.SupplierId == 0) 
+                throw new Exception("SupplierId cannot be 0");
+            if (billDto.Fruits == null || billDto.Fruits.Count == 0 || billDto.Fruits.Any(f => f.FruitId == 0))
+                throw new Exception("You must select a fruit to be billed!");
+            if (billDto.CommissionRate <= 0)
+                throw new Exception("Commission rate should be greater than Zero!!");
+
+            var bill = billDto.MapToSupplierBill();
+            //bill.Fruits = await context.Fruits
+            //    .Where(f => billDto.Fruits
+            //    .Select(fruit => fruit.FruitId)
+            //    .Contains(f.Id) && !f.IsDeleted)
+            //    .ToListAsync();
+
+            foreach (var fruitDto in billDto.Fruits)
+            {
+                var fruit = await context.Fruits
+                    .Where(f => f.Id == fruitDto.FruitId && !f.IsDeleted)
+                    .FirstOrDefaultAsync() ?? throw new Exception($"This fruit {fruitDto.FruitId} does not exist!");
+
+                if (fruit.IsBilled)
+                    throw new Exception($"This fruit {fruit.FruitName} has already been billed!"); 
+
+                fruit.PriceOfKilogramInBill = fruitDto.PriceOfKilogram;
+                fruit.IsBilled = true;
+                bill.Fruits.Add(fruit);
+            }
+            bill.Price = bill.Fruits.Select(f => f.NumberOfKilogramsSold * f.PriceOfKilogramInBill).Sum();
+            bill.TotalAmount = bill.Price - bill.Fruits.Select(f => f.MashalValue + f.NylonValue).Sum();
+            bill.MyCommisionValue = bill.TotalAmount * (bill.CommissionRate / 100);
+            bill.ValueDueToSupplier = bill.TotalAmount - bill.MyCommisionValue;
+
+            supplier.TotalAmountOfBills += bill.ValueDueToSupplier;
+            supplier.TotalRemainingAmount = supplier.TotalAmountOfBills - supplier.TotalAmountPaid;
             context.Suppliers.Update(supplier);
             await context.SupplierBills.AddAsync(bill);
             await context.SaveChangesAsync();
@@ -80,37 +88,36 @@ namespace Shader.Services.Implementation
         {
             if (billDto.SupplierId == 0)
                 throw new Exception("SupplierId cannot be 0");
-            if (billDto.Fruits == null || billDto.Fruits.Count == 0 || billDto.Fruits.Any(f => f == 0))
+            if (billDto.Fruits == null || billDto.Fruits.Count == 0 || billDto.Fruits.Any(f => f.FruitId == 0))
                 throw new Exception("You must select a fruit to be billed!");
             if (billDto.CommissionRate <= 0)
                 throw new Exception("Commission rate should be greater than Zero!!");
-            if (billDto.MshalValue < 0)
-                throw new Exception("Mshal value cannot be less than Zero");
-            if (billDto.NylonValue < 0)
-                throw new Exception("Nylon value cannot be less than Zero");
 
-            var supplierBill = await GetSupplierBillByIdAsync(id) ??
+            var bill = await GetSupplierBillByIdAsync(id) ??
                 throw new Exception("This supplier bill does not exist!");
 
             var supplier = await context.Suppliers
                 .Where(s => !s.IsDeleted)
                 .FirstOrDefaultAsync(s => s.Id == billDto.SupplierId) ??
                 throw new Exception("This supplier does not exist!");
-            supplier.TotalAmountOfBills -= supplierBill.TotalAmount;
+            supplier.TotalAmountOfBills -= bill.TotalAmount;
 
-            foreach (var fruit in supplierBill.Fruits)
+            foreach (var fruit in bill.Fruits)
             {
-                if(billDto.Fruits.All(f => f != fruit.Id))
+                if(billDto.Fruits.All(f => f.FruitId != fruit.Id))
                 {
                     fruit.IsBilled = false;
+                    bill.TotalAmount -= fruit.PriceOfKilogramInBill * fruit.NumberOfKilogramsSold - (fruit.MashalValue + fruit.NylonValue);
+                    fruit.PriceOfKilogramInBill = 0;
+
                 }
             }
-            billDto.Map(supplierBill);
-            supplier.TotalAmountOfBills += supplierBill.TotalAmount;
+            billDto.Map(bill);
+            supplier.TotalAmountOfBills += bill.TotalAmount;
             context.Suppliers.Update(supplier);
-            context.SupplierBills.Update(supplierBill);
+            context.SupplierBills.Update(bill);
             await context.SaveChangesAsync();
-            return supplierBill.MapToRSupplierBillDto();
+            return bill.MapToRSupplierBillDto();
         }
         public async Task<bool> DeleteSupplierBillAsync(int id)
         {

@@ -1,4 +1,5 @@
 ﻿using Shader.Data.Dtos.Client;
+using Shader.Data.DTOs.ClientPayment;
 using Shader.Data.Entities;
 using Shader.Helpers;
 
@@ -11,7 +12,10 @@ namespace Shader.Services.Abstraction
         Task<PagedResponse<RAllClientsDto>> GetAllClientsWithNameAsync(string name, int pageNumber, int pageSize);
         Task<RClientDto> AddClientAsync(WClientDto dto);
         Task<RClientDto> UpdateClientAsync(int id, WClientDto dto);
-        Task<Client> UpdateClientAggregatesAsync(Client client);
         Task<bool> DeleteClientAsync(int id);
+        Client UpdateClientWithIncreaseInTransaction(Client client, ClientTransaction transaction);
+        Client UpdateClientWithDecreaseInTransaction(Client client, ClientTransaction transaction);
+        Client UpdateClientWithIncreaseInPayment(Client existingClient, WClientPaymentDto paymentDto);
+        Client UpdateClientWithDecreaseInPayment(Client existingClient, ClientPayment payment);
     }
 }

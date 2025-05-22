@@ -6,12 +6,15 @@ namespace Shader.Data.Entities
     public class Fruit
     {
         public int Id { get; set; }
-        public string FruitName { get; set; }
+        public string FruitName { get; set; } = null!;
         public FruitStatus Status { get; set; }
         public DateTime Date { get; set; } = DateTime.Now;
         public int SupplierId { get; set; }
-        public Supplier Supplier { get; set; }
+        public Supplier Supplier { get; set; } = null!;
         public decimal MerchantPurchasePrice { get; set; } // سعر الشراء
+        public decimal MashalValue { get; set; }
+        public decimal NylonValue { get; set; }
+        public decimal PriceOfKilogramInBill { get; set; } // السعر فى الفاتوره
         public bool IsDeleted { get; set; } = false;
         public bool IsCageHasMortgage { get; set; } = false;
         public bool IsBilled { get; set; } = false; // هل تم إصدار فاتورة للفواكه

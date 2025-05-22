@@ -22,41 +22,47 @@ namespace Shader.Services.Implementation
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
             
-            var expensesDto = context.Expenses
+            var expenses = await context.Expenses
                 .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) >= startDate && DateOnly.FromDateTime(e.Date) <= endDate)
-                .OrderByDescending(e => e.Date)
-                .Map<Expense, RExpenseDto>().ToList();
-            return  await Task.FromResult(expensesDto.CreatePagedResponse(pageNumber, pageSize));
+                .OrderByDescending(e => e.Date).ToListAsync();
+
+            return expenses.MapToRExpenseDtos().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<PagedResponse<RExpenseDto>> GetExpensesByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
-            var expensesDto = context.Expenses
+            var expenses = await context.Expenses
                 .Where(e => !e.IsDeleted && DateOnly.FromDateTime(e.Date) == date)
                 .OrderByDescending(e => e.Date)
-                .Map<Expense, RExpenseDto>().ToList();
-            return await Task.FromResult(expensesDto.CreatePagedResponse(pageNumber, pageSize));
+                .ToListAsync();
+
+            return expenses.MapToRExpenseDtos().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<PagedResponse<RExpenseDto>> GetAllExpensesAsync(int pageNumber, int pageSize)
         {
-            var expensesDto = context.Expenses
+            var expenses = await context.Expenses
                 .Where (e => !e.IsDeleted)
                 .OrderByDescending(e => e.Date)
-                .Map<Expense, RExpenseDto>().ToList();
-            return  await Task.FromResult(expensesDto.CreatePagedResponse(pageNumber, pageSize));
+                .ToListAsync();
+
+            return expenses.MapToRExpenseDtos().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<RExpenseDto> GetExpenseByIdAsync(int id)
         {
             var expense = await context.Expenses
-                .Where(e => e.Id == id && !e.IsDeleted)
-                .FirstOrDefaultAsync()??
+                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted) ??
                 throw new Exception("This expense does not exist!");
-            return expense.Map<Expense, RExpenseDto>();
+
+            return expense.MapToRExpenseDto();
         }
+
         public async Task<RExpenseDto> AddExpenseAsync(WExpenseDto dto)
         {
             if (dto.Amount <= 0) 
                 throw new Exception("Amount must be greater than zero.");
-            var expense = dto.Map<WExpenseDto, Expense>();
+            var expense = dto.MapToExpense();
             if (expenses.Any(e => e != dto.Type))
             {
                 expense.Type = ExpenseType.Other;
@@ -64,33 +70,34 @@ namespace Shader.Services.Implementation
             expense.Date = DateTime.Now;
             await context.Expenses.AddAsync(expense);
             await context.SaveChangesAsync();
-            return expense.Map<Expense, RExpenseDto>();
+            return expense.MapToRExpenseDto();
         }
+
         public async Task<RExpenseDto> UpdateExpenseAsync(int id, WExpenseDto dto)
         {
             if (dto.Amount <= 0) 
                 throw new Exception("Amount must be greater than zero.");
 
-            var existingExpense = await context.Expenses
-                .Where(e => e.Id == id && !e.IsDeleted)
-                .FirstOrDefaultAsync()??
+            var expense = await context.Expenses
+                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted) ??
                 throw new Exception("This expense does not exist!");
 
-            dto.Map(existingExpense);
+            dto.MapToExpense(expense);
             if (expenses.Any(e => e != dto.Type))
             {
-                existingExpense.Type = ExpenseType.Other;
+                expense.Type = ExpenseType.Other;
             }
-            context.Expenses.Update(existingExpense);
+            context.Expenses.Update(expense);
             await context.SaveChangesAsync();
-            return existingExpense.Map<Expense, RExpenseDto>();
+            return expense.MapToRExpenseDto();
         }
+
         public async Task<bool> DeleteExpenseAsync(int id)
         {
             var existingExpense = await context.Expenses
-                .Where(e => e.Id == id && !e.IsDeleted)
-                .FirstOrDefaultAsync() ??
+                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted) ??
                 throw new Exception("This expense does not exist!");
+
             existingExpense.IsDeleted = true;
             context.Expenses.Update(existingExpense);
             return await context.SaveChangesAsync() > 0;

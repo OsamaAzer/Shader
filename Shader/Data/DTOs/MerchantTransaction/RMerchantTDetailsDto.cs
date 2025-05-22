@@ -7,7 +7,7 @@ namespace Shader.Data.DTOs.ShaderTransaction
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public string MerchantName { get; set; }
         public decimal Price { get; set; }
         public decimal DiscountAmount { get; set; }

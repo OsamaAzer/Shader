@@ -6,6 +6,7 @@ namespace Shader.Data.Dtos.ClientTransaction
     {
         [Required]
         public int FruitId { get; set; }
+        [Required]
         public int NumberOfCages { get; set; }
         [Required]
         public decimal WeightInKilograms { get; set; }

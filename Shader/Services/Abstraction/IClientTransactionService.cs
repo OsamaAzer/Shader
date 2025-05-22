@@ -16,8 +16,6 @@ namespace Shader.Services.Abstraction
         Task<RClientTDetailsDto> GetTransactionByIdAsync(int id);
         Task<RClientTDetailsDto> AddTransactionAsync(WClientTDto cashTransactionDto);
         Task<RClientTDetailsDto> UpdateTransactionAsync(int id, WClientTDto cashTransactionDto);
-        Task<RClientTDetailsDto> UpdateTransactionWithPayments
-            (int id, decimal paidAmount, decimal discountAmount, decimal cageMortgageAmountPaid);
         Task<bool> DeleteTransactionAsync(int id);
         // todo : bool flag to inform if the transaction is paid or not
         // todo : shader interact with another shader

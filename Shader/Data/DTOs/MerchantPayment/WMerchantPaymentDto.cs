@@ -8,7 +8,9 @@ namespace Shader.Data.DTOs.MerchantPayment
     {
         [Required]
         public int MerchantId { get; set; }
+        [Required]
         public decimal MortgageAmount { get; set; }
+        [Required]
         public decimal PaidAmount { get; set; }
     }
 }

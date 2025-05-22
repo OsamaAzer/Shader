@@ -11,28 +11,22 @@ namespace Shader.Mapping
         public static SupplierBill MapToSupplierBill(this WSupplierBillDto billDto, SupplierBill? bill = null)
         {
             bill ??= new SupplierBill();
-            if (bill.Date == default)
-            {
-                bill.Date = DateTime.Now;
-            }
-            if (billDto.SupplierId == 0) throw new Exception("SupplierId cannot be 0");
-            bill.SupplierId = billDto.SupplierId;
-            bill.NylonValue = billDto.NylonValue;
-            bill.MshalValue = billDto.MshalValue;
-            bill.CommissionRate = billDto.CommissionRate;
-            if (billDto.Fruits.Any() == false || billDto.Fruits.Any(f => f == 0)) 
+
+            if (billDto.Fruits.Any() == false || billDto.Fruits.Any(f => f.FruitId == 0))
                 throw new Exception("You must select a fruit to be billed!");
+
+            if (billDto.SupplierId == 0) 
+                throw new Exception("SupplierId cannot be 0");
+
+            bill.Date = DateTime.Now;
+            bill.SupplierId = billDto.SupplierId;
+            bill.CommissionRate = billDto.CommissionRate;
             bill.Description = billDto.Description;
-            
             return bill;
         }
 
         public static RSupplierBillDto MapToRSupplierBillDto(this SupplierBill bill)
         {
-            if (bill == null)
-            {
-                throw new ArgumentNullException(nameof(bill), "Supplier bill cannot be null");
-            }
             var billDto = new RSupplierBillDto
             {
                 Id = bill.Id,
@@ -44,16 +38,11 @@ namespace Shader.Mapping
                 CommissionRate = bill.CommissionRate,
                 MyCommisionValue = bill.MyCommisionValue,
                 ValueDueToSupplier = bill.ValueDueToSupplier,
-                MshalValue = bill.MshalValue,
-                NylonValue = bill.NylonValue,
                 Fruits = bill.Fruits.Select(fruit => new RFruitsDto
                 {
                     FruitName = fruit.FruitName,
                     TotalCages = fruit.TotalCages,
-                    RemainingCages = fruit.RemainingCages,
-                    PriceOfKilogramsSold = fruit.PriceOfKilogramsSold,
                     NumberOfKilogramsSold = fruit.NumberOfKilogramsSold,
-                    Status = fruit.Status
                 }).ToList()
             };
             return billDto;

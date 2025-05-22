@@ -11,7 +11,7 @@ namespace Shader.Data.Entities
         public decimal MortgageAmount { get; set; }
         public decimal PaidAmount { get; set; }
         public int MerchantId { get; set; }
-        public Merchant Merchant { get; set; }
+        public Merchant Merchant { get; set; } 
         public bool IsDeleted { get; set; }
     }
 }

@@ -28,7 +28,6 @@ namespace Shader.Controllers
             {
                 return BadRequest(ex.Message);
             }
-
         }
 
         [HttpGet("date")]
@@ -37,6 +36,7 @@ namespace Shader.Controllers
             var expenses = await _expenseService.GetExpensesByDateAsync(date, pageNumber, pageSize);
             return Ok(expenses);
         }
+
         [HttpGet("today")]
         public async Task<IActionResult> GetTodayExpenses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -44,6 +44,7 @@ namespace Shader.Controllers
             var expenses = await _expenseService.GetExpensesByDateAsync(today, pageNumber, pageSize);
             return Ok(expenses);
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAllExpenses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {

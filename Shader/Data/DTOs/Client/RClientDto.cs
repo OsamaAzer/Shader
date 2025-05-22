@@ -7,8 +7,8 @@ namespace Shader.Data.Dtos.Client
         public int Id { get; set; }
         public string Name { get; set; }
         public string City { get; set; }
-        public string PhoneNumber { get; set; }
-        public Status Status { get; set; }
+        public string? PhoneNumber { get; set; }
+        public ClientStatus Status { get; set; }
         public decimal Price { get; set; } // المبلغ الكلي
         public decimal TotalAmount { get; set; } // المبلغ بعد الخصم
         public decimal AmountPaid { get; set; }

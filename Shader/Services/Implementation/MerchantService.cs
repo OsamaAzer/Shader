@@ -2,8 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Plugins;
 using Shader.Data;
+using Shader.Data.DTOs.MerchantPayment;
 using Shader.Data.DTOs.ShaderSeller;
+using Shader.Data.DTOs.ShaderTransaction;
 using Shader.Data.Entities;
+using Shader.Enums;
 using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
@@ -63,14 +66,90 @@ namespace Shader.Services.Implementation
             await context.SaveChangesAsync();
             return merchant.ToDto<Merchant, RMerchantDto>();
         }
-        public async Task<Merchant> UpdateMerchantAggregatesAsync(Merchant merchant)
+        public  Merchant UpdateMerchantWithIncreaseInTransaction(Merchant merchant, MerchantTransaction transaction)
         {
-            var existingMerchant = await context.Merchants
-                .Where(s => !s.IsDeleted)
-                .FirstOrDefaultAsync(s => s.Id == merchant.Id) ??
-                throw new Exception($"Merchant with ID {merchant.Id} not found.");
-            
-            
+            merchant.PurchasePrice += transaction.Price;
+            merchant.PurchaseTotalDiscountAmount += transaction.DiscountAmount;
+            //merchant.PurchaseTotalAmount = merchant.PurchasePrice - merchant.PurchaseTotalDiscountAmount;
+            //merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+            merchant.PurchaseTotalMortgageAmount += transaction.TotalCageMortgageAmount;
+            //merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            context.Merchants.Update(merchant);
+            return merchant;
+        }
+        public  Merchant UpdateMerchantWithDecreaseInTransaction(Merchant merchant, MerchantTransaction transaction)
+        {
+            merchant.PurchasePrice -= transaction.Price;
+            merchant.PurchaseTotalDiscountAmount -= transaction.DiscountAmount;
+            //merchant.PurchaseTotalAmount = merchant.PurchasePrice - merchant.PurchaseTotalDiscountAmount;
+            //merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+            merchant.PurchaseTotalMortgageAmount -= transaction.TotalCageMortgageAmount;
+            //merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            context.Merchants.Update(merchant);
+            return merchant;
+        }
+        public  Merchant UpdateMerchantWithIncreaseInPayment(Merchant merchant, WMerchantPaymentDto paymentDto)
+        {
+            if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
+                throw new Exception($"Payment amount or mortgage amount can't be less than zero.");
+            if (merchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
+                throw new Exception($"Merchant current balance equal {merchant.CurrentAmountBalance}.");
+            if (merchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
+                throw new Exception($"Merchant current mortgage balance equal {merchant.CurrentMortgageAmountBalance}.");
+
+            if (merchant.CurrentAmountBalance < 0 || merchant.CurrentMortgageAmountBalance < 0)
+            {
+                if (merchant.CurrentAmountBalance < 0 && paymentDto.PaidAmount > merchant.CurrentAmountBalance * -1)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+                }
+                else
+                {
+                    merchant.PurchaseAmountPaid += paymentDto.PaidAmount;
+                    //merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+                }
+                if (merchant.CurrentMortgageAmountBalance < 0 && paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance * -1)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+                }
+                else
+                {
+                    merchant.PurchaseTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+                    //merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
+                }
+            }
+            if (merchant.CurrentAmountBalance > 0 || merchant.CurrentMortgageAmountBalance > 0)
+            {
+                if (merchant.CurrentAmountBalance > 0 && paymentDto.PaidAmount > merchant.CurrentAmountBalance)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+                }
+                else
+                {
+                    merchant.SellAmountPaid += paymentDto.PaidAmount;
+                    //merchant.SellTotalRemainingAmount = merchant.SellTotalAmount - merchant.SellAmountPaid;
+                }
+                if (merchant.CurrentMortgageAmountBalance > 0 && paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+                }
+                else
+                {
+                    merchant.SellTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+                    //merchant.SellTotalRemainingMortgageAmount = merchant.SellTotalMortgageAmount - merchant.SellTotalMortgageAmountPaid;
+                }
+            }
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            return merchant;
+        }
+        public  Merchant UpdateMerchantWithDecreaseInPayment(Merchant merchant, WMerchantPaymentDto paymentDto)
+        {
+
             return merchant;
         }
         public async Task<bool> DeleteMerchantAsync(int id)

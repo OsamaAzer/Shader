@@ -6,9 +6,9 @@ namespace Shader.Data.DTOs.SupplierBill
     public class RSupplierBillDto
     {
         public int Id { get; set; }
-        public string SupplierName { get; set; }
+        public string SupplierName { get; set; } = null!;
         public DateTime Date { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public decimal Price { get; set; }
         public decimal TotalAmount { get; set; } // المبلغ الإجمالي
         public decimal CommissionRate { get; set; }

@@ -6,7 +6,9 @@ namespace Shader.Data.DTOs.ClientPayment
     {
         [Required]
         public int ClientId { get; set; }
+        [Required]
         public decimal MortgageAmount { get; set; }
+        [Required]
         public decimal PaidAmount { get; set; }
     }
 }

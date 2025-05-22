@@ -39,7 +39,6 @@ namespace Shader.Mapping
             }
             return destination;
         }
-
         public static IEnumerable<TDestination> MapWithNested<TSource, TDestination>(this IEnumerable<TSource> sources)
             where TDestination : class, new()
             where TSource : class, new()
@@ -52,7 +51,6 @@ namespace Shader.Mapping
             }
             return destinations;
         }
-
         private static object MapWithNested(this object source, Type destinationType)
         {
             var destination = Activator.CreateInstance(destinationType);
@@ -121,7 +119,7 @@ namespace Shader.Mapping
             }
             return destinations;
         }
-        public static ICollection<TDestination> ToEntities<TSource, TDestination>(this ICollection<TSource> sources, ICollection<TDestination> destinations = null)
+        public static IEnumerable<TDestination> ToEntities<TSource, TDestination>(this ICollection<TSource> sources, ICollection<TDestination> destinations = null)
             where TDestination : class, new()
             where TSource : class, new()
         {

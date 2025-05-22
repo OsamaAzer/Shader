@@ -8,8 +8,7 @@ namespace Shader.Data.Entities
         public DateTime Date { get; set; } = DateTime.Now;
         public string? Description { get; set; }
         public int MerchantId { get; set; }
-        public Merchant Merchant { get; set; }
-        //public TransactionType TransactionType { get; set; }
+        public Merchant Merchant { get; set; } 
         public bool IsDeleted { get; set; } = false;
         public decimal Price { get; set; }
         public decimal TotalAmount { get; set; }

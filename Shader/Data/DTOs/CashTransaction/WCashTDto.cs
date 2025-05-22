@@ -4,6 +4,7 @@ namespace Shader.Data.Dtos.CashTransaction
 {
     public class WCashTDto
     {
+        [MaxLength(250)]
         public string? Description { get; set; }
         [Required]
         public List<WCashTFruitDto> CashTransactionFruits { get; set; }

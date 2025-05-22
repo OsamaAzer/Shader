@@ -9,7 +9,7 @@ using Shader.Services.Abstraction;
 
 namespace Shader.Services.Implementation
 {
-    public class MerchantTransactionService(ShaderContext context) : IMerchantTransactionService
+    public class MerchantTransactionService(ShaderContext context, IFruitService fruitService, IMerchantService merchantService) : IMerchantTransactionService
     {
         public async Task<PagedResponse<RMerchantTDto>> GetAllTransactionsAsync(int pageNumber, int pageSize)
         {
@@ -98,43 +98,20 @@ namespace Shader.Services.Implementation
                     .FirstOrDefaultAsync(f => f.Id == mtf.FruitId) ?? 
                     throw new Exception("This fruit dosen't exist");
 
-                if (mtf.NumberOfCages <= 0)
-                    throw new Exception("The number of cages must be greater than Zero");
-                if (mtf.WeightInKilograms <= 0)
-                    throw new Exception("The Weight must be greater than Zero");
-                if (mtf.PriceOfKiloGram <= 0)
-                    throw new Exception("The price of kilogrammust be greater than Zero");
-                if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
-                    throw new Exception("The number of cages is not enough");
-
-                fruit.NumberOfKilogramsSold += mtf.WeightInKilograms;
-                fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                fruit.PriceOfKilogramsSold += mtf.PriceOfKiloGram * mtf.WeightInKilograms;
-                fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                fruit.RemainingCages -= mtf.NumberOfCages;
-                fruit.SoldCages += mtf.NumberOfCages;
-
-                if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                    fruit.Status = FruitStatus.NotAvailabe;
-                else
-                    fruit.Status = FruitStatus.InStock;
-
+                fruitService.UpdateTookFruitInMerchantTransaction(fruit, mtf);
                 if (fruit.IsCageHasMortgage)
-                {
                     transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * mtf.NumberOfCages;
-                }
-                context.Fruits.Update(fruit);
             }
-            merchant.PurchasePrice += transaction.Price;
-            merchant.PurchaseTotalDiscountAmount += transaction.DiscountAmount;
-            merchant.PurchaseTotalAmount += transaction.TotalAmount;
-            merchant.PurchaseTotalRemainingAmount += transaction.TotalAmount;
-            merchant.PurchaseTotalMortgageAmount += transaction.TotalCageMortgageAmount;
-            merchant.PurchaseTotalRemainingMortgageAmount += transaction.TotalCageMortgageAmount;
-            merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
-            merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            //merchant.PurchasePrice += transaction.Price;
+            //merchant.PurchaseTotalDiscountAmount += transaction.DiscountAmount;
+            //merchant.PurchaseTotalAmount += transaction.TotalAmount;
+            //merchant.PurchaseTotalRemainingAmount += transaction.TotalAmount;
+            //merchant.PurchaseTotalMortgageAmount += transaction.TotalCageMortgageAmount;
+            //merchant.PurchaseTotalRemainingMortgageAmount += transaction.TotalCageMortgageAmount;
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            merchantService.UpdateMerchantWithIncreaseInTransaction(merchant, transaction);
             await context.MerchantTransactions.AddAsync(transaction);
-            context.Merchants.Update(merchant);
             await context.SaveChangesAsync();
             return transaction.MapToRMerchantTDetailsDto();
         }
@@ -151,108 +128,7 @@ namespace Shader.Services.Implementation
                 .Where(c => !c.IsDeleted)
                 .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("This transaction dosen't exist");
 
-            foreach (var mtf in transaction.MerchantTransactionFruits)
-            {
-                bool flag = mtDto.MerchantTransactionFruits.Any(c => c.FruitId == mtf.FruitId);
-                if (!flag)
-                {
-                    var removedFruit = await context.Fruits
-                        .Where(f => f.Id == mtf.FruitId)
-                        .Where(f => !f.IsDeleted)
-                        .FirstOrDefaultAsync();
-                    if (removedFruit is not null)
-                    {
-                        removedFruit.NumberOfKilogramsSold -= mtf.WeightInKilograms;
-                        removedFruit.NumberOfKilogramsSold = Math.Round(removedFruit.NumberOfKilogramsSold, 2);
-                        removedFruit.PriceOfKilogramsSold -= mtf.PriceOfKiloGram * mtf.WeightInKilograms;
-                        removedFruit.PriceOfKilogramsSold = Math.Round(removedFruit.PriceOfKilogramsSold, 2);
-                        removedFruit.RemainingCages += mtf.NumberOfCages;
-                        removedFruit.SoldCages -= mtf.NumberOfCages;
-
-                        if (removedFruit.RemainingCages == 0 && removedFruit.SoldCages == removedFruit.TotalCages)
-                            removedFruit.Status = FruitStatus.NotAvailabe;
-                        else
-                            removedFruit.Status = FruitStatus.InStock;
-
-                        if (removedFruit.IsCageHasMortgage)
-                        {
-                            transaction.TotalCageMortgageAmount -= removedFruit.CageMortgageValue * mtf.NumberOfCages;
-                        }
-                        context.Fruits.Update(removedFruit);
-                    }
-                }
-                else
-                {
-                    foreach (var ctfDto in mtDto.MerchantTransactionFruits)
-                    {
-                        if (mtDto.MerchantTransactionFruits.Where(c => c.FruitId == ctfDto.FruitId).Count() > 1)
-                            throw new Exception("You can't add the same fruit multible times in the same transaction!");
-
-                        var fruit = await context.Fruits
-                            .Where(f => !f.IsDeleted)
-                            .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId);
-
-                        if (mtf.NumberOfCages <= 0)
-                            throw new Exception("The number of cages must be greater than Zero");
-                        if (mtf.WeightInKilograms <= 0)
-                            throw new Exception("The Weight must be greater than Zero");
-                        if (mtf.PriceOfKiloGram <= 0)
-                            throw new Exception("The price of kilogrammust be greater than Zero");
-
-                        if (fruit is not null)
-                        {
-                            if (fruit.RemainingCages == 0) throw new Exception("The number of cages is not enough");
-                            fruit.NumberOfKilogramsSold -= mtf.WeightInKilograms;
-                            fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                            fruit.PriceOfKilogramsSold -= mtf.PriceOfKiloGram * mtf.WeightInKilograms;
-                            fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                            fruit.RemainingCages += mtf.NumberOfCages;
-                            fruit.SoldCages -= mtf.NumberOfCages;
-
-                            if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                                fruit.Status = FruitStatus.NotAvailabe;
-                            else
-                                fruit.Status = FruitStatus.InStock;
-
-                            if (fruit.IsCageHasMortgage)
-                            {
-                                transaction.TotalCageMortgageAmount -= fruit.CageMortgageValue * mtf.NumberOfCages;
-                            }
-
-                            fruit.NumberOfKilogramsSold += ctfDto.WeightInKilograms;
-                            fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                            fruit.PriceOfKilogramsSold += ctfDto.PriceOfKiloGram * ctfDto.WeightInKilograms;
-                            fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                            fruit.RemainingCages -= ctfDto.NumberOfCages;
-                            fruit.SoldCages += ctfDto.NumberOfCages;
-
-                            if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                                fruit.Status = FruitStatus.NotAvailabe;
-                            else
-                                fruit.Status = FruitStatus.InStock;
-
-                            if (fruit.IsCageHasMortgage)
-                            {
-                                transaction.TotalCageMortgageAmount = fruit.CageMortgageValue * ctfDto.NumberOfCages;
-                            }
-                            context.Fruits.Update(fruit);
-                        }
-                    }
-                }
-            }
             var oldMerchantId = transaction.MerchantId;
-            if (oldMerchantId == mtDto.MerchantId)
-            {
-                merchant.PurchasePrice -= transaction.Price;
-                merchant.PurchaseTotalDiscountAmount -= transaction.DiscountAmount;
-                merchant.PurchaseTotalAmount -= transaction.TotalAmount;
-                merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
-                merchant.PurchaseTotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-                merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
-                merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
-                merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
-            }
-
             if (oldMerchantId != mtDto.MerchantId)
             {
                 var removedMerchant = await context.Merchants
@@ -261,29 +137,64 @@ namespace Shader.Services.Implementation
                     .FirstOrDefaultAsync(c => c.Id == oldMerchantId);
 
                 if (removedMerchant is not null)
+                    merchantService.UpdateMerchantWithDecreaseInTransaction(removedMerchant, transaction);
+            }
+            else
+            {
+                merchantService.UpdateMerchantWithDecreaseInTransaction(merchant, transaction);
+            }
+            foreach (var mtfDto in mtDto.MerchantTransactionFruits)
+            {
+                foreach (var mtf in transaction.MerchantTransactionFruits)
                 {
-                    removedMerchant.PurchasePrice -= transaction.Price;
-                    removedMerchant.PurchaseTotalDiscountAmount -= transaction.DiscountAmount;
-                    removedMerchant.PurchaseTotalAmount -= transaction.TotalAmount;
-                    removedMerchant.PurchaseTotalRemainingAmount = removedMerchant.PurchaseTotalAmount - removedMerchant.PurchaseAmountPaid;
-                    removedMerchant.PurchaseTotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-                    removedMerchant.PurchaseTotalRemainingMortgageAmount = removedMerchant.PurchaseTotalMortgageAmount - removedMerchant.PurchaseTotalMortgageAmountPaid;
-                    removedMerchant.CurrentAmountBalance = removedMerchant.SellTotalRemainingAmount - removedMerchant.PurchaseTotalRemainingAmount;
-                    removedMerchant.CurrentMortgageAmountBalance = removedMerchant.SellTotalRemainingMortgageAmount - removedMerchant.PurchaseTotalRemainingMortgageAmount;
-                    context.Merchants.Update(removedMerchant);
+                    bool addedFruitIsExist = mtDto.MerchantTransactionFruits.Any(c => c.FruitId == mtf.FruitId);
+                    if (addedFruitIsExist)
+                    {
+                        var fruit = await context.Fruits
+                            .Where(f => !f.IsDeleted)
+                            .FirstOrDefaultAsync(f => f.Id == mtfDto.FruitId) ??
+                            throw new Exception($"This fruit with id ({mtfDto.FruitId}) dosen't exist");
+
+                        if (fruit is not null)
+                        {
+                            fruitService.UpdateReturnedFruitInMerchantTransaction(fruit, mtf);
+                            if (fruit.IsCageHasMortgage)
+                                transaction.TotalCageMortgageAmount -= fruit.CageMortgageValue * mtf.NumberOfCages;
+
+                            fruitService.UpdateTookFruitInMerchantTransaction(fruit, mtfDto);
+                            if (fruit.IsCageHasMortgage)
+                                transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * mtfDto.NumberOfCages;
+                        }
+                    }
+                    else
+                    {
+                        var removedFruit = await context.Fruits
+                                    .Where(f => !f.IsDeleted)
+                                    .FirstOrDefaultAsync(f => f.Id == mtf.FruitId);
+                        if (removedFruit is not null)
+                        {
+                            fruitService.UpdateReturnedFruitInMerchantTransaction(removedFruit, mtf);
+                            if (removedFruit.IsCageHasMortgage)
+                                transaction.TotalCageMortgageAmount -= removedFruit.CageMortgageValue * mtf.NumberOfCages;
+                        }
+
+                        if (mtDto.MerchantTransactionFruits.Where(c => c.FruitId == mtfDto.FruitId).Count() > 1)
+                            throw new Exception("You can't add the same fruit multible times in the same transaction!");
+
+                        var newFruit = await context.Fruits
+                            .Where(f => !f.IsDeleted)
+                            .FirstOrDefaultAsync(f => f.Id == mtfDto.FruitId) ??
+                            throw new Exception($"The fruit with id: ({mtfDto.FruitId}) doesn't exist!!");
+
+                        fruitService.UpdateTookFruitInMerchantTransaction(newFruit, mtfDto);
+                        if (newFruit.IsCageHasMortgage)
+                            transaction.TotalCageMortgageAmount += newFruit.CageMortgageValue * mtfDto.NumberOfCages;
+                    }
                 }
             }
             transaction = mtDto.MapToMerchantTransaction(transaction);
             context.MerchantTransactions.Update(transaction);
-            merchant.PurchasePrice += transaction.Price;
-            merchant.PurchaseTotalDiscountAmount += transaction.DiscountAmount;
-            merchant.PurchaseTotalAmount += transaction.TotalAmount;
-            merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
-            merchant.PurchaseTotalMortgageAmount += transaction.TotalCageMortgageAmount;
-            merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
-            merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
-            merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
-            context.Merchants.Update(merchant);
+            merchantService.UpdateMerchantWithIncreaseInTransaction(merchant, transaction);
             await context.SaveChangesAsync();
             return transaction.MapToRMerchantTDetailsDto();
         }
@@ -303,21 +214,9 @@ namespace Shader.Services.Implementation
                     .FirstOrDefaultAsync();
                 if (fruit is not null)
                 {
-                    fruit.NumberOfKilogramsSold -= mtf.WeightInKilograms;
-                    fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                    fruit.PriceOfKilogramsSold -= mtf.PriceOfKiloGram * mtf.WeightInKilograms;
-                    fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                    fruit.RemainingCages += mtf.NumberOfCages;
-                    fruit.SoldCages -= mtf.NumberOfCages;
-                    if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                        fruit.Status = FruitStatus.NotAvailabe;
-                    else
-                        fruit.Status = FruitStatus.InStock;
+                    fruitService.UpdateReturnedFruitInMerchantTransaction(fruit, mtf);
                     if (fruit.IsCageHasMortgage)
-                    {
                         transaction.TotalCageMortgageAmount -= fruit.CageMortgageValue * mtf.NumberOfCages;
-                    }
-                    context.Fruits.Update(fruit);
                 }
             }
             var merchant = await context.Merchants
@@ -327,15 +226,16 @@ namespace Shader.Services.Implementation
 
             if (merchant is not null)
             {
-                merchant.PurchasePrice -= transaction.Price;
-                merchant.PurchaseTotalDiscountAmount -= transaction.DiscountAmount;
-                merchant.PurchaseTotalAmount -= transaction.TotalAmount;
-                merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
-                merchant.PurchaseTotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-                merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
-                merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
-                merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
-                context.Merchants.Update(merchant);
+                //merchant.PurchasePrice -= transaction.Price;
+                //merchant.PurchaseTotalDiscountAmount -= transaction.DiscountAmount;
+                //merchant.PurchaseTotalAmount -= transaction.TotalAmount;
+                //merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+                //merchant.PurchaseTotalMortgageAmount -= transaction.TotalCageMortgageAmount;
+                //merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
+                //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+                //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+                //context.Merchants.Update(merchant);
+                merchantService.UpdateMerchantWithDecreaseInTransaction(merchant, transaction);
             }
 
             transaction.IsDeleted = true;

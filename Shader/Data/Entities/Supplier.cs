@@ -10,6 +10,8 @@ namespace Shader.Data.Entities
         [RegularExpression(@"^(?:\+20|0)?(1[0-2]|15)\d{8}$", ErrorMessage = "Invalid Egyptian phone number.")]
         public string? PhoneNumber { get; set; }
         public decimal TotalAmountOfBills { get; set; } // المبلغ الإجمالي للفواتير
+        public decimal TotalAmountPaid { get; set; } // المبلغ المدفوع
+        public decimal TotalRemainingAmount { get; set; } // المبلغ المتبقي
         public bool IsMerchant { get; set; } = false; // هل المورد تاجر
         public int? MerchantId { get; set; }
         public Merchant? Merchant { get; set; }

@@ -5,6 +5,7 @@ namespace Shader.Data.Dtos.ClientTransaction
 {
     public class WClientTDto
     {
+        [MaxLength(250)]
         public string? Description { get; set; }
         public decimal DiscountAmount { get; set; }
         [Required]

@@ -14,46 +14,52 @@ using System.Linq;
 
 namespace Shader.Services.Implementation
 {
-    public class ClientTransactionService(ShaderContext context, IClientService clientService) : IClientTransactionService
+    public class ClientTransactionService(ShaderContext context, IClientService clientService, IFruitService fruitService) : IClientTransactionService
     {
         public async Task<PagedResponse<RClientTDto>> GetTransactionsByClientIdAsync(int clientId, int pageNumber, int pageSize)
         {
             var client = await context.Clients
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == clientId) ??
+                .FirstOrDefaultAsync(c => c.Id == clientId && !c.IsDeleted) ??
                 throw new Exception($"The client with Id: ({clientId}) doesn't exist!!");
 
             var transactions = await context.ClientTransactions
+                .Include(c => c.Client)
                 .Include(c => c.ClientTransactionFruits)
                 .ThenInclude(c => c.Fruit)
-                .Include(c => c.Client)
                 .Where(c => c.ClientId == clientId && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
+
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<PagedResponse<RClientTDto>> GetTransactionsByDateAsync(DateOnly date, int pageNumber, int pageSize)
         {
             var transactions = await context.ClientTransactions
+                .Include(c => c.Client)
                 .Include(c => c.ClientTransactionFruits)
                 .ThenInclude(c => c.Fruit)
-                .Include(c => c.Client)
                 .Where(c => DateOnly.FromDateTime(c.Date) == date && !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
+
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<PagedResponse<RClientTDto>> GetAllTransactionsAsync(int pageNumber, int pageSize)
+
         {
             var transactions = await context.ClientTransactions
+                .Include(c => c.Client)
                 .Include(c => c.ClientTransactionFruits)
                 .ThenInclude(c => c.Fruit)
-                .Include(c => c.Client)
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
+
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<PagedResponse<RClientTDto>> GetTransactionsByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
@@ -61,9 +67,9 @@ namespace Shader.Services.Implementation
                 throw new Exception("Start date must be less than end date.");
 
             var transactions = await context.ClientTransactions
+                .Include(c => c.Client)
                 .Include(c => c.ClientTransactionFruits)
                 .ThenInclude(c => c.Fruit)
-                .Include(c => c.Client)
                 .Where(c => !c.IsDeleted)
                 .Where(c => DateOnly.FromDateTime(c.Date) >= startDate && DateOnly.FromDateTime(c.Date) <= endDate)
                 .OrderByDescending(c => c.Date)
@@ -71,22 +77,24 @@ namespace Shader.Services.Implementation
 
             return transactions.MapToRClientTDto().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<RClientTDetailsDto> GetTransactionByIdAsync(int id)
         {
             var transaction = await context.ClientTransactions
-                .Where(c => !c.IsDeleted)
+                .Include(c => c.Client)
                 .Include(c => c.ClientTransactionFruits)
                 .ThenInclude(ctf => ctf.Fruit)
-                .Include(c => c.Client)
-                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("This client transacttion dosen't exist");
+                .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted) ?? 
+                throw new Exception("This client transacttion dosen't exist");
+
             return transaction.MapToRClientTDetailsDto();
         }
+
         public async Task<RClientTDetailsDto> AddTransactionAsync(WClientTDto ctDto)
         {
             var client = await context.Clients
                 .Include(c => c.Transactions)
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == ctDto.ClientId) ?? 
+                .FirstOrDefaultAsync(c => c.Id == ctDto.ClientId && !c.IsDeleted) ?? 
                 throw new Exception($"This client with Id({ctDto.ClientId}) dosen't exist!!");
 
             if (ctDto.ClientTransactionFruits.All(c => c.FruitId == 0)) throw new Exception("You must select a fruit!!");
@@ -96,300 +104,128 @@ namespace Shader.Services.Implementation
             foreach (var ctf in ctDto.ClientTransactionFruits)
             {
                 if (ctDto.ClientTransactionFruits.Where(c => c.FruitId == ctf.FruitId).Count() > 1)
-                    throw new Exception("You can't add the same fruit multible times in the same transaction!");
+                    throw new Exception($"You can't add a fruit multible times in the same transaction!");
 
                 var fruit = await context.Fruits
-                    .Where(f => !f.IsDeleted)
-                    .FirstOrDefaultAsync(f => f.Id == ctf.FruitId) ?? throw new Exception("This fruit dosen't exist");
+                    .FirstOrDefaultAsync(f => f.Id == ctf.FruitId && !f.IsDeleted) ??
+                    throw new Exception("This fruit dosen't exist");
 
-                if (ctf.NumberOfCages <= 0)
-                    throw new Exception("The number of cages must be greater than Zero");
-                if (ctf.WeightInKilograms <= 0)
-                    throw new Exception("The Weight must be greater than Zero");
-                if (ctf.PriceOfKiloGram <= 0)
-                    throw new Exception("The price of kilogrammust be greater than Zero");
-                if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
-                    throw new Exception("The number of cages is not enough");
-
-                fruit.NumberOfKilogramsSold += ctf.WeightInKilograms;
-                fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                fruit.PriceOfKilogramsSold += ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                fruit.RemainingCages -= ctf.NumberOfCages;
-                fruit.SoldCages += ctf.NumberOfCages;
-
-                if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                    fruit.Status = FruitStatus.NotAvailabe;
-                else
-                    fruit.Status = FruitStatus.InStock;
+                fruitService.UpdateTookFruitInClientTransaction(fruit, ctf);
 
                 if (fruit.IsCageHasMortgage)
-                {
                     transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * ctf.NumberOfCages;
-                }
-                context.Fruits.Update(fruit);
-                
             }
-
+            clientService.UpdateClientWithIncreaseInTransaction(client, transaction); // update client data according to the transaction.
             await context.ClientTransactions.AddAsync(transaction);
-            client = await clientService.UpdateClientAggregatesAsync(client); // update client data according to the transaction.
-            context.Clients.Update(client);
             await context.SaveChangesAsync();
             return transaction.MapToRClientTDetailsDto();
         }
+
         public async Task<RClientTDetailsDto> UpdateTransactionAsync(int id, WClientTDto ctDto)
         {
             var client = await context.Clients
                 .Include(c => c.Transactions)
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == ctDto.ClientId) ?? throw new Exception("This client dosen't exist");
+                .FirstOrDefaultAsync(c => c.Id == ctDto.ClientId && !c.IsDeleted) ?? 
+                throw new Exception("This client dosen't exist");
 
             var transaction = await context.ClientTransactions
                 .Include(c => c.ClientTransactionFruits)
                 .ThenInclude(ctf => ctf.Fruit)
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("This transaction dosen't exist");
-
-            foreach (var ctf in transaction.ClientTransactionFruits)
-            {
-                bool flag = ctDto.ClientTransactionFruits.Any(c => c.FruitId == ctf.FruitId);
-                if (!flag)
-                {
-                    var removedFruit = await context.Fruits
-                        .Where(f => f.Id == ctf.FruitId)
-                        .Where(f => !f.IsDeleted)
-                        .FirstOrDefaultAsync();
-                    if (removedFruit is not null)
-                    {
-                        removedFruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
-                        removedFruit.NumberOfKilogramsSold = Math.Round(removedFruit.NumberOfKilogramsSold, 2);
-                        removedFruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                        removedFruit.PriceOfKilogramsSold = Math.Round(removedFruit.PriceOfKilogramsSold, 2);
-                        removedFruit.RemainingCages += ctf.NumberOfCages;
-                        removedFruit.SoldCages -= ctf.NumberOfCages;
-
-                        if (removedFruit.RemainingCages == 0 && removedFruit.SoldCages == removedFruit.TotalCages)
-                            removedFruit.Status = FruitStatus.NotAvailabe;
-                        else
-                            removedFruit.Status = FruitStatus.InStock;
-
-                        if (removedFruit.IsCageHasMortgage)
-                        {
-                            transaction.TotalCageMortgageAmount -= removedFruit.CageMortgageValue * ctf.NumberOfCages;
-                        }
-
-                        context.Fruits.Update(removedFruit);
-                    }
-                }
-                else
-                {
-                    foreach (var ctfDto in ctDto.ClientTransactionFruits)
-                    {
-                        if (ctDto.ClientTransactionFruits.Where(c => c.FruitId == ctfDto.FruitId).Count() > 1)
-                            throw new Exception("You can't add the same fruit multible times in the same transaction!");
-
-                        var fruit = await context.Fruits
-                            .Where(f => !f.IsDeleted)
-                            .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId)??
-                            throw new Exception("The selected fruit dosen't exist");
-
-                        if (ctf.NumberOfCages <= 0)
-                            throw new Exception("The number of cages must be greater than Zero");
-                        if (ctf.WeightInKilograms <= 0)
-                            throw new Exception("The Weight must be greater than Zero");
-                        if (ctf.PriceOfKiloGram <= 0)
-                            throw new Exception("The price of kilogrammust be greater than Zero");
-                        if (fruit.RemainingCages == 0 && fruit.Status == FruitStatus.NotAvailabe)
-                            throw new Exception("The number of cages is not enough");
-
-                        if (fruit is not null)
-                        {
-                            if (fruit.RemainingCages == 0) throw new Exception("The number of cages is not enough");
-                            fruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
-                            fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                            fruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                            fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                            fruit.RemainingCages += ctf.NumberOfCages;
-                            fruit.SoldCages -= ctf.NumberOfCages;
-
-                            if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                                fruit.Status = FruitStatus.NotAvailabe;
-                            else
-                                fruit.Status = FruitStatus.InStock;
-
-                            if (fruit.IsCageHasMortgage)
-                            {
-                                transaction.TotalCageMortgageAmount -= fruit.CageMortgageValue * ctf.NumberOfCages;
-                            }
-
-                            fruit.NumberOfKilogramsSold += ctfDto.WeightInKilograms;
-                            fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                            fruit.PriceOfKilogramsSold += ctfDto.PriceOfKiloGram * ctfDto.WeightInKilograms;
-                            fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                            fruit.RemainingCages -= ctfDto.NumberOfCages;
-                            fruit.SoldCages += ctfDto.NumberOfCages;
-
-                            if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                                fruit.Status = FruitStatus.NotAvailabe;
-                            else
-                                fruit.Status = FruitStatus.InStock;
-
-                            if (fruit.IsCageHasMortgage)
-                            {
-                                transaction.TotalCageMortgageAmount = fruit.CageMortgageValue * ctfDto.NumberOfCages;
-                            }
-
-                            context.Fruits.Update(fruit);
-                        }
-                    }
-                }
-            }
+                .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted) ?? 
+                throw new Exception("This transaction dosen't exist");
 
             var oldClientId = transaction.ClientId;
-
-            if (oldClientId == ctDto.ClientId)
-            {
-                client.Price -= transaction.Price;
-                client.TotalAmount -= transaction.TotalAmount;
-                client.TotalRemainingAmount = client.TotalAmount - client.AmountPaid;
-                client.TotalDiscountAmount -= transaction.DiscountAmount;
-                client.TotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-                client.TotalRemainingMortgageAmount = client.TotalMortgageAmount - client.TotalMortgageAmountPaid;
-                //client = await clientService.UpdateClientAggregatesAsync(client.Id);
-                //context.Clients.Update(client);
-            }
-
             if (oldClientId != ctDto.ClientId)
             {
                 var removedClient = await context.Clients
                     .Include(c => c.Transactions)
-                    .Where(c => !c.IsDeleted)
-                    .FirstOrDefaultAsync(c => c.Id == oldClientId);
+                    .FirstOrDefaultAsync(c => c.Id == oldClientId && !c.IsDeleted);
 
                 if (removedClient is not null)
+                    clientService.UpdateClientWithDecreaseInTransaction(removedClient, transaction);
+            }
+            else
+            {
+                clientService.UpdateClientWithDecreaseInTransaction(client, transaction);
+            }
+            foreach (var ctfDto in ctDto.ClientTransactionFruits)
+            {
+                foreach (var ctf in transaction.ClientTransactionFruits)
                 {
-                    removedClient.Price -= transaction.Price;
-                    removedClient.TotalAmount -= transaction.TotalAmount;
-                    removedClient.TotalRemainingAmount = client.TotalAmount - client.AmountPaid;
-                    removedClient.TotalDiscountAmount -= transaction.DiscountAmount;
-                    removedClient.TotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-                    removedClient.TotalRemainingMortgageAmount = client.TotalMortgageAmount - client.TotalMortgageAmountPaid;
-                    context.Clients.Update(removedClient);
-                    //removedClient = await clientService.UpdateClientAggregatesAsync(removedClient.Id);
-                    //context.Clients.Update(removedClient);
+                    bool addedFruitIsExist = ctDto.ClientTransactionFruits.Any(c => c.FruitId == ctf.FruitId);
+                    if (addedFruitIsExist)
+                    {
+                        var fruit = await context.Fruits
+                            .FirstOrDefaultAsync(f => f.Id == ctf.FruitId && !f.IsDeleted);
+
+                        if (fruit is not null)
+                        {
+                            fruitService.UpdateReturnedFruitInClientTransaction(fruit, ctf);
+                            if (fruit.IsCageHasMortgage)
+                                transaction.TotalCageMortgageAmount -= fruit.CageMortgageValue * ctf.NumberOfCages;
+
+                            fruitService.UpdateTookFruitInClientTransaction(fruit, ctfDto);
+                            if (fruit.IsCageHasMortgage)
+                                transaction.TotalCageMortgageAmount += fruit.CageMortgageValue * ctf.NumberOfCages;
+                        }
+                    }
+                    else
+                    {
+                        var removedFruit = await context.Fruits
+                            .FirstOrDefaultAsync(f => f.Id == ctf.FruitId && !f.IsDeleted);
+
+                        if (removedFruit is not null)
+                        {
+                            fruitService.UpdateReturnedFruitInClientTransaction(removedFruit, ctf);
+                            if (removedFruit.IsCageHasMortgage)
+                                transaction.TotalCageMortgageAmount -= removedFruit.CageMortgageValue * ctf.NumberOfCages;
+                        }
+
+                        if (ctDto.ClientTransactionFruits.Where(c => c.FruitId == ctfDto.FruitId).Count() > 1)
+                            throw new Exception("You can't add the same fruit multible times in the same transaction!");
+
+                        var newFruit = await context.Fruits
+                            .FirstOrDefaultAsync(f => f.Id == ctfDto.FruitId && !f.IsDeleted) ??
+                            throw new Exception($"The fruit with id :({ctfDto.FruitId}) dosen't exist!");
+
+                        fruitService.UpdateTookFruitInClientTransaction(newFruit, ctfDto);
+                        if (newFruit.IsCageHasMortgage)
+                            transaction.TotalCageMortgageAmount += newFruit.CageMortgageValue * ctfDto.NumberOfCages;
+                    }
                 }
             }
-
-
-            transaction = ctDto.MapToClientTransaction(transaction);
+            ctDto.MapToClientTransaction(transaction);
             context.ClientTransactions.Update(transaction);
-
-            client.Price += transaction.Price;
-            client.TotalAmount += transaction.Price - transaction.DiscountAmount;
-            client.TotalRemainingAmount = client.TotalAmount - client.AmountPaid;
-            client.TotalDiscountAmount += transaction.DiscountAmount;
-            client.TotalMortgageAmount += transaction.TotalCageMortgageAmount;
-            client.TotalRemainingMortgageAmount = client.TotalMortgageAmount - client.TotalMortgageAmountPaid;
-            context.Clients.Update(client);
+            clientService.UpdateClientWithIncreaseInTransaction(client, transaction);
             await context.SaveChangesAsync();
             return transaction.MapToRClientTDetailsDto();
         }
-        public async Task<RClientTDetailsDto> UpdateTransactionWithPayments
-            (int id, decimal paidAmount, decimal discountAmount, decimal cageMortgageAmountPaid)
-        {
 
-            var transaction = await context.ClientTransactions
-                .Include(c => c.ClientTransactionFruits)
-                .ThenInclude(ctf => ctf.Fruit)
-                .Where(c =>!c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("The transaction doesn't exist!");
-
-            var client = context.Clients
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefault(c => c.Id == transaction.ClientId) ?? throw new Exception("The client doesn't exist!");
-
-            //if (transaction.TotalCageMortgageAmount == transaction.TotalCageMortgageAmountPaid && transaction.RemainingMortgageAmount == 0 && transaction.TotalCageMortgageAmountPaid > 0)
-            //    throw new Exception("The cage mortgage amount was paid!");
-            //if (transaction.AmountPaid == transaction.TotalAmount && transaction.RemainingAmount == 0 && transaction.AmountPaid > 0)
-            //    throw new Exception("The transaction amount was paid!"); 
-            //if (paidAmount + discountAmount > transaction.RemainingAmount)
-            //    throw new Exception("The amount paid and discount amount can't be greater than the remaining amount!");
-            //if (paidAmount > transaction.RemainingAmount)
-            //    throw new Exception("The amount paid is greater than the remaining amount!");
-            //if (discountAmount > transaction.RemainingAmount) 
-            //    throw new Exception("The discount amount can't be greater than or equal remaining amount!");
-            //if (cageMortgageAmountPaid > transaction.TotalCageMortgageAmount && cageMortgageAmountPaid > transaction.RemainingMortgageAmount)
-            //    throw new Exception("The cage mortgage amount paid can't be greater than the remaining cage mortgage amount!");
-            
-
-            //transaction.AmountPaid += paidAmount;
-
-            if (transaction.DiscountAmount >= 0 && discountAmount > 0)
-                transaction.DiscountAmount = discountAmount;
-
-            transaction.TotalAmount = transaction.Price - transaction.DiscountAmount;
-            //transaction.RemainingAmount = transaction.TotalAmount - transaction.AmountPaid;
-            //transaction.TotalCageMortgageAmountPaid += cageMortgageAmountPaid;
-            //transaction.RemainingMortgageAmount = transaction.TotalCageMortgageAmount - transaction.TotalCageMortgageAmountPaid;
-
-            context.ClientTransactions.Update(transaction);
-            client = await clientService.UpdateClientAggregatesAsync(client);
-            context.Clients.Update(client);
-            await context.SaveChangesAsync();
-            return transaction.MapToRClientTDetailsDto();
-        }
         public async Task<bool> DeleteTransactionAsync(int id)
         {
             var transaction = await context.ClientTransactions
                 .Include(c => c.ClientTransactionFruits)
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == id) ?? throw new Exception("This transaction dosen't exist");
+                .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted) ?? throw new Exception("This transaction dosen't exist");
 
 
             foreach (var ctf in transaction.ClientTransactionFruits)
             {
                 var fruit = await context.Fruits
-                    .Where(f => f.Id == ctf.FruitId)
-                    .Where(f => !f.IsDeleted)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(f => f.Id == ctf.FruitId && !f.IsDeleted);
+
                 if(fruit is not null)
-                {
-                    fruit.NumberOfKilogramsSold -= ctf.WeightInKilograms;
-                    fruit.NumberOfKilogramsSold = Math.Round(fruit.NumberOfKilogramsSold, 2);
-                    fruit.PriceOfKilogramsSold -= ctf.PriceOfKiloGram * ctf.WeightInKilograms;
-                    fruit.PriceOfKilogramsSold = Math.Round(fruit.PriceOfKilogramsSold, 2);
-                    fruit.RemainingCages += ctf.NumberOfCages;
-                    fruit.SoldCages -= ctf.NumberOfCages;
-
-                    if (fruit.RemainingCages == 0 && fruit.SoldCages == fruit.TotalCages)
-                        fruit.Status = FruitStatus.NotAvailabe;
-                    else
-                        fruit.Status = FruitStatus.InStock;
-
-                    context.Fruits.Update(fruit);
-                }
+                    fruitService.UpdateReturnedFruitInClientTransaction(fruit, ctf);
             }
             transaction.IsDeleted = true;
-            //client.Price -= transaction.Price;
-            //client.TotalAmount -= transaction.TotalAmount;
-            //client.AmountPaid -= transaction.AmountPaid;
-            //client.TotalRemainingAmount = client.TotalAmount - client.AmountPaid;
-            //client.TotalDiscountAmount -= transaction.DiscountAmount;
-            //client.TotalMortgageAmount -= transaction.TotalCageMortgageAmount;
-            //client.TotalMortgageAmountPaid -= transaction.TotalCageMortgageAmountPaid;
-            //client.TotalRemainingMortgageAmount = client.TotalMortgageAmount - client.TotalMortgageAmountPaid;
-            //context.Clients.Update(client);
             context.ClientTransactions.Update(transaction);
+
             var client = await context.Clients
                 .Include(c=> c.Transactions)
-                .Where(c => !c.IsDeleted)
-                .FirstOrDefaultAsync(c => c.Id == transaction.ClientId);
+                .FirstOrDefaultAsync(c => c.Id == transaction.ClientId && !c.IsDeleted);
 
             if (client is not null)
-            {
-                client = await clientService.UpdateClientAggregatesAsync(client);
-                context.Update(client);
-            }
+                clientService.UpdateClientWithDecreaseInTransaction(client, transaction);
+
             return await context.SaveChangesAsync() > 0;
         }
         

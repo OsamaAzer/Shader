@@ -19,6 +19,8 @@ namespace Shader.Data
         public DbSet<CashTransaction> CashTransactions { get; set; }
         public DbSet<CashTransactionFruit> CashTransactionFruits { get; set; }
         public DbSet<Expense> Expenses { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Absence> Absences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

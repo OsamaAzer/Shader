@@ -13,6 +13,8 @@ namespace Shader.Services.Abstraction
         Task<PagedResponse<RMerchantPaymentDto>> GetPaymentsByMerchantIdAsync(int merchantId, int pageNumber, int pageSize);
         Task<RMerchantPaymentDto> GetPaymentByIdAsync(int id);
         Task<RMerchantPaymentDto> CreatePaymentAsync(WMerchantPaymentDto payment);
+        Task<RMerchantPaymentDto> PayingMoneyAsync(WMerchantPaymentDto payment);
+        Task<RMerchantPaymentDto> ReceivingMoneyAsync(WMerchantPaymentDto payment);
         Task<RMerchantPaymentDto> UpdatePaymentAsync(int id, WMerchantPaymentDto payment);
         Task<bool> DeletePaymentAsync(int id);
     }

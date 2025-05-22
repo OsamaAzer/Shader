@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using Shader.Data;
 using Shader.Data.Dtos.ClientTransaction;
 using Shader.Data.DTOs.ClientTransaction;
@@ -62,14 +63,14 @@ namespace Shader.Mapping
             }
             transaction.Price = ctDto.ClientTransactionFruits
                 .Select(c => c.PriceOfKiloGram * c.WeightInKilograms).Sum();
-            transaction.TotalAmount = transaction.Price - transaction.DiscountAmount;
-            transaction.ClientTransactionFruits = ctDto.ClientTransactionFruits.Select(clientTransactionFruitDto => new ClientTransactionFruit
+            //transaction.TotalAmount = transaction.Price - transaction.DiscountAmount;
+            transaction.ClientTransactionFruits = ctDto.ClientTransactionFruits.Select(ctfDto => new ClientTransactionFruit
             {
-                FruitId = clientTransactionFruitDto.FruitId,
-                NumberOfCages = clientTransactionFruitDto.NumberOfCages,
-                WeightInKilograms = clientTransactionFruitDto.WeightInKilograms,
-                PriceOfKiloGram = clientTransactionFruitDto.PriceOfKiloGram,
-                TransactionPrice = clientTransactionFruitDto.WeightInKilograms * clientTransactionFruitDto.PriceOfKiloGram,
+                FruitId = ctfDto.FruitId,
+                NumberOfCages = ctfDto.NumberOfCages,
+                WeightInKilograms = ctfDto.WeightInKilograms,
+                PriceOfKiloGram = ctfDto.PriceOfKiloGram,
+                //TransactionPrice = ctfDto.WeightInKilograms * ctfDto.PriceOfKiloGram,
             }).ToList();
             return transaction;
         }

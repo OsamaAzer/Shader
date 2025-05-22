@@ -21,7 +21,7 @@ namespace Shader.Mapping
                 NumberOfCages = fruit.NumberOfCages,
                 PriceOfKiloGram = fruit.PriceOfKiloGram,
                 WeightInKilograms = fruit.WeightInKilograms,
-                TransactionPrice = fruit.PriceOfKiloGram * fruit.WeightInKilograms
+                //TransactionPrice = fruit.PriceOfKiloGram * fruit.WeightInKilograms
             }).ToList();
             return transaction;
         }

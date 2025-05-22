@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shader.Data;
 using Shader.Data.DTOs.MerchantPayment;
+using Shader.Data.Entities;
 using Shader.Enums;
 using Shader.Helpers;
 using Shader.Mapping;
@@ -8,7 +9,7 @@ using Shader.Services.Abstraction;
 
 namespace Shader.Services.Implementation
 {
-    public class MerchantPaymentService(ShaderContext context) : IMerchantPaymentService
+    public class MerchantPaymentService(ShaderContext context, IMerchantService merchantService) : IMerchantPaymentService
     {
         public async Task<PagedResponse<RMerchantPaymentDto>> GetAllPaymentsAsync(int pageNumber, int pageSize)
         {
@@ -61,156 +62,254 @@ namespace Shader.Services.Implementation
         }
         public async Task<RMerchantPaymentDto> CreatePaymentAsync(WMerchantPaymentDto paymentDto)
         {
-            var existingMerchant = await context.Merchants
+            var merchant = await context.Merchants
                 .Where(c => !c.IsDeleted)
                 .FirstOrDefaultAsync(c => c.Id == paymentDto.MerchantId) ??
             throw new Exception($"Merchant with ID {paymentDto.MerchantId} not found.");
             var newPayment = paymentDto.ToMerchantPayment();
 
             if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
-                throw new Exception($"Payment amount or mortgage amount can't be negative.");
-            if (existingMerchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
-                throw new Exception($"Merchant current balance equal {existingMerchant.CurrentAmountBalance}.");
-            if (existingMerchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
-                throw new Exception($"Merchant current mortgage balance equal {existingMerchant.CurrentMortgageAmountBalance}.");
+                throw new Exception($"Payment amount or mortgage amount can't be less than zero.");
+            if (merchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
+                throw new Exception($"Merchant current balance equal {merchant.CurrentAmountBalance}.");
+            if (merchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
+                throw new Exception($"Merchant current mortgage balance equal {merchant.CurrentMortgageAmountBalance}.");
 
-            if (existingMerchant.CurrentAmountBalance < 0 || existingMerchant.CurrentMortgageAmountBalance < 0)
+            if (merchant.CurrentAmountBalance < 0 || merchant.CurrentMortgageAmountBalance < 0)
             {
-                if (paymentDto.PaidAmount > existingMerchant.CurrentAmountBalance * -1)
-                    throw new Exception($"Payment amount exceeds the remaining amount {existingMerchant.CurrentAmountBalance}.");
-                if (paymentDto.MortgageAmount > existingMerchant.CurrentMortgageAmountBalance * -1)
-                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {existingMerchant.CurrentMortgageAmountBalance}.");
-                existingMerchant.PurchaseAmountPaid += paymentDto.PaidAmount;
-                existingMerchant.PurchaseTotalRemainingAmount = existingMerchant.PurchaseTotalAmount - existingMerchant.PurchaseAmountPaid;
-                existingMerchant.PurchaseTotalMortgageAmountPaid += paymentDto.MortgageAmount;
-                existingMerchant.PurchaseTotalRemainingMortgageAmount = existingMerchant.PurchaseTotalMortgageAmount - existingMerchant.PurchaseTotalMortgageAmountPaid;
+                if (merchant.CurrentAmountBalance < 0 && paymentDto.PaidAmount > merchant.CurrentAmountBalance * -1)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+                }
+                else
+                {
+                    merchant.PurchaseAmountPaid += paymentDto.PaidAmount;
+                    //merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+                }
+                if (merchant.CurrentMortgageAmountBalance < 0 && paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance * -1)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+                }
+                else
+                {
+                    merchant.PurchaseTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+                    //merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
+                }
                 newPayment.TransactionType = TransactionType.PayingMoney;
             }
-            if (existingMerchant.CurrentAmountBalance > 0 || existingMerchant.CurrentMortgageAmountBalance > 0)
+            if (merchant.CurrentAmountBalance > 0 || merchant.CurrentMortgageAmountBalance > 0)
             {
-                if (paymentDto.PaidAmount > existingMerchant.CurrentAmountBalance )
-                    throw new Exception($"Payment amount exceeds the remaining amount {existingMerchant.CurrentAmountBalance}.");
-                if (paymentDto.MortgageAmount > existingMerchant.CurrentMortgageAmountBalance )
-                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {existingMerchant.CurrentMortgageAmountBalance}.");
-                existingMerchant.SellAmountPaid += paymentDto.PaidAmount;
-                existingMerchant.SellTotalRemainingAmount = existingMerchant.SellTotalAmount - existingMerchant.SellAmountPaid;
-                existingMerchant.SellTotalMortgageAmountPaid += paymentDto.MortgageAmount;
-                existingMerchant.SellTotalRemainingMortgageAmount = existingMerchant.SellTotalMortgageAmount - existingMerchant.SellTotalMortgageAmountPaid;
+                if (merchant.CurrentAmountBalance > 0 && paymentDto.PaidAmount > merchant.CurrentAmountBalance)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+                }
+                else
+                {
+                    merchant.SellAmountPaid += paymentDto.PaidAmount;
+                    //merchant.SellTotalRemainingAmount = merchant.SellTotalAmount - merchant.SellAmountPaid;
+                }
+                if (merchant.CurrentMortgageAmountBalance > 0 && paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance)
+                {
+                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+                }
+                else
+                {
+                    merchant.SellTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+                    //merchant.SellTotalRemainingMortgageAmount = merchant.SellTotalMortgageAmount - merchant.SellTotalMortgageAmountPaid;
+                }
                 newPayment.TransactionType = TransactionType.ReceivingMoney;
             }
-            existingMerchant.CurrentAmountBalance = existingMerchant.SellTotalRemainingAmount - existingMerchant.PurchaseTotalRemainingAmount;
-            existingMerchant.CurrentMortgageAmountBalance = existingMerchant.SellTotalRemainingMortgageAmount - existingMerchant.PurchaseTotalRemainingMortgageAmount;
-            context.Merchants.Update(existingMerchant);
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            context.Merchants.Update(merchant);
             await context.MerchantPayments.AddAsync(newPayment);
             await context.SaveChangesAsync();
             return newPayment.ToRMerchantPayment();
         }
+        public async Task<RMerchantPaymentDto> PayingMoneyAsync(WMerchantPaymentDto paymentDto)
+        {
+            var merchant = await context.Merchants
+                .Where(c => !c.IsDeleted)
+                .FirstOrDefaultAsync(c => c.Id == paymentDto.MerchantId) ??
+            throw new Exception($"Merchant with ID {paymentDto.MerchantId} not found.");
+            var newPayment = paymentDto.ToMerchantPayment();
+
+            //if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
+            //    throw new Exception($"Payment amount or mortgage amount can't be less than zero.");
+            //if (merchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
+            //    throw new Exception($"Merchant current balance equal {merchant.CurrentAmountBalance}.");
+            //if (merchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
+            //    throw new Exception($"Merchant current mortgage balance equal {merchant.CurrentMortgageAmountBalance}.");
+
+            //if (merchant.CurrentAmountBalance < 0 && paymentDto.PaidAmount > merchant.CurrentAmountBalance * -1)
+            //{
+            //    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+            //}
+            //else
+            //{
+            //    merchant.PurchaseAmountPaid += paymentDto.PaidAmount;
+            //    merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+            //}
+            //if (merchant.CurrentMortgageAmountBalance < 0 && paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance * -1)
+            //{
+            //    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+            //}
+            //else
+            //{
+            //    merchant.PurchaseTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+            //    merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
+            //}
+            merchantService.UpdateMerchantWithIncreaseInPayment(merchant, paymentDto);
+            newPayment.TransactionType = TransactionType.PayingMoney;
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            context.Merchants.Update(merchant);
+            await context.MerchantPayments.AddAsync(newPayment);
+            await context.SaveChangesAsync();
+            return newPayment.ToRMerchantPayment();
+        }
+        public async Task<RMerchantPaymentDto> ReceivingMoneyAsync(WMerchantPaymentDto paymentDto)
+        {
+            var merchant = await context.Merchants
+                            .Where(c => !c.IsDeleted)
+                            .FirstOrDefaultAsync(c => c.Id == paymentDto.MerchantId) ??
+                        throw new Exception($"Merchant with ID {paymentDto.MerchantId} not found.");
+            var newPayment = paymentDto.ToMerchantPayment();
+
+            //if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
+            //    throw new Exception($"Payment amount or mortgage amount can't be less than zero.");
+            //if (merchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
+            //    throw new Exception($"Merchant current balance equal {merchant.CurrentAmountBalance}.");
+            //if (merchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
+            //    throw new Exception($"Merchant current mortgage balance equal {merchant.CurrentMortgageAmountBalance}.");
+
+            //if (merchant.CurrentAmountBalance > 0 && paymentDto.PaidAmount > merchant.CurrentAmountBalance)
+            //{
+            //    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+            //}
+            //else
+            //{
+            //    merchant.SellAmountPaid += paymentDto.PaidAmount;
+            //    merchant.SellTotalRemainingAmount = merchant.SellTotalAmount - merchant.SellAmountPaid;
+            //}
+            //if (merchant.CurrentMortgageAmountBalance > 0 && paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance)
+            //{
+            //    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+            //}
+            //else
+            //{
+            //    merchant.SellTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+            //    merchant.SellTotalRemainingMortgageAmount = merchant.SellTotalMortgageAmount - merchant.SellTotalMortgageAmountPaid;
+            //}
+            merchantService.UpdateMerchantWithIncreaseInPayment(merchant, paymentDto);
+            newPayment.TransactionType = TransactionType.ReceivingMoney;
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            context.Merchants.Update(merchant);
+            await context.MerchantPayments.AddAsync(newPayment);
+            await context.SaveChangesAsync();
+            return newPayment.ToRMerchantPayment();
+        } 
         public async Task<RMerchantPaymentDto> UpdatePaymentAsync(int id, WMerchantPaymentDto paymentDto)
         {
-            var existingPayment = await context.MerchantPayments
+            var payment = await context.MerchantPayments
                 .Include(payment => payment.Merchant)
                 .Where(p => !p.IsDeleted)
                 .FirstOrDefaultAsync(p => p.Id == id) ??
                 throw new Exception($"Payment with ID {id} not found.");
 
-            var existingMerchant = await context.Merchants
+            var merchant = await context.Merchants
                     .Where(c => !c.IsDeleted)
                     .FirstOrDefaultAsync(c => c.Id == paymentDto.MerchantId)??
                     throw new Exception($"Merchant with ID {paymentDto.MerchantId} not found.");
 
             if (paymentDto.PaidAmount < 0 || paymentDto.MortgageAmount < 0)
                 throw new Exception($"Payment amount or mortgage amount can't be negative.");
-            if (existingMerchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
-                throw new Exception($"Merchant current balance equal {existingMerchant.CurrentAmountBalance}.");
-            if (existingMerchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
-                throw new Exception($"Merchant current mortgage balance equal {existingMerchant.CurrentMortgageAmountBalance}.");
+            if (merchant.CurrentAmountBalance == 0 && paymentDto.PaidAmount > 0)
+                throw new Exception($"Merchant current balance equal {merchant.CurrentAmountBalance}.");
+            if (merchant.CurrentMortgageAmountBalance == 0 && paymentDto.MortgageAmount > 0)
+                throw new Exception($"Merchant current mortgage balance equal {merchant.CurrentMortgageAmountBalance}.");
 
-            var oldPaymentTransactionType = existingPayment.TransactionType;
-            var oldMerchantId = existingPayment.MerchantId;
-            if (oldMerchantId != paymentDto.MerchantId)
+            var oldPaymentTransactionType = payment.TransactionType;
+            var deletedMerchantId = payment.MerchantId;
+            if (deletedMerchantId != paymentDto.MerchantId)
             {
-                var oldMerchant = await context.Merchants
+                var deletedMerchant = await context.Merchants
                     .Where(c => !c.IsDeleted)
-                    .FirstOrDefaultAsync(c => c.Id == oldMerchantId);
-                if (oldMerchant != null)
+                    .FirstOrDefaultAsync(c => c.Id == deletedMerchantId);
+                if (deletedMerchant != null)
                 {
                     if (oldPaymentTransactionType == TransactionType.PayingMoney)
                     {
-                        oldMerchant.PurchaseAmountPaid -= existingPayment.PaidAmount;
-                        oldMerchant.PurchaseTotalRemainingAmount = oldMerchant.PurchaseTotalAmount - oldMerchant.PurchaseAmountPaid;
-                        oldMerchant.PurchaseTotalMortgageAmountPaid -= existingPayment.MortgageAmount;
-                        oldMerchant.PurchaseTotalRemainingMortgageAmount = oldMerchant.PurchaseTotalMortgageAmount - oldMerchant.PurchaseTotalMortgageAmountPaid;
+                        deletedMerchant.PurchaseAmountPaid -= payment.PaidAmount;
+                        //deletedMerchant.PurchaseTotalRemainingAmount = deletedMerchant.PurchaseTotalAmount - deletedMerchant.PurchaseAmountPaid;
+                        deletedMerchant.PurchaseTotalMortgageAmountPaid -= payment.MortgageAmount;
+                        //deletedMerchant.PurchaseTotalRemainingMortgageAmount = deletedMerchant.PurchaseTotalMortgageAmount - deletedMerchant.PurchaseTotalMortgageAmountPaid;
                     }
                     else
                     {
-                        oldMerchant.SellAmountPaid -= existingPayment.PaidAmount;
-                        oldMerchant.SellTotalRemainingAmount = oldMerchant.SellTotalAmount - oldMerchant.SellAmountPaid;
-                        oldMerchant.SellTotalMortgageAmountPaid -= existingPayment.MortgageAmount;
-                        oldMerchant.SellTotalRemainingMortgageAmount = oldMerchant.SellTotalMortgageAmount - oldMerchant.SellTotalMortgageAmountPaid;
+                        deletedMerchant.SellAmountPaid -= payment.PaidAmount;
+                        //deletedMerchant.SellTotalRemainingAmount = deletedMerchant.SellTotalAmount - deletedMerchant.SellAmountPaid;
+                        deletedMerchant.SellTotalMortgageAmountPaid -= payment.MortgageAmount;
+                        //deletedMerchant.SellTotalRemainingMortgageAmount = deletedMerchant.SellTotalMortgageAmount - deletedMerchant.SellTotalMortgageAmountPaid;
                     }
-                    oldMerchant.CurrentAmountBalance = oldMerchant.SellTotalRemainingAmount - oldMerchant.PurchaseTotalRemainingAmount;
-                    oldMerchant.CurrentMortgageAmountBalance = oldMerchant.SellTotalRemainingMortgageAmount - oldMerchant.PurchaseTotalRemainingMortgageAmount;
-                    context.Merchants.Update(oldMerchant);
+                    //deletedMerchant.CurrentAmountBalance = deletedMerchant.SellTotalRemainingAmount - deletedMerchant.PurchaseTotalRemainingAmount;
+                    //deletedMerchant.CurrentMortgageAmountBalance = deletedMerchant.SellTotalRemainingMortgageAmount - deletedMerchant.PurchaseTotalRemainingMortgageAmount;
+                    context.Merchants.Update(deletedMerchant);
                 }
             }
             else
             {
-                if (existingMerchant != null)
+                if (oldPaymentTransactionType == TransactionType.PayingMoney)
                 {
-                    if (oldPaymentTransactionType == TransactionType.PayingMoney)
-                    {
-                        existingMerchant.PurchaseAmountPaid -= existingPayment.PaidAmount;
-                        existingMerchant.PurchaseTotalRemainingAmount = existingMerchant.PurchaseTotalAmount - existingMerchant.PurchaseAmountPaid;
-                        existingMerchant.PurchaseTotalMortgageAmountPaid -= existingPayment.MortgageAmount;
-                        existingMerchant.PurchaseTotalRemainingMortgageAmount = existingMerchant.PurchaseTotalMortgageAmount - existingMerchant.PurchaseTotalMortgageAmountPaid;
-                    }
-                    else
-                    {
-                        existingMerchant.SellAmountPaid -= existingPayment.PaidAmount;
-                        existingMerchant.SellTotalRemainingAmount = existingMerchant.SellTotalAmount - existingMerchant.SellAmountPaid;
-                        existingMerchant.SellTotalMortgageAmountPaid -= existingPayment.MortgageAmount;
-                        existingMerchant.SellTotalRemainingMortgageAmount = existingMerchant.SellTotalMortgageAmount - existingMerchant.SellTotalMortgageAmountPaid;
-                    }
-                    existingMerchant.CurrentAmountBalance = existingMerchant.SellTotalRemainingAmount - existingMerchant.PurchaseTotalRemainingAmount;
-                    existingMerchant.CurrentMortgageAmountBalance = existingMerchant.SellTotalRemainingMortgageAmount - existingMerchant.PurchaseTotalRemainingMortgageAmount;
-                    context.Merchants.Update(existingMerchant);
+                    merchant.PurchaseAmountPaid -= payment.PaidAmount;
+                    //merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+                    merchant.PurchaseTotalMortgageAmountPaid -= payment.MortgageAmount;
+                    //merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
                 }
+                else
+                {
+                    merchant.SellAmountPaid -= payment.PaidAmount;
+                    //merchant.SellTotalRemainingAmount = merchant.SellTotalAmount - merchant.SellAmountPaid;
+                    merchant.SellTotalMortgageAmountPaid -= payment.MortgageAmount;
+                    //merchant.SellTotalRemainingMortgageAmount = merchant.SellTotalMortgageAmount - merchant.SellTotalMortgageAmountPaid;
+                }
+                //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+                //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+                context.Merchants.Update(merchant);
             }
-            paymentDto.ToMerchantPayment(existingPayment);
-            if (existingMerchant is not null)
+            paymentDto.ToMerchantPayment(payment);
+            if (merchant.CurrentAmountBalance < 0 || merchant.CurrentMortgageAmountBalance < 0)
             {
-                if (existingMerchant.CurrentAmountBalance < 0 || existingMerchant.CurrentMortgageAmountBalance < 0)
-                {
-                    if (paymentDto.PaidAmount > existingMerchant.CurrentAmountBalance * -1)
-                        throw new Exception($"Payment amount exceeds the remaining amount {existingMerchant.CurrentAmountBalance}.");
-                    if (paymentDto.MortgageAmount > existingMerchant.CurrentMortgageAmountBalance * -1)
-                        throw new Exception($"Payment amount exceeds the remaining mortgage amount {existingMerchant.CurrentMortgageAmountBalance}.");
-                    existingMerchant.PurchaseAmountPaid += paymentDto.PaidAmount;
-                    existingMerchant.PurchaseTotalRemainingAmount = existingMerchant.PurchaseTotalAmount - existingMerchant.PurchaseAmountPaid;
-                    existingMerchant.PurchaseTotalMortgageAmountPaid += paymentDto.MortgageAmount;
-                    existingMerchant.PurchaseTotalRemainingMortgageAmount = existingMerchant.PurchaseTotalMortgageAmount - existingMerchant.PurchaseTotalMortgageAmountPaid;
-                    existingPayment.TransactionType = TransactionType.PayingMoney;
-                }
-                if (existingMerchant.CurrentAmountBalance > 0 || existingMerchant.CurrentMortgageAmountBalance > 0)
-                {
-                    if (paymentDto.PaidAmount > existingMerchant.CurrentAmountBalance )
-                        throw new Exception($"Payment amount exceeds the remaining amount {existingMerchant.CurrentAmountBalance}.");
-                    if (paymentDto.MortgageAmount > existingMerchant.CurrentMortgageAmountBalance )
-                        throw new Exception($"Payment amount exceeds the remaining mortgage amount {existingMerchant.CurrentMortgageAmountBalance}.");
-                    existingMerchant.SellAmountPaid += paymentDto.PaidAmount;
-                    existingMerchant.SellTotalRemainingAmount = existingMerchant.SellTotalAmount - existingMerchant.SellAmountPaid;
-                    existingMerchant.SellTotalMortgageAmountPaid += paymentDto.MortgageAmount;
-                    existingMerchant.SellTotalRemainingMortgageAmount = existingMerchant.SellTotalMortgageAmount - existingMerchant.SellTotalMortgageAmountPaid;
-                    existingPayment.TransactionType = TransactionType.ReceivingMoney;
-                }
-                existingMerchant.CurrentAmountBalance = existingMerchant.SellTotalRemainingAmount - existingMerchant.PurchaseTotalRemainingAmount;
-                existingMerchant.CurrentMortgageAmountBalance = existingMerchant.SellTotalRemainingMortgageAmount - existingMerchant.PurchaseTotalRemainingMortgageAmount;
-                context.Merchants.Update(existingMerchant);
+                if (paymentDto.PaidAmount > merchant.CurrentAmountBalance * -1)
+                    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+                if (paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance * -1)
+                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+                merchant.PurchaseAmountPaid += paymentDto.PaidAmount;
+                //merchant.PurchaseTotalRemainingAmount = merchant.PurchaseTotalAmount - merchant.PurchaseAmountPaid;
+                merchant.PurchaseTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+                //merchant.PurchaseTotalRemainingMortgageAmount = merchant.PurchaseTotalMortgageAmount - merchant.PurchaseTotalMortgageAmountPaid;
+                payment.TransactionType = TransactionType.PayingMoney;
             }
+            if (merchant.CurrentAmountBalance > 0 || merchant.CurrentMortgageAmountBalance > 0)
+            {
+                if (paymentDto.PaidAmount > merchant.CurrentAmountBalance )
+                    throw new Exception($"Payment amount exceeds the remaining amount {merchant.CurrentAmountBalance}.");
+                if (paymentDto.MortgageAmount > merchant.CurrentMortgageAmountBalance )
+                    throw new Exception($"Payment amount exceeds the remaining mortgage amount {merchant.CurrentMortgageAmountBalance}.");
+                merchant.SellAmountPaid += paymentDto.PaidAmount;
+                //merchant.SellTotalRemainingAmount = merchant.SellTotalAmount - merchant.SellAmountPaid;
+                merchant.SellTotalMortgageAmountPaid += paymentDto.MortgageAmount;
+                //merchant.SellTotalRemainingMortgageAmount = merchant.SellTotalMortgageAmount - merchant.SellTotalMortgageAmountPaid;
+                payment.TransactionType = TransactionType.ReceivingMoney;
+            }
+            //merchant.CurrentAmountBalance = merchant.SellTotalRemainingAmount - merchant.PurchaseTotalRemainingAmount;
+            //merchant.CurrentMortgageAmountBalance = merchant.SellTotalRemainingMortgageAmount - merchant.PurchaseTotalRemainingMortgageAmount;
+            context.Merchants.Update(merchant);
              
-            context.MerchantPayments.Update(existingPayment);
+            context.MerchantPayments.Update(payment);
             await context.SaveChangesAsync();
-            return existingPayment.ToRMerchantPayment();
+            return payment.ToRMerchantPayment();
         }
         public async Task<bool> DeletePaymentAsync(int id)
         {
@@ -229,20 +328,20 @@ namespace Shader.Services.Implementation
                 if (existingPayment.TransactionType == Enums.TransactionType.PayingMoney)
                 {
                     existingMerchant.PurchaseAmountPaid -= existingPayment.PaidAmount;
-                    existingMerchant.PurchaseTotalRemainingAmount = existingMerchant.PurchaseTotalAmount - existingMerchant.PurchaseAmountPaid;
+                    //existingMerchant.PurchaseTotalRemainingAmount = existingMerchant.PurchaseTotalAmount - existingMerchant.PurchaseAmountPaid;
                     existingMerchant.PurchaseTotalMortgageAmountPaid -= existingPayment.MortgageAmount;
-                    existingMerchant.PurchaseTotalRemainingMortgageAmount = existingMerchant.PurchaseTotalMortgageAmount - existingMerchant.PurchaseTotalMortgageAmountPaid;
+                    //existingMerchant.PurchaseTotalRemainingMortgageAmount = existingMerchant.PurchaseTotalMortgageAmount - existingMerchant.PurchaseTotalMortgageAmountPaid;
                 }
                 else
                 {
                     existingMerchant.SellAmountPaid -= existingPayment.PaidAmount;
-                    existingMerchant.SellTotalRemainingAmount = existingMerchant.SellTotalAmount - existingMerchant.SellAmountPaid;
+                    //existingMerchant.SellTotalRemainingAmount = existingMerchant.SellTotalAmount - existingMerchant.SellAmountPaid;
                     existingMerchant.SellTotalMortgageAmountPaid -= existingPayment.MortgageAmount;
-                    existingMerchant.SellTotalRemainingMortgageAmount = existingMerchant.SellTotalMortgageAmount - existingMerchant.SellTotalMortgageAmountPaid;
+                    //existingMerchant.SellTotalRemainingMortgageAmount = existingMerchant.SellTotalMortgageAmount - existingMerchant.SellTotalMortgageAmountPaid;
                 }
 
-                existingMerchant.CurrentAmountBalance = existingMerchant.SellTotalRemainingAmount - existingMerchant.PurchaseTotalRemainingAmount;
-                existingMerchant.CurrentMortgageAmountBalance = existingMerchant.SellTotalRemainingMortgageAmount - existingMerchant.PurchaseTotalRemainingMortgageAmount;
+                //existingMerchant.CurrentAmountBalance = existingMerchant.SellTotalRemainingAmount - existingMerchant.PurchaseTotalRemainingAmount;
+                //existingMerchant.CurrentMortgageAmountBalance = existingMerchant.SellTotalRemainingMortgageAmount - existingMerchant.PurchaseTotalRemainingMortgageAmount;
                 context.Merchants.Update(existingMerchant);
             }
             existingPayment.IsDeleted = true;

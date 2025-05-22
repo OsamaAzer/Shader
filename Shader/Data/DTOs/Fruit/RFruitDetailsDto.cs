@@ -10,6 +10,8 @@ namespace Shader.Data.Dtos.Fruit
         public FruitStatus Status { get; set; }
         public DateTime Date { get; set; } 
         public string SupplierName { get; set; }
+        public decimal MashalValue { get; set; }
+        public decimal NyloanValue { get; set; }
         public decimal MerchantPurchasePrice { get; set; } 
         public bool IsBilled { get; set; }
         public bool IsCageHasMortgage { get; set; }

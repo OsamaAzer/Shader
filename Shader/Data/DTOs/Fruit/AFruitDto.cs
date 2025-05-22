@@ -7,7 +7,8 @@ namespace Shader.Data.Dtos.Fruit
         [Required, MaxLength(100)]
         public string FruitName { get; set; }
         public bool IsCageHasMortgage { get; set; } = false;
-        public decimal? CageMortgageValue { get; set; } // قيمة رهن القفص
+        public decimal CageMortgageValue { get; set; } // قيمة رهن القفص
+        [Required]
         public int TotalCages { get; set; }
         [Required]
         public int SupplierId { get; set; }
