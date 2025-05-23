@@ -12,5 +12,7 @@ namespace Shader.Data.Dtos.Fruit
         [Required]
         public int SupplierId { get; set; }
         public decimal MerchantPurchasePrice { get; set; }
+        public decimal MashalValue { get; set; }
+        public decimal NylonValue { get; set; }
     }
 }

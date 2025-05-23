@@ -15,7 +15,7 @@ namespace Shader.Mapping
                 Date = fruit.Date,
                 SupplierName = fruit.Supplier.Name,
                 MashalValue = fruit.MashalValue,
-                NyloanValue = fruit.NylonValue,
+                NylonValue = fruit.NylonValue,
                 MerchantPurchasePrice = fruit.MerchantPurchasePrice,
                 IsBilled = fruit.IsBilled,
                 IsCageHasMortgage = fruit.IsCageHasMortgage,

@@ -6,7 +6,7 @@ using Shader.Services.Abstraction;
 
 namespace Shader.Services.Implementation
 {
-    public class DEmpAbsenceService(ShaderContext context) : IDEmpAbsenceService
+    public class DailyEmpAbsenceService(ShaderContext context) : IDailyEmpAbsenceService
     {
         public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesAsync()
         {
@@ -14,6 +14,7 @@ namespace Shader.Services.Implementation
                 .Include(a => a.Employee)
                 .Where(a => !a.IsDeleted)
                 .ToListAsync();
+
             return absences.MapToRAbsenceDtos();
         }
         public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId)
@@ -22,6 +23,7 @@ namespace Shader.Services.Implementation
                 .Include(a => a.Employee)
                 .Where(a => a.EmployeeId == employeeId && !a.IsDeleted)
                 .ToListAsync();
+
             return absences.MapToRAbsenceDtos();
         }
         public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesByDateRangeAsync(DateOnly startDate, DateOnly endDate)
@@ -30,6 +32,7 @@ namespace Shader.Services.Implementation
                 .Include(a => a.Employee)
                 .Where(a => DateOnly.FromDateTime(a.Date) >= startDate && DateOnly.FromDateTime(a.Date) <= endDate && !a.IsDeleted)
                 .ToListAsync();
+
             return absences.MapToRAbsenceDtos();
         }
         public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate)

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shader.Data;
+using Shader.Services;
 using Shader.Services.Abstraction;
 using Shader.Services.Implementation;
 using System.Text.Json.Serialization;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<ShaderContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));  
+
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
@@ -20,6 +22,13 @@ builder.Services.AddScoped<IMerchantService, MerchantService>();
 builder.Services.AddScoped<IMerchantTransactionService, MerchantTransactionService>();
 builder.Services.AddScoped<IClientPaymentService, ClientPaymentService>();
 builder.Services.AddScoped<IMerchantPaymentService, MerchantPaymentService>();
+builder.Services.AddScoped<IDailyEmpService, DailyEmpService>();
+builder.Services.AddScoped<IDailyEmpAbsenceService, DailyEmpAbsenceService>();
+builder.Services.AddScoped<IDailySRecordingService, DailySRecordingService>();
+builder.Services.AddScoped<IMonthlyEmpService, MonthlyEmpService>();
+builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddScoped<IMonthlyEmpAbsenceService, MonthlyEmpAbsenceService>();
+
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });

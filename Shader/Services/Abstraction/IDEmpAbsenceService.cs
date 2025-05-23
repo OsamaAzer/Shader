@@ -3,7 +3,7 @@ using Shader.Services.Implementation;
 
 namespace Shader.Services.Abstraction
 {
-    public interface IDEmpAbsenceService
+    public interface IDailyEmpAbsenceService
     {
         Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesAsync();
         Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesByDateRangeAsync(DateOnly startDate, DateOnly endDate);

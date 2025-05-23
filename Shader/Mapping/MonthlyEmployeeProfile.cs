@@ -12,7 +12,7 @@ namespace Shader.Mapping
                 Id = e.Id,
                 Name = e.Name,
                 PhoneNumber = e.PhoneNumber,
-                Salary = e.Salary
+                BaseSalary = e.BaseSalary
             });
         }
         public static RMonthlyEmpDto MapToREmployeeDto(this MonthlyEmployee employee)
@@ -22,7 +22,7 @@ namespace Shader.Mapping
                 Id = employee.Id,
                 Name = employee.Name,
                 PhoneNumber = employee.PhoneNumber,
-                Salary = employee.Salary,
+                BaseSalary = employee.BaseSalary,
                 BorrowedAmount = employee.BorrowedAmount,
             };
         }
@@ -30,7 +30,7 @@ namespace Shader.Mapping
         {
             employee ??= new MonthlyEmployee();
             employee.Name = employeeDto.Name;
-            employee.Salary = employeeDto.Salary;
+            employee.BaseSalary = employeeDto.BaseSalary;
             employee.PhoneNumber = employeeDto.PhoneNumber;
             return employee;
         }

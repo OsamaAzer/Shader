@@ -7,7 +7,7 @@ using Shader.Services.Abstraction;
 
 namespace Shader.Services
 {
-    public class MEmpAbsenceService(ShaderContext context) : IMEmpAbsenceService
+    public class MonthlyEmpAbsenceService(ShaderContext context) : IMonthlyEmpAbsenceService
     {
         public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesAsync()
         {
