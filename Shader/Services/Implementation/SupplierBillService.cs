@@ -17,6 +17,7 @@ namespace Shader.Services.Implementation
                 .Where(sb => !sb.IsDeleted)
                 .OrderByDescending(sb => sb.Date)
                 .ToListAsync();
+
             return bills.CreatePagedResponse(pageNumber, pageSize);
         }
         public async Task<PagedResponse<SupplierBill>> GetSupplierBillsBySupplierIdAsync(int supplierId, int pageNumber, int pageSize)
@@ -26,6 +27,7 @@ namespace Shader.Services.Implementation
                 .Where(sb => sb.SupplierId == supplierId && !sb.IsDeleted)
                 .OrderByDescending(sb => sb.Date)
                 .ToListAsync();
+
             return bills.CreatePagedResponse(pageNumber, pageSize);
         }
         public async Task<SupplierBill> GetSupplierBillByIdAsync(int id)

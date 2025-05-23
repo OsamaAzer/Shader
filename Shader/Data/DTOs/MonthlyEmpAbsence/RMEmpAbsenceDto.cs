@@ -1,6 +1,6 @@
-﻿namespace Shader.Data.DTOs.Absence
+﻿namespace Shader.Data.DTOs.MonthlyEmpAbsence
 {
-    public class RAbsenceDto
+    public class RDEmpAbsenceDto
     {
         public int Id { get; set; }
         public string EmployeeName { get; set; } = null!;

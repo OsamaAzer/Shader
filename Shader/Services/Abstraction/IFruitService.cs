@@ -17,7 +17,6 @@ namespace Shader.Services.Abstraction
         Task<PagedResponse<RFruitsDto>> GetInStockFruitsAsync(int pageNumber, int pageSize);
         Task<PagedResponse<RFruitsDto>> SearchWithFruitNameAsync(string fruitName, int pageNumber, int pageSize);
         Task<IEnumerable<RFruitsDto>> AddFruitsAsync(int supplierId, List<WRangeFruitDto> fruitDtos);
-        Task<RFruitDetailsDto> AddExtraFruitDataAsync(int fruitId, decimal mshalValue, decimal nyloanValue);
         Task<RFruitDetailsDto> GetFruitByIdAsync(int id);
         Task<RFruitDetailsDto> AddFruitCagesAsync(int id, int numberOfCages);
         Task<RFruitDetailsDto> UpdateFruitAsync(int id, UFruitDto fruit);
