@@ -18,8 +18,15 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSupplierBills([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var bills = await _supplierBillService.GetAllSupplierBillsAsync(pageNumber, pageSize);
-            return Ok(bills);
+            try
+            {
+                var bills = await _supplierBillService.GetAllSupplierBillsAsync(pageNumber, pageSize);
+                return Ok(bills);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("supplier/{supplierId}")]

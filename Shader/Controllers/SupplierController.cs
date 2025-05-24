@@ -18,23 +18,44 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSuppliers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllSuppliers()
         {
-            var suppliers = await _supplierService.GetAllSuppliersAsync(pageNumber, pageSize);
-            return Ok(suppliers);
+            try
+            {
+                var suppliers = await _supplierService.GetAllSuppliersAsync();
+                return Ok(suppliers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         [HttpGet("merchant-suppliers")]
-        public async Task<IActionResult> GetAllMerchantSuppliers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllMerchantSuppliers()
         {
-            var suppliers = await _supplierService.GetAllMerchantSuppliersAsync(pageNumber, pageSize);
-            return Ok(suppliers);
+            try
+            {
+                var suppliers = await _supplierService.GetAllMerchantSuppliersAsync();
+                return Ok(suppliers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("name")]
-        public async Task<IActionResult> GetSuppliersWithName(string name, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetSuppliersWithName(string name)
         {
-            var suppliers = await _supplierService.GetAllSuppliersWithNameAsync(name, pageNumber, pageSize);
-            return Ok(suppliers);
+            try
+            {
+                var suppliers = await _supplierService.GetAllSuppliersWithNameAsync(name);
+                return Ok(suppliers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]

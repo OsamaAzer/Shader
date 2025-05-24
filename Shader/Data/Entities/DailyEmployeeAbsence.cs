@@ -6,7 +6,6 @@
         public int EmployeeId { get; set; }
         public DailyEmployee Employee { get; set; } = null!;
         public DateOnly Date { get; set; }
-        public string? Reason { get; set; }
         public bool IsDeleted { get; set; } = false;
     }
 }

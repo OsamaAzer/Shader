@@ -16,28 +16,47 @@ namespace Shader.Controllers
             _cashTransactionService = cashTransactionService;
         }
 
-        
-
         [HttpGet]
         public async Task<IActionResult> GetAllCashTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _cashTransactionService.GetAllCashTransactionsAsync(pageNumber , pageSize );
-            return Ok(result);
+            try
+            {
+                var result = await _cashTransactionService.GetAllCashTransactionsAsync(pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("today")]
         public async Task<IActionResult> GetTodayCashTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var today = DateOnly.FromDateTime(DateTime.Now);
-            var result = await _cashTransactionService.GetCashTransactionsByDateAsync(today, pageNumber , pageSize );
-            return Ok(result);
+            try
+            {
+                var today = DateOnly.FromDateTime(DateTime.Now);
+                var result = await _cashTransactionService.GetCashTransactionsByDateAsync(today, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("date")]
         public async Task<IActionResult> GetCashTransactionsByDate([FromQuery] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _cashTransactionService.GetCashTransactionsByDateAsync(date, pageNumber , pageSize );
-            return Ok(result);
+            try
+            {
+                var result = await _cashTransactionService.GetCashTransactionsByDateAsync(date, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("range")]

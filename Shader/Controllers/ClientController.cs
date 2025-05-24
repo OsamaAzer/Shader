@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shader.Data.Dtos.Client;
 using Shader.Services.Abstraction;
 using Shader.Services.Implementation;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Shader.Controllers
 {
@@ -32,17 +33,31 @@ namespace Shader.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> GetClientsWithName(string name, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetClientsWithName(string name)
         {
-            var clients = await _clientService.GetAllClientsWithNameAsync(name, pageNumber, pageSize);
-            return Ok(clients);
+            try
+            {
+                var clients = await _clientService.GetAllClientsWithNameAsync(name);
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllClients([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllClients()
         {
-            var clients = await _clientService.GetAllClientsAsync(pageNumber, pageSize);
-            return Ok(clients);
+            try
+            {
+                var clients = await _clientService.GetAllClientsAsync();
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost]

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Shader.Data.Dtos.Expense;
 using Shader.Services.Abstraction;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Shader.Controllers
 {
@@ -33,23 +34,44 @@ namespace Shader.Controllers
         [HttpGet("date")]
         public async Task<IActionResult> GetExpensesByDate([FromQuery] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var expenses = await _expenseService.GetExpensesByDateAsync(date, pageNumber, pageSize);
-            return Ok(expenses);
+            try
+            {
+                var expenses = await _expenseService.GetExpensesByDateAsync(date, pageNumber, pageSize);
+                return Ok(expenses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("today")]
         public async Task<IActionResult> GetTodayExpenses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var today = DateOnly.FromDateTime(DateTime.Now);
-            var expenses = await _expenseService.GetExpensesByDateAsync(today, pageNumber, pageSize);
-            return Ok(expenses);
+            try
+            {
+                var today = DateOnly.FromDateTime(DateTime.Now);
+                var expenses = await _expenseService.GetExpensesByDateAsync(today, pageNumber, pageSize);
+                return Ok(expenses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllExpenses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var expenses = await _expenseService.GetAllExpensesAsync(pageNumber, pageSize);
-            return Ok(expenses);
+            try
+            {
+                var expenses = await _expenseService.GetAllExpensesAsync(pageNumber, pageSize);
+                return Ok(expenses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]

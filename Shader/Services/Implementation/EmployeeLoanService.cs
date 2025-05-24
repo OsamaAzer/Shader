@@ -22,6 +22,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RLoanDto>> GetLoansByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var loans = await context.EmployeeLoans
                 .Include(l => l.Employee)
                 .Where(l => l.Date >= startDate && l.Date <= endDate && !l.IsDeleted)
@@ -43,6 +46,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RLoanDto>> GetLoansForEmployeeByDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var loans = await context.EmployeeLoans
                 .Include(l => l.Employee)
                 .Where(l => l.EmployeeId == employeeId && l.Date >= startDate && l.Date<= endDate && !l.IsDeleted)

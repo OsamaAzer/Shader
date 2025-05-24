@@ -1,26 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
-using Shader.Data.DTOs.DailyEmpAbsence;
+using Shader.Data.DTOs.MonthlyEmpAbsence;
 using Shader.Services.Abstraction;
 
 namespace Shader.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DailyEmpAbsenceController : ControllerBase
+    public class MonthlyEmpAbsenceController(IMonthlyEmpAbsenceService absenceService) : ControllerBase
     {
-        private readonly IDailyEmpAbsenceService _service;
-
-        public DailyEmpAbsenceController(IDailyEmpAbsenceService service)
-        {
-            _service = service;
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetAbsences([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var result = await _service.GetAbsencesAsync(pageNumber, pageSize);
+                var result = await absenceService.GetAbsencesAsync(pageNumber, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -34,7 +27,7 @@ namespace Shader.Controllers
         {
             try
             {
-                var result = await _service.GetAbsencesByEmployeeIdAsync(employeeId, pageNumber, pageSize);
+                var result = await absenceService.GetAbsencesByEmployeeIdAsync(employeeId, pageNumber, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -43,26 +36,27 @@ namespace Shader.Controllers
             }
         }
 
-        [HttpGet("range")]
+        [HttpGet("date-range")]
         public async Task<IActionResult> GetAbsencesByDateRange([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var result = await _service.GetAbsencesByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
+                var result = await absenceService.GetAbsencesByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+            
         }
 
-        [HttpGet("employee/{employeeId}/range")]
+        [HttpGet("employee/{employeeId}/date-range")]
         public async Task<IActionResult> GetAbsencesForEmployeeByDateRange(int employeeId, [FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var result = await _service.GetAbsencesForEmployeeByDateRangeAsync(employeeId, startDate, endDate, pageNumber, pageSize);
+                var result = await absenceService.GetAbsencesForEmployeeByDateRangeAsync(employeeId, startDate, endDate, pageNumber, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -71,26 +65,12 @@ namespace Shader.Controllers
             }
         }
 
-        [HttpPost("past")]
-        public async Task<IActionResult> AddPastAbsence([FromBody] WDailyPastAbsenceDto absenceDto)
+        [HttpPost("add-range")]
+        public async Task<IActionResult> AddRangeOfAbsences([FromBody] List<int> employeeIds)
         {
             try
             {
-                var result = await _service.AddPastAbsenceAsync(absenceDto);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddAbsence([FromBody] List<int> employeeIds)
-        {
-            try
-            {
-                var result = await _service.AddRangeAsync(employeeIds);
+                var result = await absenceService.AddRangeOfAbsencesAsync(employeeIds);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -100,11 +80,11 @@ namespace Shader.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAbsence(int id, [FromBody] WDailyEmpAbsenceDto absenceDto)
+        public async Task<IActionResult> UpdateAbsence(int id, [FromBody] WMonthlyEmpAbsenceDto absenceDto)
         {
             try
             {
-                var result = await _service.UpdateAbsenceAsync(id, absenceDto);
+                var result = await absenceService.UpdateAbsenceAsync(id, absenceDto);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -118,10 +98,8 @@ namespace Shader.Controllers
         {
             try
             {
-                var result = await _service.DeleteAbsenceAsync(id);
-                if (result)
-                    return NoContent();
-                return NotFound();
+                var result = await absenceService.DeleteAbsenceAsync(id);
+                return Ok(result);
             }
             catch (Exception ex)
             {

@@ -16,15 +16,15 @@ namespace Shader.Services.Implementation
 {
     public class FruitService(ShaderContext context) : IFruitService
     {
-        public async Task<PagedResponse<RFruitsDto>> GetAllFruitsAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RFruitsDto>> GetAllFruitsAsync()
         {
             var fruits = await context.Fruits
                 .Where(f => !f.IsDeleted)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<PagedResponse<RFruitsDto>> GetSupplierFruitsToBeBilledAsync(int supplierId, int pageNumber, int pageSize)
+        public async Task<IEnumerable<RFruitsDto>> GetSupplierFruitsToBeBilledAsync(int supplierId)
         {
             var supplier = await context.Suppliers
                 .FirstOrDefaultAsync(s => s.Id == supplierId && !s.IsDeleted) ??
@@ -34,18 +34,18 @@ namespace Shader.Services.Implementation
                 .Where(f => f.SupplierId == supplierId && !f.Supplier.IsMerchant && !f.IsBilled && !f.IsDeleted && f.Status == FruitStatus.NotAvailabe)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<PagedResponse<RFruitsDto>> GetInStockFruitsAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RFruitsDto>> GetInStockFruitsAsync()
         {
             var fruits = await context.Fruits
                 .Where(f => f.Status == FruitStatus.InStock && !f.IsDeleted)
                 .OrderByDescending(f => f.RemainingCages)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<PagedResponse<RFruitsDto>> GetInStockSupplierFruitsAsync(int supplierId, int pageNumber, int pageSize)
+        public async Task<IEnumerable<RFruitsDto>> GetInStockSupplierFruitsAsync(int supplierId)
         {
             var supplier = await context.Suppliers
                 .FirstOrDefaultAsync(s => s.Id == supplierId && !s.IsDeleted) ??
@@ -56,17 +56,17 @@ namespace Shader.Services.Implementation
                 .OrderByDescending(f => f.RemainingCages)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<PagedResponse<RFruitsDto>> GetUnAvailableFruitsAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RFruitsDto>> GetUnAvailableFruitsAsync()
         {
             var fruits = await context.Fruits
                 .Where(f => f.Status == FruitStatus.NotAvailabe && !f.IsDeleted)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<PagedResponse<RFruitsDto>> GetAllSupplierFruitsAsync(int supplierId, int pageNumber, int pageSize)
+        public async Task<IEnumerable<RFruitsDto>> GetAllSupplierFruitsAsync(int supplierId)
         {
             var supplier = await context.Suppliers
                 .FirstOrDefaultAsync(s => s.Id == supplierId && !s.IsDeleted) ??
@@ -76,15 +76,15 @@ namespace Shader.Services.Implementation
                 .Where(f => f.SupplierId == supplierId && !f.IsDeleted)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
-        public async Task<PagedResponse<RFruitsDto>> SearchWithFruitNameAsync(string fruitName, int pageNumber, int pageSize)
+        public async Task<IEnumerable<RFruitsDto>> SearchWithFruitNameAsync(string fruitName)
         {
             var fruits = await context.Fruits
                 .Where(f => f.FruitName.ToLower().Contains(fruitName.ToLower()) && !f.IsDeleted)
                 .ToListAsync();
 
-            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>().CreatePagedResponse(pageNumber, pageSize));
+            return await Task.FromResult(fruits.Map<Fruit, RFruitsDto>());
         }
         public async Task<RFruitDetailsDto> GetFruitByIdAsync(int id)
         {
@@ -133,7 +133,7 @@ namespace Shader.Services.Implementation
                     throw new Exception($"Total cages must be greater than zero!!");
                 if (fruit.CageMortgageValue < 0)
                     throw new Exception($"Please enter a valid Cage mortgage amound");
-                if (fruit.MerchantPurchasePrice < 0)
+                if (fruit.MerchantAsSupplierPurchasePrice < 0)
                     throw new Exception($"Please enter a valid Merchant purchase price");
 
                 if (fruit.CageMortgageValue == 0)
@@ -153,11 +153,11 @@ namespace Shader.Services.Implementation
                     fruit.Status = FruitStatus.NotAvailabe;
 
                 if (!supplier.IsMerchant)
-                    fruit.MerchantPurchasePrice = 0;
+                    fruit.MerchantAsSupplierPurchasePrice = 0;
 
                 if (supplier.IsMerchant && supplier.Merchant is not null)
                 {
-                    supplier.Merchant.SellPrice += fruit.MerchantPurchasePrice;
+                    supplier.Merchant.SellPrice += fruit.MerchantAsSupplierPurchasePrice;
                     //supplier.Merchant.SellTotalAmount += fruit.MerchantPurchasePrice;
                     //supplier.Merchant.SellTotalRemainingAmount = supplier.Merchant.SellTotalAmount - supplier.Merchant.SellAmountPaid;
                     //supplier.Merchant.CurrentAmountBalance = 
@@ -203,7 +203,7 @@ namespace Shader.Services.Implementation
 
                 if (oldSupplier is not null && oldSupplier.IsMerchant && oldSupplier.Merchant is not null)
                 {
-                    oldSupplier.Merchant.SellPrice -= fruit.MerchantPurchasePrice;
+                    oldSupplier.Merchant.SellPrice -= fruit.MerchantAsSupplierPurchasePrice;
                     //oldSupplier.Merchant.SellTotalAmount -= fruit.MerchantPurchasePrice;
                     //oldSupplier.Merchant.SellTotalRemainingAmount = oldSupplier.Merchant.SellTotalAmount - oldSupplier.Merchant.SellAmountPaid;
                     //oldSupplier.Merchant.CurrentAmountBalance =
@@ -213,7 +213,7 @@ namespace Shader.Services.Implementation
             }
             if (supplier.IsMerchant && supplier.Merchant is not null)
             {
-                supplier.Merchant.SellPrice -= fruit.MerchantPurchasePrice;
+                supplier.Merchant.SellPrice -= fruit.MerchantAsSupplierPurchasePrice;
                 //supplier.Merchant.SellTotalAmount -= fruit.MerchantPurchasePrice;
                 //supplier.Merchant.SellTotalRemainingAmount = supplier.Merchant.SellTotalAmount - supplier.Merchant.SellAmountPaid;
                 //supplier.Merchant.CurrentAmountBalance =
@@ -221,7 +221,7 @@ namespace Shader.Services.Implementation
 
                 dto.Map(fruit);
 
-                supplier.Merchant.SellPrice += fruit.MerchantPurchasePrice;
+                supplier.Merchant.SellPrice += fruit.MerchantAsSupplierPurchasePrice;
                 //supplier.Merchant.SellTotalAmount += fruit.MerchantPurchasePrice;
                 //supplier.Merchant.SellTotalRemainingAmount = supplier.Merchant.SellTotalAmount - supplier.Merchant.SellAmountPaid;
                 //supplier.Merchant.CurrentAmountBalance =
@@ -229,7 +229,7 @@ namespace Shader.Services.Implementation
                 context.Merchants.Update(supplier.Merchant);
             }
             if (!supplier.IsMerchant)
-                fruit.MerchantPurchasePrice = 0;
+                fruit.MerchantAsSupplierPurchasePrice = 0;
 
                 //dto.Map(fruit);
             fruit.SupplierId = supplier.Id;

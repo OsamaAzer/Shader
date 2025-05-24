@@ -5,6 +5,5 @@
         public int Id { get; set; }
         public string EmployeeName { get; set; } = null!;
         public DateOnly Date { get; set; }
-        public string? Reason { get; set; }
     }
 }

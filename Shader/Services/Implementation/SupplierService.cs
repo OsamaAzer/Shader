@@ -11,23 +11,23 @@ namespace Shader.Services.Implementation
 {
     public class SupplierService(ShaderContext context) : ISupplierService
     {
-        public async Task<PagedResponse<RSupplierDto>> GetAllSuppliersAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RSupplierDto>> GetAllSuppliersAsync()
         {
             var suppliers = await context.Suppliers
                 .Where(s=> !s.IsDeleted)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
-            return suppliers.Map<Supplier, RSupplierDto>().CreatePagedResponse(pageNumber, pageSize);
+            return suppliers.Map<Supplier, RSupplierDto>();
         }
-        public async Task<PagedResponse<RSupplierDto>> GetAllMerchantSuppliersAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RSupplierDto>> GetAllMerchantSuppliersAsync()
         {
             var suppliers = await context.Suppliers
                 .Where(s => !s.IsDeleted && s.IsMerchant)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
-            return suppliers.Map<Supplier, RSupplierDto>().CreatePagedResponse(pageNumber, pageSize);
+            return suppliers.Map<Supplier, RSupplierDto>();
         }
-        public async Task<PagedResponse<RSupplierDto>> GetAllSuppliersWithNameAsync(string name, int pageNumber, int pageSize)
+        public async Task<IEnumerable<RSupplierDto>> GetAllSuppliersWithNameAsync(string name )
         {
             var suppliers = await context.Suppliers
                 .Where(s => !s.IsDeleted)
@@ -35,7 +35,7 @@ namespace Shader.Services.Implementation
                 .OrderBy(s => s.Name)
                 .ToListAsync();
 
-            return suppliers.Map<Supplier, RSupplierDto>().CreatePagedResponse(pageNumber, pageSize);  
+            return suppliers.Map<Supplier, RSupplierDto>();  
         }
         public async Task<RSupplierDto> GetSupplierByIdAsync(int id)
         {

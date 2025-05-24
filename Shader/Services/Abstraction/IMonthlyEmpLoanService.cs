@@ -9,6 +9,7 @@ namespace Shader.Services.Abstraction
         Task<PagedResponse<RLoanDto>> GetLoansByDateRangeAsync(DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize);
         Task<PagedResponse<RLoanDto>> GetLoansByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize);
         Task<PagedResponse<RLoanDto>> GetLoansForEmployeeByDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize);
+        Task<RLoanDto> GetLoanByIdAsync(int id);
         Task<RLoanDto> AddLoanAsync(WLoanDto loan);
         Task<RLoanDto> UpdateLoanAsync(int id, WLoanDto loan);
         Task<bool> DeleteLoanAsync(int id);

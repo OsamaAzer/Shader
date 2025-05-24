@@ -14,17 +14,17 @@ namespace Shader.Services.Implementation
 {
     public class ClientService(ShaderContext context) : IClientService
     {
-        public async Task<PagedResponse<RAllClientsDto>> GetAllClientsAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RAllClientsDto>> GetAllClientsAsync()
         {
             var clients =  await context.Clients
                             .Where(c => !c.IsDeleted)
                             .OrderBy(c => c.Name)
                             .ToListAsync();
 
-            return clients.MapToRAllClientsDto().CreatePagedResponse(pageNumber, pageSize);
+            return clients.MapToRAllClientsDto();
         }
 
-        public async Task<PagedResponse<RAllClientsDto>> GetAllClientsWithNameAsync(string name, int pageNumber, int pageSize)
+        public async Task<IEnumerable<RAllClientsDto>> GetAllClientsWithNameAsync(string name)
         {
             var clients = await context.Clients
                         .Where(c => !c.IsDeleted)
@@ -32,7 +32,7 @@ namespace Shader.Services.Implementation
                         .OrderBy(c => c.Name)
                         .ToListAsync();
 
-            return clients.MapToRAllClientsDto().CreatePagedResponse(pageNumber, pageSize);
+            return clients.MapToRAllClientsDto();
         }
 
         public async Task<RClientDto> GetClientByIdAsync(int id)

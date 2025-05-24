@@ -11,8 +11,15 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RMonthlyEmpDto>>> GetAll()
         {
-            var employees = await monthlyEmpService.GetAllEmployeesAsync();
-            return Ok(employees);
+            try
+            {
+                var employees = await monthlyEmpService.GetAllEmployeesAsync();
+                return Ok(employees);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id:int}")]

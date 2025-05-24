@@ -13,7 +13,6 @@ namespace Shader.Mapping
             {
                 Id = absence.Id,
                 EmployeeName = absence.Employee.Name,
-                Reason = absence.Reason,
                 Date = absence.Date
             };
         }
@@ -26,7 +25,6 @@ namespace Shader.Mapping
         public static DailyEmployeeAbsence MapToAbsence(this WDailyEmpAbsenceDto absenceDto, DailyEmployeeAbsence? absence = null)
         {
             absence ??= new DailyEmployeeAbsence();
-            absence.Reason = absenceDto.Reason;
             absence.EmployeeId = absenceDto.EmployeeId;
             if (absence.Date == default)
             {
@@ -38,7 +36,6 @@ namespace Shader.Mapping
         public static DailyEmployeeAbsence MapFromPastToDailyEmpAbsence(this WDailyPastAbsenceDto absenceDto)
         {
             var absence = new DailyEmployeeAbsence();
-            absence.Reason = absenceDto.Reason;
             absence.EmployeeId = absenceDto.EmployeeId;
             if (absenceDto.AbsenceDate >= DateOnly.FromDateTime(DateTime.Now))
                 throw new Exception($"Absence date should be in the past!!");

@@ -9,13 +9,13 @@ namespace Shader.Services.Abstraction
 {
     public interface IFruitService
     {
-        Task<PagedResponse<RFruitsDto>> GetAllSupplierFruitsAsync(int supplierId, int pageNumber, int pageSize);
-        Task<PagedResponse<RFruitsDto>> GetInStockSupplierFruitsAsync(int supplierId, int pageNumber, int pageSize);
-        Task<PagedResponse<RFruitsDto>> GetSupplierFruitsToBeBilledAsync(int supplierId, int pageNumber, int pageSize);
-        Task<PagedResponse<RFruitsDto>> GetAllFruitsAsync(int pageNumber, int pageSize);
-        Task<PagedResponse<RFruitsDto>> GetUnAvailableFruitsAsync(int pageNumber, int pageSize);
-        Task<PagedResponse<RFruitsDto>> GetInStockFruitsAsync(int pageNumber, int pageSize);
-        Task<PagedResponse<RFruitsDto>> SearchWithFruitNameAsync(string fruitName, int pageNumber, int pageSize);
+        Task<IEnumerable<RFruitsDto>> GetAllSupplierFruitsAsync(int supplierId);
+        Task<IEnumerable<RFruitsDto>> GetInStockSupplierFruitsAsync(int supplierId);
+        Task<IEnumerable<RFruitsDto>> GetSupplierFruitsToBeBilledAsync(int supplierId);
+        Task<IEnumerable<RFruitsDto>> GetAllFruitsAsync();
+        Task<IEnumerable<RFruitsDto>> GetUnAvailableFruitsAsync();
+        Task<IEnumerable<RFruitsDto>> GetInStockFruitsAsync();
+        Task<IEnumerable<RFruitsDto>> SearchWithFruitNameAsync(string fruitName);
         Task<IEnumerable<RFruitsDto>> AddFruitsAsync(int supplierId, List<WRangeFruitDto> fruitDtos);
         Task<RFruitDetailsDto> GetFruitByIdAsync(int id);
         Task<RFruitDetailsDto> AddFruitCagesAsync(int id, int numberOfCages);

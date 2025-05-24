@@ -15,21 +15,21 @@ namespace Shader.Services.Implementation
 {
     public class MerchantService(ShaderContext context) : IMerchantService
     {
-        public async Task<PagedResponse<RMerchantDto>> GetAllMerchantsAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RMerchantDto>> GetAllMerchantsAsync()
         {
             var sellers = await context.Merchants
                 .Where(s => !s.IsDeleted)
                 .ToListAsync();
 
-            return sellers.ToDtos<Merchant, RMerchantDto>().CreatePagedResponse(pageNumber, pageSize);
+            return sellers.ToDtos<Merchant, RMerchantDto>();
         }
-        public async Task<PagedResponse<RMerchantDto>> GetAllMerchantsWithNameAsync(string name, int pageNumber, int pageSize)
+        public async Task<IEnumerable<RMerchantDto>> GetAllMerchantsWithNameAsync(string name)
         {
             var sellers = await context.Merchants
                 .Where(s => !s.IsDeleted)
                 .Where(s => s.Name.ToLower().Contains(name.ToLower()))
                 .ToListAsync();
-            return sellers.ToDtos<Merchant, RMerchantDto>().CreatePagedResponse(pageNumber, pageSize);    
+            return sellers.ToDtos<Merchant, RMerchantDto>();    
         }
         public async Task<Merchant> GetMerchantByIdAsync(int id)
         {

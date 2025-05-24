@@ -19,22 +19,43 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _merchantTransactionService.GetAllTransactionsAsync(pageNumber, pageSize);
-            return Ok(transactions);
+            try
+            {
+                var transactions = await _merchantTransactionService.GetAllTransactionsAsync(pageNumber, pageSize);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("date/{date}")]
         public async Task<IActionResult> GetTransactionsByDate([FromRoute] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(date, pageNumber, pageSize);
-            return Ok(transactions);
+            try
+            {
+                var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(date, pageNumber, pageSize);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("today")]
         public async Task<IActionResult> GetTodayTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(DateOnly.FromDateTime(DateTime.Now), pageNumber, pageSize);
-            return Ok(transactions);
+            try
+            {
+                var transactions = await _merchantTransactionService.GetAllTransactionsByDateAsync(DateOnly.FromDateTime(DateTime.Now), pageNumber, pageSize);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("date-range")]

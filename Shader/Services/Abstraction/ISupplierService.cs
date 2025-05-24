@@ -5,9 +5,9 @@ namespace Shader.Services.Abstraction
 {
     public interface ISupplierService
     {
-        Task<PagedResponse<RSupplierDto>> GetAllSuppliersAsync(int pageNumber, int pageSize);
-        Task<PagedResponse<RSupplierDto>> GetAllMerchantSuppliersAsync(int pageNumber, int pageSize);
-        Task<PagedResponse<RSupplierDto>> GetAllSuppliersWithNameAsync(string name, int pageNumber, int pageSize);
+        Task<IEnumerable<RSupplierDto>> GetAllSuppliersAsync();
+        Task<IEnumerable<RSupplierDto>> GetAllMerchantSuppliersAsync();
+        Task<IEnumerable<RSupplierDto>> GetAllSuppliersWithNameAsync(string name );
         Task<RSupplierDto> GetSupplierByIdAsync(int id);
         Task<RSupplierDto> AddSupplierAsync(WSupplierDto supplier);
         Task<RSupplierDto> AddMerchantAsSupplierAsync(int merchantId);

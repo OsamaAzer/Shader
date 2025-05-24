@@ -11,7 +11,7 @@ namespace Shader.Data.Entities
         public DateTime Date { get; set; } = DateTime.Now;
         public int SupplierId { get; set; }
         public Supplier Supplier { get; set; } = null!;
-        public decimal MerchantPurchasePrice { get; set; } // سعر الشراء
+        public decimal MerchantAsSupplierPurchasePrice { get; set; } // سعر الشراء من شادر مسجل كمورد
         public decimal MashalValue { get; set; }
         public decimal NylonValue { get; set; }
         public decimal PriceOfKilogramInBill { get; set; } // السعر فى الفاتوره

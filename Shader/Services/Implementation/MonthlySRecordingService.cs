@@ -23,6 +23,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RMonthlySRecordingDto>> GetAllByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var monthlySRecordings = await context.MonthlySalaryRecordings
                 .Include(m => m.Employee)
                 .Where(m => m.Date >= startDate && m.Date <= endDate && !m.IsDeleted)
@@ -44,6 +47,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RMonthlySRecordingDto>> GetAllByEmployeeIdAndDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var monthlySRecordings = await context.MonthlySalaryRecordings
                 .Include(m => m.Employee)
                 .Where(m => m.EmployeeId == employeeId && m.Date >= startDate && m.Date <= endDate && !m.IsDeleted)
@@ -62,7 +68,7 @@ namespace Shader.Services.Implementation
             return monthlySRecording.ToRMonthlySRecordingDto();
         }
 
-        public async Task<IEnumerable<RMonthlySRecordingDto>> AddAsync(List<int> employees, int month)
+        public async Task<IEnumerable<RMonthlySRecordingDto>> AddRangeAsync(List<int> employees, int month)
         {
             if (employees == null || !employees.Any())
                 throw new ArgumentException("Employee list cannot be null or empty.", nameof(employees));

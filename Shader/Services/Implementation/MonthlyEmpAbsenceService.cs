@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Shader.Data;
 using Shader.Data.DTOs.MonthlyEmpAbsence;
 using Shader.Data.Entities;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -10,58 +11,75 @@ namespace Shader.Services
 {
     public class MonthlyEmpAbsenceService(ShaderContext context) : IMonthlyEmpAbsenceService
     {
-        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesAsync()
+        public async Task<PagedResponse<RMonthlyEmpAbsenceDto>> GetAbsencesAsync(int pageNumber, int pageSize)
         {
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => !a.IsDeleted)
                 .ToListAsync();
 
-            return absences.MapToRAbsenceDtos();
+            return absences.MapToRAbsenceDtos().CreatePagedResponse(pageNumber, pageSize);
         }
 
-        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId)
+        public async Task<PagedResponse<RMonthlyEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize)
         {
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => a.EmployeeId == employeeId && !a.IsDeleted)
                 .ToListAsync();
 
-            return absences.MapToRAbsenceDtos();
+            return absences.MapToRAbsenceDtos().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+
+        public async Task<PagedResponse<RMonthlyEmpAbsenceDto>> GetAbsencesByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => a.Date >= startDate && a.Date <= endDate && !a.IsDeleted)
                 .ToListAsync();
 
-            return absences.MapToRAbsenceDtos();
+            return absences.MapToRAbsenceDtos().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate)
+
+        public async Task<PagedResponse<RMonthlyEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync
+            (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => a.EmployeeId == employeeId && a.Date >= startDate && a.Date <= endDate && !a.IsDeleted)
                 .ToListAsync();
 
-            return absences.MapToRAbsenceDtos();
+            return absences.MapToRAbsenceDtos().CreatePagedResponse(pageNumber, pageSize);
         }
 
-        public async Task<RMonthlyEmpAbsenceDto> AddAbsenceAsync(WMonthlyEmpAbsenceDto absenceDto)
+        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> AddRangeOfAbsencesAsync(List<int> employeeIds)
         {
-            var employee = await context.MonthlyEmployees.FindAsync(absenceDto.EmployeeId) ??
-                throw new Exception($"Employee with ID {absenceDto.EmployeeId} not found.");
+            if (employeeIds == null || !employeeIds.Any())
+            {
+                throw new ArgumentException("Employee IDs cannot be null or empty.", nameof(employeeIds));
+            }
 
-            
-
-
-            var absence = absenceDto.MapToAbsence();
-            await context.MonthlyEmpAbsences.AddAsync(absence);
+            var absences = new List<MonthlyEmployeeAbsence>();
+            foreach (var employeeId in employeeIds)
+            {
+                var employee = await context.MonthlyEmployees.FindAsync(employeeId) ??
+                    throw new Exception($"Employee with ID {employeeId} not found.");
+                var absenceDto = new WMonthlyEmpAbsenceDto();
+                absenceDto.EmployeeId = employeeId;
+                var absence = absenceDto.MapToAbsence();
+                absence.Employee = employee;
+                absences.Add(absence);
+            }
+            await context.MonthlyEmpAbsences.AddRangeAsync(absences);
             await context.SaveChangesAsync();
-            // Reload with employee navigation property
-            await context.Entry(absence).Reference(a => a.Employee).LoadAsync();
-            return absence.MapToRAbsenceDto();
+            return absences.MapToRAbsenceDtos();
         }
 
         public async Task<RMonthlyEmpAbsenceDto> UpdateAbsenceAsync(int id, WMonthlyEmpAbsenceDto absenceDto)

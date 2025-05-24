@@ -12,7 +12,7 @@ namespace Shader.Services.Abstraction
         Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAndDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize);
         Task<RDailySRecordingDto> GetByIdAsync(int id);
-        Task<IEnumerable<RDailySRecordingDto>> CreateAsync(List<int> employeeIds);
+        Task<IEnumerable<RDailySRecordingDto>> AddRangeAsync(List<int> employeeIds);
         Task<RDailySRecordingDto> UpdateAsync(int id, WDailySRecordingDto dailySRecordingDto);
         Task<bool> DeleteAsync(int id);
     }

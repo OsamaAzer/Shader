@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Shader.Data.DTOs.ClientPayment;
 using Shader.Services.Abstraction;
+using Shader.Services.Implementation;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Shader.Controllers
 {
@@ -18,30 +20,58 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsAsync(pageNumber, pageSize);
-            return Ok(payments);
+            try
+            {
+                var payments = await _clientPaymentService.GetAllPaymentsAsync(pageNumber, pageSize);
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("date/{date}")]
         public async Task<IActionResult> GetPaymentsByDate([FromRoute] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(date, pageNumber, pageSize);
-            return Ok(payments);
+            try
+            {
+                var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(date, pageNumber, pageSize);
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("today")]
         public async Task<IActionResult> GetTodayPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(DateOnly.FromDateTime(DateTime.Now), pageNumber, pageSize);
-            return Ok(payments);
+            try
+            {
+                var payments = await _clientPaymentService.GetAllPaymentsByDateAsync(DateOnly.FromDateTime(DateTime.Now), pageNumber, pageSize);
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("date-range")]
         public async Task<IActionResult> GetPaymentsByDateRange
             ([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await _clientPaymentService.GetAllPaymentsByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
-            return Ok(payments);
+            try
+            {
+                var payments = await _clientPaymentService.GetAllPaymentsByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("client/{clientId}")]

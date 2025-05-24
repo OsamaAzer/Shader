@@ -17,39 +17,67 @@ namespace Shader.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllFruits([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var fruits = await _fruitService.GetAllFruitsAsync(pageNumber, pageSize);
-            return Ok(fruits);
-        }
-
-        [HttpGet("in-stock")]
-        public async Task<IActionResult> GetInStockFruits([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var fruits = await _fruitService.GetInStockFruitsAsync(pageNumber, pageSize);
-            return Ok(fruits);
-        }
-
-        [HttpGet("unavailable")]
-        public async Task<IActionResult> GetUnavailableFruits([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var fruits = await _fruitService.GetUnAvailableFruitsAsync(pageNumber, pageSize);
-            return Ok(fruits);
-        }
-
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchFruits([FromQuery] string fruitName, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var fruits = await _fruitService.SearchWithFruitNameAsync(fruitName, pageNumber, pageSize);
-            return Ok(fruits);
-        }
-
-        [HttpGet("supplier-bill/{supplierId}")]
-        public async Task<IActionResult> GetSupplierFruitsToBeBilled(int supplierId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllFruits()
         {
             try
             {
-                var fruits = await _fruitService.GetSupplierFruitsToBeBilledAsync(supplierId, pageNumber, pageSize);
+                var fruits = await _fruitService.GetAllFruitsAsync();
+                return Ok(fruits);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("in-stock")]
+        public async Task<IActionResult> GetInStockFruits()
+        {
+            try
+            {
+                var fruits = await _fruitService.GetInStockFruitsAsync();
+                return Ok(fruits);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("unavailable")]
+        public async Task<IActionResult> GetUnavailableFruits()
+        {
+            try
+            {
+                var fruits = await _fruitService.GetUnAvailableFruitsAsync();
+                return Ok(fruits);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchFruits([FromQuery] string fruitName)
+        {
+            try
+            {
+                var fruits = await _fruitService.SearchWithFruitNameAsync(fruitName);
+                return Ok(fruits);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("supplier-bill/{supplierId}")]
+        public async Task<IActionResult> GetSupplierFruitsToBeBilled(int supplierId)
+        {
+            try
+            {
+                var fruits = await _fruitService.GetSupplierFruitsToBeBilledAsync(supplierId);
                 return Ok(fruits);
             }
             catch (Exception ex)
@@ -59,11 +87,11 @@ namespace Shader.Controllers
         }
 
         [HttpGet("in-stock/supplier/{supplierId}")]
-        public async Task<IActionResult> GetInStockSupplierFruits(int supplierId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetInStockSupplierFruits(int supplierId)
         {
             try
             {
-                var fruits = await _fruitService.GetInStockSupplierFruitsAsync(supplierId, pageNumber, pageSize);
+                var fruits = await _fruitService.GetInStockSupplierFruitsAsync(supplierId);
                 return Ok(fruits);
             }
             catch (Exception ex)
@@ -73,11 +101,11 @@ namespace Shader.Controllers
         }
 
         [HttpGet("supplier/{supplierId}")]
-        public async Task<IActionResult> GetAllSupplierFruits(int supplierId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllSupplierFruits(int supplierId)
         {
             try
             {
-                var fruits = await _fruitService.GetAllSupplierFruitsAsync(supplierId, pageNumber, pageSize);
+                var fruits = await _fruitService.GetAllSupplierFruitsAsync(supplierId);
                 return Ok(fruits);
             }
             catch (Exception ex)

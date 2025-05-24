@@ -23,6 +23,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailySRecordingDto>> GetAllByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var dailySRecordings = await context.DailySalaryRecordings
                 .Include(d => d.Employee)
                 .Where(d => d.Date >= startDate && d.Date <= endDate && !d.IsDeleted)
@@ -44,6 +47,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAndDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var dailySRecordings = await context.DailySalaryRecordings
                 .Include(d => d.Employee)
                 .Where(d => d.EmployeeId == employeeId && d.Date >= startDate && d.Date <= endDate && !d.IsDeleted)
@@ -62,7 +68,7 @@ namespace Shader.Services.Implementation
             return dailySRecording.ToRDailySRecordingDto();
         }
 
-        public async Task<IEnumerable<RDailySRecordingDto>> CreateAsync(List<int> employeeIds)
+        public async Task<IEnumerable<RDailySRecordingDto>> AddRangeAsync(List<int> employeeIds)
         {
             if (employeeIds == null || !employeeIds.Any())
                 throw new ArgumentException("Employee IDs cannot be null or empty.", nameof(employeeIds));

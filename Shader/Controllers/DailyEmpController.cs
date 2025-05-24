@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Shader.Data.DTOs.DailyEmp;
 using Shader.Services.Abstraction;
+using Shader.Services.Implementation;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Shader.Controllers
 {
@@ -11,8 +13,15 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RDailyEmpDto>>> GetAll()
         {
-            var employees = await dailyEmpService.GetAllEmployeesAsync();
-            return Ok(employees);
+            try
+            {
+                var employees = await dailyEmpService.GetAllEmployeesAsync();
+                return Ok(employees);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("{id:int}")]
@@ -25,15 +34,22 @@ namespace Shader.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpPost]
         public async Task<ActionResult<RDailyEmpDto>> Add([FromBody] WDailyEmpDto employeeDto)
         {
-            var employee = await dailyEmpService.AddEmployeeAsync(employeeDto);
-            return Ok( employee);
+            try
+            {
+                var employee = await dailyEmpService.AddEmployeeAsync(employeeDto);
+                return Ok(employee);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id:int}")]
@@ -46,7 +62,7 @@ namespace Shader.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -62,7 +78,7 @@ namespace Shader.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
     }

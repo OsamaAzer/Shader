@@ -11,8 +11,15 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllLoans([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await loanService.GetAllLoansAsync(pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await loanService.GetAllLoansAsync(pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         [HttpGet("by-date-range")]
@@ -22,8 +29,15 @@ namespace Shader.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            var result = await loanService.GetLoansByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await loanService.GetLoansByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         [HttpGet("by-employee/{employeeId}")]
@@ -32,8 +46,15 @@ namespace Shader.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            var result = await loanService.GetLoansByEmployeeIdAsync(employeeId, pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await loanService.GetLoansByEmployeeIdAsync(employeeId, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         [HttpGet("by-employee/{employeeId}/by-date-range")]
@@ -44,8 +65,15 @@ namespace Shader.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            var result = await loanService.GetLoansForEmployeeByDateRangeAsync(employeeId, startDate, endDate, pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await loanService.GetLoansForEmployeeByDateRangeAsync(employeeId, startDate, endDate, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
@@ -58,7 +86,7 @@ namespace Shader.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new { Message = ex.Message });
+                return BadRequest(new { Message = ex.Message });
             }
         }
 
@@ -72,7 +100,7 @@ namespace Shader.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new { Message = ex.Message });
+                return BadRequest(new { Message = ex.Message });
             }
         }
 
@@ -86,7 +114,7 @@ namespace Shader.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new { Message = ex.Message });
+                return BadRequest(new { Message = ex.Message });
             }
         }
 
@@ -97,13 +125,13 @@ namespace Shader.Controllers
             {
                 var success = await loanService.DeleteLoanAsync(id);
                 if (!success)
-                    return NotFound();
+                    return BadRequest("Some thing went wrong while deleting..");
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return NotFound(new { Message = ex.Message });
+                return BadRequest(new { Message = ex.Message });
             }
         }
     }

@@ -12,8 +12,15 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await service.GetAllAsync(pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await service.GetAllAsync(pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("by-date-range")]
@@ -23,8 +30,15 @@ namespace Shader.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            var result = await service.GetAllByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await service.GetAllByDateRangeAsync(startDate, endDate, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("by-employee/{employeeId}")]
@@ -33,8 +47,15 @@ namespace Shader.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            var result = await service.GetAllByEmployeeIdAsync(employeeId, pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await service.GetAllByEmployeeIdAsync(employeeId, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("by-employee-date-range")]
@@ -45,8 +66,15 @@ namespace Shader.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            var result = await service.GetAllByEmployeeIdAndDateRangeAsync(employeeId, startDate, endDate, pageNumber, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await service.GetAllByEmployeeIdAndDateRangeAsync(employeeId, startDate, endDate, pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
@@ -64,11 +92,11 @@ namespace Shader.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] List<int> employeeIds)
+        public async Task<IActionResult> Add([FromBody] List<int> employeeIds, int month)
         {
             try
             {
-                var result = await service.AddAsync(employeeIds);
+                var result = await service.AddRangeAsync(employeeIds, month);
                 return Ok(result);
             }
             catch (Exception ex)

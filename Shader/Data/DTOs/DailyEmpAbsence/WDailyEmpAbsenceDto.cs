@@ -6,6 +6,5 @@ namespace Shader.Services.Implementation
     {
         [Required]
         public int EmployeeId { get; set; }
-        public string? Reason { get; set; }
     }
 }

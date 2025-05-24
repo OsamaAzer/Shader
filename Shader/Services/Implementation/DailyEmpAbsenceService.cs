@@ -34,6 +34,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailyEmpAbsenceDto>> GetAbsencesByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date."); 
+
             var absences = await context.DailyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => a.Date >= startDate && a.Date <= endDate && !a.IsDeleted)
@@ -45,6 +48,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailyEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var absences = await context.DailyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => a.EmployeeId == employeeId && a.Date >= startDate && a.Date <= endDate && !a.IsDeleted)
@@ -67,7 +73,7 @@ namespace Shader.Services.Implementation
             return absence.MapToRAbsenceDto();
         }
 
-        public async Task<IEnumerable<RDailyEmpAbsenceDto>> AddAbsenceAsync(List<int> employeeIds)
+        public async Task<IEnumerable<RDailyEmpAbsenceDto>> AddRangeAsync(List<int> employeeIds)
         {
             if (employeeIds == null || !employeeIds.Any())
                 throw new ArgumentException("Employee IDs cannot be null or empty.");

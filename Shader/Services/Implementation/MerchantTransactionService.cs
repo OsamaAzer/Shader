@@ -53,7 +53,7 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RMerchantTDto>> GetTransactionsByMerchantIdAsync(int merchantId, int pageNumber, int pageSize)
         {
             var merchant = await context.Merchants
-            .Where(c => !c.IsDeleted)
+                .Where(c => !c.IsDeleted)
                 .FirstOrDefaultAsync(c => c.Id == merchantId) ??
                 throw new Exception($"The merchant with Id: ({merchantId}) doesn't exist!!");
 

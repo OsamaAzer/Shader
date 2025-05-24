@@ -20,8 +20,15 @@ namespace Shader.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllClientTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _clientTransactionService.GetAllTransactionsAsync(pageNumber, pageSize);
-            return Ok(transactions);
+            try
+            {
+                var transactions = await _clientTransactionService.GetAllTransactionsAsync(pageNumber, pageSize);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
@@ -56,17 +63,31 @@ namespace Shader.Controllers
         [HttpGet("today")]
         public async Task<IActionResult> GetTodayClientTransactions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var today = DateOnly.FromDateTime(DateTime.Now);
-            var transactions = await _clientTransactionService.GetTransactionsByDateAsync(today, pageNumber, pageSize);
-            return Ok(transactions);
+            try
+            {
+                var today = DateOnly.FromDateTime(DateTime.Now);
+                var transactions = await _clientTransactionService.GetTransactionsByDateAsync(today, pageNumber, pageSize);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("date")]
         public async Task<IActionResult> GetClientTransactionsByDate
             ([FromQuery] DateOnly date, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var transactions = await _clientTransactionService.GetTransactionsByDateAsync(date, pageNumber, pageSize);
-            return Ok(transactions);
+            try
+            {
+                var transactions = await _clientTransactionService.GetTransactionsByDateAsync(date, pageNumber, pageSize);
+                return Ok(transactions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("range")]

@@ -94,7 +94,7 @@ namespace Shader.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Shader.Controllers
         {
             try
             {
-                var result = await _service.CreateAsync(employeeIds);
+                var result = await _service.AddRangeAsync(employeeIds);
                 return Ok(result);
             }
             catch (Exception ex)
