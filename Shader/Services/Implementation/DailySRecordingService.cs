@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shader.Data;
 using Shader.Data.DTOs.DailySalaryRecording;
+using Shader.Data.Entities;
+using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
 
@@ -8,42 +10,48 @@ namespace Shader.Services.Implementation
 {
     public class DailySRecordingService(ShaderContext context) : IDailySRecordingService
     {
-        public async Task<IEnumerable<RDailySRecordingDto>> GetAllAsync()
+        public async Task<PagedResponse<RDailySRecordingDto>> GetAllAsync(int pageNumber, int pageSize)
         {
             var dailySRecordings = await context.DailySalaryRecordings
                 .Include(d => d.Employee)
                 .Where(d => !d.IsDeleted)
                 .ToListAsync();
 
-            return dailySRecordings.ToRDailySRecordingDtos();
+            return dailySRecordings.ToRDailySRecordingDtos().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RDailySRecordingDto>> GetAllByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+
+        public async Task<PagedResponse<RDailySRecordingDto>> GetAllByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             var dailySRecordings = await context.DailySalaryRecordings
                 .Include(d => d.Employee)
-                .Where(d => DateOnly.FromDateTime(d.Date) >= startDate && DateOnly.FromDateTime(d.Date) <= endDate && !d.IsDeleted)
+                .Where(d => d.Date >= startDate && d.Date <= endDate && !d.IsDeleted)
                 .ToListAsync();
 
-            return dailySRecordings.ToRDailySRecordingDtos();
+            return dailySRecordings.ToRDailySRecordingDtos().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RDailySRecordingDto>> GetByEmployeeIdAsync(int employeeId)
+
+        public async Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize)
         {
             var dailySRecordings = await context.DailySalaryRecordings
                 .Include(d => d.Employee)
                 .Where(d => d.EmployeeId == employeeId && !d.IsDeleted)
                 .ToListAsync();
 
-            return dailySRecordings.ToRDailySRecordingDtos();
+            return dailySRecordings.ToRDailySRecordingDtos().CreatePagedResponse(pageNumber, pageSize);
         }
-        public async Task<IEnumerable<RDailySRecordingDto>> GetByEmployeeIdAndDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate)
+
+        public async Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAndDateRangeAsync
+            (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
             var dailySRecordings = await context.DailySalaryRecordings
                 .Include(d => d.Employee)
-                .Where(d => d.EmployeeId == employeeId && DateOnly.FromDateTime(d.Date) >= startDate && DateOnly.FromDateTime(d.Date) <= endDate && !d.IsDeleted)
+                .Where(d => d.EmployeeId == employeeId && d.Date >= startDate && d.Date <= endDate && !d.IsDeleted)
                 .ToListAsync();
 
-            return dailySRecordings.ToRDailySRecordingDtos();
+            return dailySRecordings.ToRDailySRecordingDtos().CreatePagedResponse(pageNumber, pageSize);
         }
+
         public async Task<RDailySRecordingDto> GetByIdAsync(int id)
         {
             var dailySRecording = await context.DailySalaryRecordings
@@ -53,14 +61,29 @@ namespace Shader.Services.Implementation
 
             return dailySRecording.ToRDailySRecordingDto();
         }
-        public async Task<RDailySRecordingDto> CreateAsync(WDailySRecordingDto dailySRecordingDto)
+
+        public async Task<IEnumerable<RDailySRecordingDto>> CreateAsync(List<int> employeeIds)
         {
-            var dailySRecording = dailySRecordingDto.ToDailySRecording();
-            dailySRecording.Date = DateTime.Now;
-            await context.DailySalaryRecordings.AddAsync(dailySRecording);
+            if (employeeIds == null || !employeeIds.Any())
+                throw new ArgumentException("Employee IDs cannot be null or empty.", nameof(employeeIds));
+
+            var dailySRecordings = new List<DailySalaryRecording>();
+            foreach (var employeeId in employeeIds)
+            {
+                var employee = await context.DailyEmployees.FindAsync(employeeId) ??
+                    throw new Exception($"Employee with ID {employeeId} not found.");
+
+                var dailySRecordingDto = new WDailySRecordingDto();
+                dailySRecordingDto.EmployeeId = employeeId;
+                var dailySRecording = dailySRecordingDto.ToDailySRecording();
+                //dailySRecording.Employee = employee;
+                dailySRecordings.Add(dailySRecording);
+            }
+            await context.DailySalaryRecordings.AddRangeAsync(dailySRecordings);
             await context.SaveChangesAsync();
-            return dailySRecording.ToRDailySRecordingDto();
+            return dailySRecordings.ToRDailySRecordingDtos();
         }
+
         public async Task<RDailySRecordingDto> UpdateAsync(int id, WDailySRecordingDto dailySRecordingDto)
         {
             var dailySRecording = await context.DailySalaryRecordings
@@ -68,11 +91,15 @@ namespace Shader.Services.Implementation
                 .FirstOrDefaultAsync(d => d.Id == id && !d.IsDeleted) ??
                 throw new Exception($"Daily Salary Recording with ID {id} not found.");
 
+            var employee = await context.DailyEmployees.FindAsync(dailySRecordingDto.EmployeeId) ??
+                throw new Exception($"Employee with ID {dailySRecordingDto.EmployeeId} not found.");
+
             dailySRecording = dailySRecordingDto.ToDailySRecording(dailySRecording);
             context.DailySalaryRecordings.Update(dailySRecording);
             await context.SaveChangesAsync();
             return dailySRecording.ToRDailySRecordingDto();
         }
+
         public async Task<bool> DeleteAsync(int id)
         {
             var dailySRecording = await context.DailySalaryRecordings

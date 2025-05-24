@@ -24,13 +24,21 @@ namespace Shader.Mapping
                 PhoneNumber = employee.PhoneNumber,
                 BaseSalary = employee.BaseSalary,
                 BorrowedAmount = employee.BorrowedAmount,
+                RemainingSalary = employee.RemainingSalary
             };
         }
         public static MonthlyEmployee MapToEmployee(this WMonthlyEmpDto employeeDto, MonthlyEmployee? employee = null)
         {
             employee ??= new MonthlyEmployee();
             employee.Name = employeeDto.Name;
-            employee.BaseSalary = employeeDto.BaseSalary;
+            if (employeeDto.BaseSalary <= 0)
+            {
+                throw new ArgumentException("Base salary must be greater than zero.", nameof(employeeDto.BaseSalary));
+            }
+            else
+            {
+                employee.BaseSalary = employeeDto.BaseSalary;
+            }
             employee.PhoneNumber = employeeDto.PhoneNumber;
             return employee;
         }

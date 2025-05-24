@@ -1,3 +1,4 @@
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Shader.Data;
 using Shader.Data.DTOs.MonthlyEmpAbsence;
@@ -9,7 +10,7 @@ namespace Shader.Services
 {
     public class MonthlyEmpAbsenceService(ShaderContext context) : IMonthlyEmpAbsenceService
     {
-        public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesAsync()
+        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesAsync()
         {
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
@@ -19,7 +20,7 @@ namespace Shader.Services
             return absences.MapToRAbsenceDtos();
         }
 
-        public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId)
+        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId)
         {
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
@@ -28,30 +29,34 @@ namespace Shader.Services
 
             return absences.MapToRAbsenceDtos();
         }
-        public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesByDateRangeAsync(DateOnly startDate, DateOnly endDate)
         {
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
-                .Where(a => DateOnly.FromDateTime(a.Date) >= startDate && DateOnly.FromDateTime(a.Date) <= endDate && !a.IsDeleted)
+                .Where(a => a.Date >= startDate && a.Date <= endDate && !a.IsDeleted)
                 .ToListAsync();
 
             return absences.MapToRAbsenceDtos();
         }
-        public async Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate)
+        public async Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate)
         {
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
-                .Where(a => a.EmployeeId == employeeId && DateOnly.FromDateTime(a.Date) >= startDate && DateOnly.FromDateTime(a.Date) <= endDate && !a.IsDeleted)
+                .Where(a => a.EmployeeId == employeeId && a.Date >= startDate && a.Date <= endDate && !a.IsDeleted)
                 .ToListAsync();
 
             return absences.MapToRAbsenceDtos();
         }
 
-        public async Task<RDEmpAbsenceDto> AddAbsenceAsync(WMEmpAbsenceDto absenceDto)
+        public async Task<RMonthlyEmpAbsenceDto> AddAbsenceAsync(WMonthlyEmpAbsenceDto absenceDto)
         {
+            var employee = await context.MonthlyEmployees.FindAsync(absenceDto.EmployeeId) ??
+                throw new Exception($"Employee with ID {absenceDto.EmployeeId} not found.");
+
+            
+
+
             var absence = absenceDto.MapToAbsence();
-            absence.Date = DateTime.Now;
-
             await context.MonthlyEmpAbsences.AddAsync(absence);
             await context.SaveChangesAsync();
             // Reload with employee navigation property
@@ -59,8 +64,11 @@ namespace Shader.Services
             return absence.MapToRAbsenceDto();
         }
 
-        public async Task<RDEmpAbsenceDto> UpdateAbsenceAsync(int id, WMEmpAbsenceDto absenceDto)
+        public async Task<RMonthlyEmpAbsenceDto> UpdateAbsenceAsync(int id, WMonthlyEmpAbsenceDto absenceDto)
         {
+            var employee = await context.MonthlyEmployees.FindAsync(absenceDto.EmployeeId) ??
+                throw new Exception($"Employee with ID {absenceDto.EmployeeId} not found.");
+
             var absence = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
                 .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted)??

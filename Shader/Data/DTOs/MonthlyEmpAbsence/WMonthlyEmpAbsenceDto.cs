@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shader.Services.Implementation
+namespace Shader.Data.DTOs.MonthlyEmpAbsence
 {
-    public class WDEmpAbsenceDto
+    public class WMonthlyEmpAbsenceDto
     {
         [Required]
         public int EmployeeId { get; set; }

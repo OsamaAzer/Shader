@@ -26,7 +26,7 @@ builder.Services.AddScoped<IDailyEmpService, DailyEmpService>();
 builder.Services.AddScoped<IDailyEmpAbsenceService, DailyEmpAbsenceService>();
 builder.Services.AddScoped<IDailySRecordingService, DailySRecordingService>();
 builder.Services.AddScoped<IMonthlyEmpService, MonthlyEmpService>();
-builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddScoped<IEmployeeLoanService, EmployeeLoanService>();
 builder.Services.AddScoped<IMonthlyEmpAbsenceService, MonthlyEmpAbsenceService>();
 
 

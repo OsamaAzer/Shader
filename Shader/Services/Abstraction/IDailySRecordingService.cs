@@ -1,15 +1,18 @@
 ﻿using Shader.Data.DTOs.DailySalaryRecording;
+using Shader.Helpers;
 
 namespace Shader.Services.Abstraction
 {
     public interface IDailySRecordingService
     {
-        Task<IEnumerable<RDailySRecordingDto>> GetAllAsync();
-        Task<IEnumerable<RDailySRecordingDto>> GetAllByDateRangeAsync(DateOnly startDate, DateOnly endDate);
-        Task<IEnumerable<RDailySRecordingDto>> GetByEmployeeIdAsync(int employeeId);
-        Task<IEnumerable<RDailySRecordingDto>> GetByEmployeeIdAndDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate);
+        Task<PagedResponse<RDailySRecordingDto>> GetAllAsync(int pageNumber, int pageSize);
+        Task<PagedResponse<RDailySRecordingDto>> GetAllByDateRangeAsync
+            (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize);
+        Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize);
+        Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAndDateRangeAsync
+            (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize);
         Task<RDailySRecordingDto> GetByIdAsync(int id);
-        Task<RDailySRecordingDto> CreateAsync(WDailySRecordingDto dailySRecordingDto);
+        Task<IEnumerable<RDailySRecordingDto>> CreateAsync(List<int> employeeIds);
         Task<RDailySRecordingDto> UpdateAsync(int id, WDailySRecordingDto dailySRecordingDto);
         Task<bool> DeleteAsync(int id);
     }

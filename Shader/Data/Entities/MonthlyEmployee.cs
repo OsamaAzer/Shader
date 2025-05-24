@@ -10,8 +10,9 @@ namespace Shader.Data.Entities
         public string? PhoneNumber { get; set; } 
         public decimal BaseSalary { get; set; }
         public decimal BorrowedAmount { get; set; }  // المبلغ المستلف
+        public decimal RemainingSalary => BaseSalary - BorrowedAmount; // الراتب المتبقي
         public bool IsDeleted { get; set; } = false;
-        public ICollection<Loan> Loans { get; set; } = new List<Loan>(); // القروض
+        public ICollection<EmployeeLoan> Loans { get; set; } = new List<EmployeeLoan>(); // القروض
         public ICollection<MonthlyEmployeeAbsence> Absences { get; set; } = new List<MonthlyEmployeeAbsence>(); 
     }
 }

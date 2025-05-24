@@ -24,7 +24,8 @@ namespace Shader.Data
         public DbSet<MonthlyEmployeeAbsence> MonthlyEmpAbsences { get; set; }
         public DbSet<DailyEmployeeAbsence> DailyEmpAbsences { get; set; }
         public DbSet<DailySalaryRecording> DailySalaryRecordings { get; set; }
-        public DbSet<Loan> Loans { get; set; }
+        public DbSet<MonthlySalaryRecording> MonthlySalaryRecordings { get; set; }
+        public DbSet<EmployeeLoan> EmployeeLoans { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

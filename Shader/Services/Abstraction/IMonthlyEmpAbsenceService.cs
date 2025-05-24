@@ -5,12 +5,12 @@ namespace Shader.Services.Abstraction
 {
     public interface IMonthlyEmpAbsenceService
     {
-        Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesAsync();
-        Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesByDateRangeAsync(DateOnly startDate, DateOnly endDate);
-        Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId);
-        Task<IEnumerable<RDEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate);
-        Task<RDEmpAbsenceDto> AddAbsenceAsync(WMEmpAbsenceDto absence);
-        Task<RDEmpAbsenceDto> UpdateAbsenceAsync(int id, WMEmpAbsenceDto absence);
+        Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesAsync();
+        Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesByDateRangeAsync(DateOnly startDate, DateOnly endDate);
+        Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId);
+        Task<IEnumerable<RMonthlyEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync(int employeeId, DateOnly startDate, DateOnly endDate);
+        Task<RMonthlyEmpAbsenceDto> AddAbsenceAsync(WMonthlyEmpAbsenceDto absence);
+        Task<RMonthlyEmpAbsenceDto> UpdateAbsenceAsync(int id, WMonthlyEmpAbsenceDto absence);
         Task<bool> DeleteAbsenceAsync(int id);
     }
 }

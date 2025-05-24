@@ -7,7 +7,9 @@ namespace Shader.Data.DTOs.MonthlySalaryRecording
         public string EmployeeName { get; set; } = null!;
         public decimal BaseSalary { get; set; }
         public decimal BorrowedAmount { get; set; } // المبلغ المستلف
-        public decimal RemainingSalary  => BaseSalary - BorrowedAmount; // الراتب المتبقي
-        public DateTime Date { get; set; } 
+        public decimal DeductionAmount { get; set; } // المبلغ المخصوم
+        public decimal RemainingSalary  => BaseSalary - (BorrowedAmount + DeductionAmount); // الراتب المتبقي
+        public DateOnly Date { get; set; } 
+        public string SalaryMonth => $"{Date:MMMM} {Date.Year}"; // الشهر والسنة
     }
 }

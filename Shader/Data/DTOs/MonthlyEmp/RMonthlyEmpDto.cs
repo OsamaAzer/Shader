@@ -8,6 +8,6 @@ namespace Shader.Data.DTOs.MonthlyEmp
         public string? PhoneNumber { get; set; }
         public decimal BaseSalary { get; set; }
         public decimal BorrowedAmount { get; set; }  // المبلغ المستلف
-        public decimal RemainingSalary => BaseSalary - BorrowedAmount; 
+        public decimal RemainingSalary { get; set; }
     }
 }

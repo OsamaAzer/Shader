@@ -5,9 +5,9 @@ namespace Shader.Mapping
 {
     public static class MonthlyEmpAbsenceProfile
     {
-        public static IEnumerable<RDEmpAbsenceDto> MapToRAbsenceDtos(this IEnumerable<MonthlyEmployeeAbsence> absences)
+        public static IEnumerable<RMonthlyEmpAbsenceDto> MapToRAbsenceDtos(this IEnumerable<MonthlyEmployeeAbsence> absences)
         {
-            return absences.Select(a => new RDEmpAbsenceDto
+            return absences.Select(a => new RMonthlyEmpAbsenceDto
             {
                 Id = a.Id,
                 EmployeeName = a.Employee.Name,
@@ -15,9 +15,9 @@ namespace Shader.Mapping
                 Reason = a.Reason
             });
         }
-        public static RDEmpAbsenceDto MapToRAbsenceDto(this MonthlyEmployeeAbsence absence)
+        public static RMonthlyEmpAbsenceDto MapToRAbsenceDto(this MonthlyEmployeeAbsence absence)
         {
-            return new RDEmpAbsenceDto
+            return new RMonthlyEmpAbsenceDto
             {
                 Id = absence.Id,
                 EmployeeName = absence.Employee.Name,
@@ -25,11 +25,15 @@ namespace Shader.Mapping
                 Reason = absence.Reason
             };
         }
-        public static MonthlyEmployeeAbsence MapToAbsence(this WMEmpAbsenceDto absenceDto, MonthlyEmployeeAbsence? absence = null)
+        public static MonthlyEmployeeAbsence MapToAbsence(this WMonthlyEmpAbsenceDto absenceDto, MonthlyEmployeeAbsence? absence = null)
         {
             absence ??= new MonthlyEmployeeAbsence();
             absence.EmployeeId = absenceDto.EmployeeId;
             absence.Reason = absenceDto.Reason;
+            if(absence.Date == default)
+            {
+                absence.Date = DateOnly.FromDateTime(DateTime.Now);
+            }
             return absence;
         }
     }
