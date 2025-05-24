@@ -7,7 +7,7 @@ namespace Shader.Mapping
 {
     public static class DailyEmpAbsenceProfile
     {
-        public static RDailyEmpAbsenceDto MapToRAbsenceDto(this DailyEmployeeAbsence absence)
+        public static RDailyEmpAbsenceDto MapToRAbsenceDto(this DailyEmpAbsence absence)
         {
             return new RDailyEmpAbsenceDto
             {
@@ -17,14 +17,14 @@ namespace Shader.Mapping
             };
         }
 
-        public static IEnumerable<RDailyEmpAbsenceDto> MapToRAbsenceDtos(this IEnumerable<DailyEmployeeAbsence> absences)
+        public static IEnumerable<RDailyEmpAbsenceDto> MapToRAbsenceDtos(this IEnumerable<DailyEmpAbsence> absences)
         {
             return absences.Select(MapToRAbsenceDto);
         }
 
-        public static DailyEmployeeAbsence MapToAbsence(this WDailyEmpAbsenceDto absenceDto, DailyEmployeeAbsence? absence = null)
+        public static DailyEmpAbsence MapToAbsence(this WDailyEmpAbsenceDto absenceDto, DailyEmpAbsence? absence = null)
         {
-            absence ??= new DailyEmployeeAbsence();
+            absence ??= new DailyEmpAbsence();
             absence.EmployeeId = absenceDto.EmployeeId;
             if (absence.Date == default)
             {
@@ -33,9 +33,9 @@ namespace Shader.Mapping
             return absence;
         }
 
-        public static DailyEmployeeAbsence MapFromPastToDailyEmpAbsence(this WDailyPastAbsenceDto absenceDto)
+        public static DailyEmpAbsence MapFromPastToDailyEmpAbsence(this WDailyPastAbsenceDto absenceDto)
         {
-            var absence = new DailyEmployeeAbsence();
+            var absence = new DailyEmpAbsence();
             absence.EmployeeId = absenceDto.EmployeeId;
             if (absenceDto.AbsenceDate >= DateOnly.FromDateTime(DateTime.Now))
                 throw new Exception($"Absence date should be in the past!!");

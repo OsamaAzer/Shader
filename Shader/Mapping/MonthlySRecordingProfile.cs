@@ -5,7 +5,7 @@ namespace Shader.Mapping
 {
     public static class MonthlySRecordingProfile
     {
-        public static RMonthlySRecordingDto ToRMonthlySRecordingDto(this MonthlySalaryRecording monthlySalaryRecording)
+        public static RMonthlySRecordingDto ToRMonthlySRecordingDto(this MonthlyEmpSalaryRecording monthlySalaryRecording)
         {
             return new RMonthlySRecordingDto
             {
@@ -18,14 +18,14 @@ namespace Shader.Mapping
             };
         }
 
-        public static IEnumerable<RMonthlySRecordingDto> ToRMonthlySRecordingDtos(this IEnumerable<MonthlySalaryRecording> monthlySalaryRecordings)
+        public static IEnumerable<RMonthlySRecordingDto> ToRMonthlySRecordingDtos(this IEnumerable<MonthlyEmpSalaryRecording> monthlySalaryRecordings)
         {
             return monthlySalaryRecordings.Select(monthlySalaryRecording => monthlySalaryRecording.ToRMonthlySRecordingDto()).ToList();
         }
 
-        public static MonthlySalaryRecording ToMonthlySRecording(this WMonthlySRecordingDto monthlySRecordingDto, MonthlySalaryRecording? monthlySRecording = null)
+        public static MonthlyEmpSalaryRecording ToMonthlySRecording(this WMonthlySRecordingDto monthlySRecordingDto, MonthlyEmpSalaryRecording? monthlySRecording = null)
         {
-            monthlySRecording ??= new MonthlySalaryRecording();
+            monthlySRecording ??= new MonthlyEmpSalaryRecording();
             monthlySRecording.EmployeeId = monthlySRecordingDto.EmployeeId;
             monthlySRecording.BaseSalary = monthlySRecording.Employee.BaseSalary;
             monthlySRecording.BorrowedAmount = monthlySRecording.Employee.BorrowedAmount;

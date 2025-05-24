@@ -5,7 +5,7 @@ namespace Shader.Mapping
 {
     public static class DailySRecordingProfile
     {
-        public static RDailySRecordingDto ToRDailySRecordingDto(this DailySalaryRecording dailySalaryRecording)
+        public static RDailySRecordingDto ToRDailySRecordingDto(this DailyEmpSalaryRecording dailySalaryRecording)
         {
             return new RDailySRecordingDto
             {
@@ -16,14 +16,14 @@ namespace Shader.Mapping
             };
         }
 
-        public static IEnumerable<RDailySRecordingDto> ToRDailySRecordingDtos(this IEnumerable<DailySalaryRecording> dailySalaryRecordings)
+        public static IEnumerable<RDailySRecordingDto> ToRDailySRecordingDtos(this IEnumerable<DailyEmpSalaryRecording> dailySalaryRecordings)
         {
             return dailySalaryRecordings.Select(dailySalaryRecording => dailySalaryRecording.ToRDailySRecordingDto()).ToList();
         }
 
-        public static DailySalaryRecording ToDailySRecording(this WDailySRecordingDto dailySRecordingDto, DailySalaryRecording? dailySRecording = null)
+        public static DailyEmpSalaryRecording ToDailySRecording(this WDailySRecordingDto dailySRecordingDto, DailyEmpSalaryRecording? dailySRecording = null)
         {
-            dailySRecording ??= new DailySalaryRecording();
+            dailySRecording ??= new DailyEmpSalaryRecording();
             dailySRecording.EmployeeId = dailySRecordingDto.EmployeeId;
             dailySRecording.DailySalary = dailySRecording.Employee.DailySalary;
             if (dailySRecording.Date == default)

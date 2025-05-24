@@ -1,6 +1,6 @@
 ﻿namespace Shader.Data.Entities
 {
-    public class MonthlyEmployeeAbsence
+    public class MonthlyEmpAbsence
     {
         public int Id { get; set; }
         public int EmployeeId { get; set; } 

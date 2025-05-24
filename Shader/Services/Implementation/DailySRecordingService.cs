@@ -73,7 +73,7 @@ namespace Shader.Services.Implementation
             if (employeeIds == null || !employeeIds.Any())
                 throw new ArgumentException("Employee IDs cannot be null or empty.", nameof(employeeIds));
 
-            var dailySRecordings = new List<DailySalaryRecording>();
+            var dailySRecordings = new List<DailyEmpSalaryRecording>();
             foreach (var employeeId in employeeIds)
             {
                 var employee = await context.DailyEmployees.FindAsync(employeeId) ??

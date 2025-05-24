@@ -66,7 +66,7 @@ namespace Shader.Services
                 throw new ArgumentException("Employee IDs cannot be null or empty.", nameof(employeeIds));
             }
 
-            var absences = new List<MonthlyEmployeeAbsence>();
+            var absences = new List<MonthlyEmpAbsence>();
             foreach (var employeeId in employeeIds)
             {
                 var employee = await context.MonthlyEmployees.FindAsync(employeeId) ??

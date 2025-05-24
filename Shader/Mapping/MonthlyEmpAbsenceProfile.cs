@@ -5,7 +5,7 @@ namespace Shader.Mapping
 {
     public static class MonthlyEmpAbsenceProfile
     {
-        public static IEnumerable<RMonthlyEmpAbsenceDto> MapToRAbsenceDtos(this IEnumerable<MonthlyEmployeeAbsence> absences)
+        public static IEnumerable<RMonthlyEmpAbsenceDto> MapToRAbsenceDtos(this IEnumerable<MonthlyEmpAbsence> absences)
         {
             return absences.Select(a => new RMonthlyEmpAbsenceDto
             {
@@ -14,7 +14,7 @@ namespace Shader.Mapping
                 Date = a.Date,
             });
         }
-        public static RMonthlyEmpAbsenceDto MapToRAbsenceDto(this MonthlyEmployeeAbsence absence)
+        public static RMonthlyEmpAbsenceDto MapToRAbsenceDto(this MonthlyEmpAbsence absence)
         {
             return new RMonthlyEmpAbsenceDto
             {
@@ -23,9 +23,9 @@ namespace Shader.Mapping
                 Date = absence.Date,
             };
         }
-        public static MonthlyEmployeeAbsence MapToAbsence(this WMonthlyEmpAbsenceDto absenceDto, MonthlyEmployeeAbsence? absence = null)
+        public static MonthlyEmpAbsence MapToAbsence(this WMonthlyEmpAbsenceDto absenceDto, MonthlyEmpAbsence? absence = null)
         {
-            absence ??= new MonthlyEmployeeAbsence();
+            absence ??= new MonthlyEmpAbsence();
             absence.EmployeeId = absenceDto.EmployeeId;
             if(absence.Date == default)
             {

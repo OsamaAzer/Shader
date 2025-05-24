@@ -28,6 +28,7 @@ builder.Services.AddScoped<IDailySRecordingService, DailySRecordingService>();
 builder.Services.AddScoped<IMonthlyEmpService, MonthlyEmpService>();
 builder.Services.AddScoped<IEmployeeLoanService, EmployeeLoanService>();
 builder.Services.AddScoped<IMonthlyEmpAbsenceService, MonthlyEmpAbsenceService>();
+builder.Services.AddScoped<IMonthlySRecordingService, MonthlySRecordingService>();
 
 
 builder.Services.AddControllers().AddJsonOptions(options =>

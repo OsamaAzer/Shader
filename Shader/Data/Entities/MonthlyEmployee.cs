@@ -13,6 +13,6 @@ namespace Shader.Data.Entities
         public decimal RemainingSalary => BaseSalary - BorrowedAmount; // الراتب المتبقي
         public bool IsDeleted { get; set; } = false;
         public ICollection<EmployeeLoan> Loans { get; set; } = new List<EmployeeLoan>(); // القروض
-        public ICollection<MonthlyEmployeeAbsence> Absences { get; set; } = new List<MonthlyEmployeeAbsence>(); 
+        public ICollection<MonthlyEmpAbsence> Absences { get; set; } = new List<MonthlyEmpAbsence>(); 
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Shader.Data.Entities
 {
-    public class MonthlySalaryRecording
+    public class MonthlyEmpSalaryRecording
     {
         public int Id { get; set; }
         public int EmployeeId { get; set; }

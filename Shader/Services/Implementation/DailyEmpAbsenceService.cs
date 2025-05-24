@@ -78,7 +78,7 @@ namespace Shader.Services.Implementation
             if (employeeIds == null || !employeeIds.Any())
                 throw new ArgumentException("Employee IDs cannot be null or empty.");
 
-            var dailyEmpAbsences = new List<DailyEmployeeAbsence>();
+            var dailyEmpAbsences = new List<DailyEmpAbsence>();
             foreach (var employeeId in employeeIds)
             {
                 var employee = await context.DailyEmployees

@@ -10,6 +10,6 @@ namespace Shader.Data.Entities
         public string? PhoneNumber { get; set; }
         public decimal DailySalary { get; set; }
         public bool IsDeleted { get; set; } = false;
-        public ICollection<DailyEmployeeAbsence> Absenses { get; set; } = new List<DailyEmployeeAbsence>();
+        public ICollection<DailyEmpAbsence> Absenses { get; set; } = new List<DailyEmpAbsence>();
     }
 }

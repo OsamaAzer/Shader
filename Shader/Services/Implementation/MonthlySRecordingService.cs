@@ -73,7 +73,7 @@ namespace Shader.Services.Implementation
             if (employees == null || !employees.Any())
                 throw new ArgumentException("Employee list cannot be null or empty.", nameof(employees));
 
-            var monthlySRecordings = new List<MonthlySalaryRecording>();
+            var monthlySRecordings = new List<MonthlyEmpSalaryRecording>();
             foreach (var employeeId in employees)
             {
                 var employee = await context.MonthlyEmployees
