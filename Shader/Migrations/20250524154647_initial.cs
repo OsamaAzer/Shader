@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Shader.Migrations
 {
     /// <inheritdoc />
-    public partial class _1st : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,21 +19,34 @@ namespace Shader.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    AmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalRemainingAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalMortgageAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalRemainingMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    TotalMortgageAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clients", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DailyEmployees",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DailySalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DailyEmployees", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -61,26 +74,18 @@ namespace Shader.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     PurchasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchaseTotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchaseAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchaseTotalRemainingAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PurchaseTotalDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PurchaseAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PurchaseTotalMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PurchaseTotalMortgageAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchaseTotalRemainingMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CurrentAmountBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CurrentMortgageAmountBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingTotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingTotalRemainingAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingTotalDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingTotalMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingTotalMortgageAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SellingTotalRemainingMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    SellPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SellTotalDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SellAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SellTotalMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SellTotalMortgageAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,19 +93,20 @@ namespace Shader.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Suppliers",
+                name: "MonthlyEmployees",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BaseSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    BorrowedAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Suppliers", x => x.Id);
+                    table.PrimaryKey("PK_MonthlyEmployees", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -127,12 +133,56 @@ namespace Shader.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DailyEmpAbsences",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DailyEmpAbsences", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DailyEmpAbsences_DailyEmployees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "DailyEmployees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DailyEmpSalaryRecordings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    DailySalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DailyEmpSalaryRecordings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DailyEmpSalaryRecordings_DailyEmployees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "DailyEmployees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MerchantPayments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TransactionType = table.Column<int>(type: "int", nullable: false),
                     MortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaidAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MerchantId = table.Column<int>(type: "int", nullable: false),
@@ -158,7 +208,6 @@ namespace Shader.Migrations
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MerchantId = table.Column<int>(type: "int", nullable: false),
-                    TransactionType = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -177,22 +226,113 @@ namespace Shader.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Suppliers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TotalAmountOfBills = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmountPaid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalRemainingAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsMerchant = table.Column<bool>(type: "bit", nullable: false),
+                    MerchantId = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Suppliers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Suppliers_Merchants_MerchantId",
+                        column: x => x.MerchantId,
+                        principalTable: "Merchants",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployeeLoans",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeLoans", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployeeLoans_MonthlyEmployees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "MonthlyEmployees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MonthlyEmpAbsences",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MonthlyEmpAbsences", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MonthlyEmpAbsences_MonthlyEmployees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "MonthlyEmployees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MonthlyEmpSalaryRecordings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    BaseSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    BorrowedAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DeductionAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MonthlyEmpSalaryRecordings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MonthlyEmpSalaryRecordings_MonthlyEmployees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "MonthlyEmployees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SupplierBills",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SupplierId = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CommissionRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MyCommisionValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ValueDueToSupplier = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    MshalValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    NylonValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    ValueDueToSupplier = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -215,6 +355,10 @@ namespace Shader.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SupplierId = table.Column<int>(type: "int", nullable: false),
+                    MerchantAsSupplierPurchasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MashalValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NylonValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PriceOfKilogramInBill = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     IsCageHasMortgage = table.Column<bool>(type: "bit", nullable: false),
                     IsBilled = table.Column<bool>(type: "bit", nullable: false),
@@ -275,7 +419,6 @@ namespace Shader.Migrations
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalCageMortgageAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     FruitId = table.Column<int>(type: "int", nullable: true)
@@ -304,7 +447,8 @@ namespace Shader.Migrations
                     FruitId = table.Column<int>(type: "int", nullable: false),
                     NumberOfCages = table.Column<int>(type: "int", nullable: false),
                     WeightInKilograms = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PriceOfKiloGram = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    PriceOfKiloGram = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TransactionPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -408,6 +552,21 @@ namespace Shader.Migrations
                 column: "FruitId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DailyEmpAbsences_EmployeeId",
+                table: "DailyEmpAbsences",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DailyEmpSalaryRecordings_EmployeeId",
+                table: "DailyEmpSalaryRecordings",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeLoans_EmployeeId",
+                table: "EmployeeLoans",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Fruits_SupplierBillId",
                 table: "Fruits",
                 column: "SupplierBillId");
@@ -433,9 +592,24 @@ namespace Shader.Migrations
                 column: "MerchantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MonthlyEmpAbsences_EmployeeId",
+                table: "MonthlyEmpAbsences",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MonthlyEmpSalaryRecordings_EmployeeId",
+                table: "MonthlyEmpSalaryRecordings",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SupplierBills_SupplierId",
                 table: "SupplierBills",
                 column: "SupplierId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Suppliers_MerchantId",
+                table: "Suppliers",
+                column: "MerchantId");
         }
 
         /// <inheritdoc />
@@ -451,6 +625,15 @@ namespace Shader.Migrations
                 name: "ClientTransactionFruits");
 
             migrationBuilder.DropTable(
+                name: "DailyEmpAbsences");
+
+            migrationBuilder.DropTable(
+                name: "DailyEmpSalaryRecordings");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeLoans");
+
+            migrationBuilder.DropTable(
                 name: "Expenses");
 
             migrationBuilder.DropTable(
@@ -460,13 +643,25 @@ namespace Shader.Migrations
                 name: "MerchantTransactionFruits");
 
             migrationBuilder.DropTable(
+                name: "MonthlyEmpAbsences");
+
+            migrationBuilder.DropTable(
+                name: "MonthlyEmpSalaryRecordings");
+
+            migrationBuilder.DropTable(
                 name: "CashTransactions");
 
             migrationBuilder.DropTable(
                 name: "ClientTransactions");
 
             migrationBuilder.DropTable(
+                name: "DailyEmployees");
+
+            migrationBuilder.DropTable(
                 name: "MerchantTransactions");
+
+            migrationBuilder.DropTable(
+                name: "MonthlyEmployees");
 
             migrationBuilder.DropTable(
                 name: "Clients");
@@ -475,13 +670,13 @@ namespace Shader.Migrations
                 name: "Fruits");
 
             migrationBuilder.DropTable(
-                name: "Merchants");
-
-            migrationBuilder.DropTable(
                 name: "SupplierBills");
 
             migrationBuilder.DropTable(
                 name: "Suppliers");
+
+            migrationBuilder.DropTable(
+                name: "Merchants");
         }
     }
 }

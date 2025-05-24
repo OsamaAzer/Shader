@@ -2,10 +2,8 @@
 using Shader.Data;
 using Shader.Data.Dtos.Supplier;
 using Shader.Data.Entities;
-using Shader.Helpers;
 using Shader.Mapping;
 using Shader.Services.Abstraction;
-using System.Collections.Generic;
 
 namespace Shader.Services.Implementation
 {

@@ -12,7 +12,7 @@ namespace Shader.Services.Implementation
     {
         public async Task<PagedResponse<RMonthlySRecordingDto>> GetAllAsync(int pageNumber, int pageSize)
         {
-            var monthlySRecordings = await context.MonthlySalaryRecordings
+            var monthlySRecordings = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
                 .Where(m => !m.IsDeleted)
                 .ToListAsync();
@@ -26,7 +26,7 @@ namespace Shader.Services.Implementation
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
 
-            var monthlySRecordings = await context.MonthlySalaryRecordings
+            var monthlySRecordings = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
                 .Where(m => m.Date >= startDate && m.Date <= endDate && !m.IsDeleted)
                 .ToListAsync();
@@ -36,7 +36,7 @@ namespace Shader.Services.Implementation
 
         public async Task<PagedResponse<RMonthlySRecordingDto>> GetAllByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize)
         {
-            var monthlySRecordings = await context.MonthlySalaryRecordings
+            var monthlySRecordings = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
                 .Where(m => m.EmployeeId == employeeId && !m.IsDeleted)
                 .ToListAsync();
@@ -50,7 +50,7 @@ namespace Shader.Services.Implementation
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
 
-            var monthlySRecordings = await context.MonthlySalaryRecordings
+            var monthlySRecordings = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
                 .Where(m => m.EmployeeId == employeeId && m.Date >= startDate && m.Date <= endDate && !m.IsDeleted)
                 .ToListAsync();
@@ -60,7 +60,7 @@ namespace Shader.Services.Implementation
 
         public async Task<RMonthlySRecordingDto> GetByIdAsync(int id)
         {
-            var monthlySRecording = await context.MonthlySalaryRecordings
+            var monthlySRecording = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
                 .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted) ??
                 throw new Exception($"Monthly Salary Recording with ID {id} not found.");
@@ -80,7 +80,7 @@ namespace Shader.Services.Implementation
                     .FirstOrDefaultAsync(m => m.Id == employeeId && !m.IsDeleted) ??
                     throw new Exception($"Employee with ID {employeeId} not found.");
 
-                bool isAlreadyRecorded = await context.MonthlySalaryRecordings
+                bool isAlreadyRecorded = await context.MonthlyEmpSalaryRecordings
                     .AnyAsync(m => m.EmployeeId == employeeId && m.Date.Month == month && m.Date.Year == DateTime.Now.Year && !m.IsDeleted);
 
                 if (isAlreadyRecorded)
@@ -100,7 +100,7 @@ namespace Shader.Services.Implementation
                 monthlySRecording.Employee.BorrowedAmount = 0; // Reset borrowed amount of the employee
                 monthlySRecordings.Add(monthlySRecording);
             }
-            await context.MonthlySalaryRecordings.AddRangeAsync(monthlySRecordings);
+            await context.MonthlyEmpSalaryRecordings.AddRangeAsync(monthlySRecordings);
             await context.SaveChangesAsync();
             return monthlySRecordings.ToRMonthlySRecordingDtos();
 
@@ -108,7 +108,7 @@ namespace Shader.Services.Implementation
 
         public async Task<RMonthlySRecordingDto> UpdateAsync(int id, WMonthlySRecordingDto monthlySRecordingDto)
         {
-            var monthlySRecording = await context.MonthlySalaryRecordings
+            var monthlySRecording = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
                 .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted) ??
                 throw new Exception($"Monthly Salary Recording with ID {id} not found.");
@@ -128,14 +128,14 @@ namespace Shader.Services.Implementation
             newEmployee.BorrowedAmount = 0; // Reset borrowed amount of the new employee
             context.MonthlyEmployees.Update(newEmployee);
             monthlySRecording = monthlySRecordingDto.ToMonthlySRecording(monthlySRecording);
-            context.MonthlySalaryRecordings.Update(monthlySRecording);
+            context.MonthlyEmpSalaryRecordings.Update(monthlySRecording);
             await context.SaveChangesAsync();
             return monthlySRecording.ToRMonthlySRecordingDto();
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var monthlySRecording = await context.MonthlySalaryRecordings.FindAsync(id) ??
+            var monthlySRecording = await context.MonthlyEmpSalaryRecordings.FindAsync(id) ??
                 throw new Exception($"Monthly Salary Recording with ID {id} not found.");
 
             var removedEmployee = await context.MonthlyEmployees
@@ -148,7 +148,7 @@ namespace Shader.Services.Implementation
             }
 
             monthlySRecording.IsDeleted = true;
-            context.MonthlySalaryRecordings.Update(monthlySRecording);
+            context.MonthlyEmpSalaryRecordings.Update(monthlySRecording);
             return await context.SaveChangesAsync() > 0;
         }
     }

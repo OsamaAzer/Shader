@@ -12,15 +12,15 @@ using Shader.Data;
 namespace Shader.Migrations
 {
     [DbContext(typeof(ShaderContext))]
-    [Migration("20250512105629_2nd")]
-    partial class _2nd
+    [Migration("20250524154647_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -126,7 +126,6 @@ namespace Shader.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
@@ -135,9 +134,6 @@ namespace Shader.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("TotalDiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -145,12 +141,6 @@ namespace Shader.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalMortgageAmountPaid")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalRemainingAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalRemainingMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -217,9 +207,6 @@ namespace Shader.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("TotalCageMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -230,6 +217,110 @@ namespace Shader.Migrations
                     b.HasIndex("FruitId");
 
                     b.ToTable("ClientTransactions");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.DailyEmployee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DailySalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DailyEmployees");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.DailyEmployeeAbsence", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("DailyEmpAbsences");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.DailySalaryRecording", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DailySalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("DailyEmpSalaryRecordings");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.EmployeeLoan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("EmployeeLoans");
                 });
 
             modelBuilder.Entity("Shader.Data.Entities.Expense", b =>
@@ -287,7 +378,19 @@ namespace Shader.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("MashalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MerchantAsSupplierPurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("NumberOfKilogramsSold")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NylonValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PriceOfKilogramInBill")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PriceOfKilogramsSold")
@@ -332,12 +435,6 @@ namespace Shader.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("CurrentAmountBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("CurrentMortgageAmountBalance")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -346,16 +443,12 @@ namespace Shader.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchaseAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("PurchaseTotalAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PurchaseTotalDiscountAmount")
@@ -367,19 +460,10 @@ namespace Shader.Migrations
                     b.Property<decimal>("PurchaseTotalMortgageAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("PurchaseTotalRemainingAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("PurchaseTotalRemainingMortgageAmount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("SellAmountPaid")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("SellPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("SellTotalAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("SellTotalDiscountAmount")
@@ -389,12 +473,6 @@ namespace Shader.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("SellTotalMortgageAmountPaid")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("SellTotalRemainingAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("SellTotalRemainingMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -467,9 +545,6 @@ namespace Shader.Migrations
                     b.Property<decimal>("TotalCageMortgageAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MerchantId");
@@ -491,6 +566,9 @@ namespace Shader.Migrations
                     b.Property<decimal>("PriceOfKiloGram")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("TransactionPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("WeightInKilograms")
                         .HasColumnType("decimal(18,2)");
 
@@ -499,6 +577,92 @@ namespace Shader.Migrations
                     b.HasIndex("FruitId");
 
                     b.ToTable("MerchantTransactionFruits");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MonthlyEmployee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BaseSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("BorrowedAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MonthlyEmployees");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MonthlyEmployeeAbsence", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("MonthlyEmpAbsences");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MonthlySalaryRecording", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BaseSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("BorrowedAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("DeductionAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("MonthlyEmpSalaryRecordings");
                 });
 
             modelBuilder.Entity("Shader.Data.Entities.Supplier", b =>
@@ -516,6 +680,12 @@ namespace Shader.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsMerchant")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MerchantId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -523,7 +693,18 @@ namespace Shader.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("TotalAmountOfBills")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalAmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalRemainingAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("MerchantId");
 
                     b.ToTable("Suppliers");
                 });
@@ -543,19 +724,12 @@ namespace Shader.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("MshalValue")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("MyCommisionValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("NylonValue")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Price")
@@ -648,6 +822,39 @@ namespace Shader.Migrations
                     b.Navigation("Client");
                 });
 
+            modelBuilder.Entity("Shader.Data.Entities.DailyEmployeeAbsence", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.DailyEmployee", "Employee")
+                        .WithMany("Absenses")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.DailySalaryRecording", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.DailyEmployee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.EmployeeLoan", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.MonthlyEmployee", "Employee")
+                        .WithMany("Loans")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("Shader.Data.Entities.Fruit", b =>
                 {
                     b.HasOne("Shader.Data.Entities.SupplierBill", null)
@@ -704,6 +911,37 @@ namespace Shader.Migrations
                     b.Navigation("MerchantTransaction");
                 });
 
+            modelBuilder.Entity("Shader.Data.Entities.MonthlyEmployeeAbsence", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.MonthlyEmployee", "Employee")
+                        .WithMany("Absences")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MonthlySalaryRecording", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.MonthlyEmployee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.Supplier", b =>
+                {
+                    b.HasOne("Shader.Data.Entities.Merchant", "Merchant")
+                        .WithMany()
+                        .HasForeignKey("MerchantId");
+
+                    b.Navigation("Merchant");
+                });
+
             modelBuilder.Entity("Shader.Data.Entities.SupplierBill", b =>
                 {
                     b.HasOne("Shader.Data.Entities.Supplier", "Supplier")
@@ -732,6 +970,11 @@ namespace Shader.Migrations
                     b.Navigation("ClientTransactionFruits");
                 });
 
+            modelBuilder.Entity("Shader.Data.Entities.DailyEmployee", b =>
+                {
+                    b.Navigation("Absenses");
+                });
+
             modelBuilder.Entity("Shader.Data.Entities.Fruit", b =>
                 {
                     b.Navigation("CashTransactions");
@@ -749,6 +992,13 @@ namespace Shader.Migrations
             modelBuilder.Entity("Shader.Data.Entities.MerchantTransaction", b =>
                 {
                     b.Navigation("MerchantTransactionFruits");
+                });
+
+            modelBuilder.Entity("Shader.Data.Entities.MonthlyEmployee", b =>
+                {
+                    b.Navigation("Absences");
+
+                    b.Navigation("Loans");
                 });
 
             modelBuilder.Entity("Shader.Data.Entities.Supplier", b =>
