@@ -33,6 +33,12 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RMerchantPaymentDto>> GetAllPaymentsByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
+            if (startDate >= endDate)
+                throw new Exception("Start date must be less than end date.");
+
             var payments = await context.MerchantPayments
                 .Include(payment => payment.Merchant)
                 .Where(p => !p.IsDeleted)

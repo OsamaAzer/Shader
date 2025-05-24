@@ -23,6 +23,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RMonthlySRecordingDto>> GetAllByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
 
@@ -36,6 +39,10 @@ namespace Shader.Services.Implementation
 
         public async Task<PagedResponse<RMonthlySRecordingDto>> GetAllByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize)
         {
+            var employee = await context.MonthlyEmployees
+                .FirstOrDefaultAsync(m => m.Id == employeeId && !m.IsDeleted) ??
+                throw new Exception($"Employee with ID {employeeId} not found.");
+
             var monthlySRecordings = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
                 .Where(m => m.EmployeeId == employeeId && !m.IsDeleted)
@@ -47,8 +54,15 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RMonthlySRecordingDto>> GetAllByEmployeeIdAndDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
+
+            var employee = await context.MonthlyEmployees
+                .FirstOrDefaultAsync(m => m.Id == employeeId && !m.IsDeleted) ??
+                throw new Exception($"Employee with ID {employeeId} not found.");
 
             var monthlySRecordings = await context.MonthlyEmpSalaryRecordings
                 .Include(m => m.Employee)
@@ -135,7 +149,8 @@ namespace Shader.Services.Implementation
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var monthlySRecording = await context.MonthlyEmpSalaryRecordings.FindAsync(id) ??
+            var monthlySRecording = await context.MonthlyEmpSalaryRecordings
+                .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted) ??
                 throw new Exception($"Monthly Salary Recording with ID {id} not found.");
 
             var removedEmployee = await context.MonthlyEmployees

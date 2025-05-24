@@ -23,6 +23,10 @@ namespace Shader.Services
 
         public async Task<PagedResponse<RMonthlyEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize)
         {
+            var employee = await context.MonthlyEmployees
+                .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
+                throw new Exception($"The employee with ID {employeeId} does not exist!");
+
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => a.EmployeeId == employeeId && !a.IsDeleted)
@@ -34,6 +38,9 @@ namespace Shader.Services
         public async Task<PagedResponse<RMonthlyEmpAbsenceDto>> GetAbsencesByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default  || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
 
@@ -48,8 +55,15 @@ namespace Shader.Services
         public async Task<PagedResponse<RMonthlyEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
+
+            var employee = await context.MonthlyEmployees
+                .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
+                throw new Exception($"The employee with ID {employeeId} does not exist!");
 
             var absences = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
@@ -69,8 +83,16 @@ namespace Shader.Services
             var absences = new List<MonthlyEmpAbsence>();
             foreach (var employeeId in employeeIds)
             {
-                var employee = await context.MonthlyEmployees.FindAsync(employeeId) ??
-                    throw new Exception($"Employee with ID {employeeId} not found.");
+                var employee = await context.MonthlyEmployees
+                .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
+                throw new Exception($"The employee with ID {employeeId} does not exist!");
+
+                var existingAbsence = await context.MonthlyEmpAbsences
+                    .FirstOrDefaultAsync(a => a.EmployeeId == employeeId && a.Date == DateOnly.FromDateTime(DateTime.Now.Date) && !a.IsDeleted);
+
+                if (existingAbsence != null)
+                    throw new Exception($"Employee {employee.Name} is already absent today.");
+
                 var absenceDto = new WMonthlyEmpAbsenceDto();
                 absenceDto.EmployeeId = employeeId;
                 var absence = absenceDto.MapToAbsence();
@@ -84,13 +106,20 @@ namespace Shader.Services
 
         public async Task<RMonthlyEmpAbsenceDto> UpdateAbsenceAsync(int id, WMonthlyEmpAbsenceDto absenceDto)
         {
-            var employee = await context.MonthlyEmployees.FindAsync(absenceDto.EmployeeId) ??
-                throw new Exception($"Employee with ID {absenceDto.EmployeeId} not found.");
+            var employee = await context.MonthlyEmployees
+                .FirstOrDefaultAsync(e => e.Id == absenceDto.EmployeeId && !e.IsDeleted) ??
+                throw new Exception($"The employee with ID {absenceDto.EmployeeId} does not exist!");
 
             var absence = await context.MonthlyEmpAbsences
                 .Include(a => a.Employee)
                 .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted)??
                 throw new Exception("Absence not found.");
+
+            var existingAbsence = await context.MonthlyEmpAbsences
+                   .FirstOrDefaultAsync(a => a.EmployeeId == absenceDto.EmployeeId && a.Date == DateOnly.FromDateTime(DateTime.Now.Date) && !a.IsDeleted);
+
+            if (existingAbsence != null)
+                throw new Exception($"Employee {employee.Name} is already absent this day.");
 
             absence = absenceDto.MapToAbsence(absence);
             context.MonthlyEmpAbsences.Update(absence);
@@ -100,7 +129,8 @@ namespace Shader.Services
 
         public async Task<bool> DeleteAbsenceAsync(int id)
         {
-            var absence = await context.MonthlyEmpAbsences.FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted) ??
+            var absence = await context.MonthlyEmpAbsences
+                .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted) ??
                 throw new Exception($"Absence with ID {id} not found.");
 
             absence.IsDeleted = true;

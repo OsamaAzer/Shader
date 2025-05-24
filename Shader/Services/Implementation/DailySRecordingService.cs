@@ -23,6 +23,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailySRecordingDto>> GetAllByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
 
@@ -36,6 +39,10 @@ namespace Shader.Services.Implementation
 
         public async Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize)
         {
+            var employee = await context.DailyEmployees
+                .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
+                throw new Exception($"the employee with id: ({employeeId}) doesn't exist!");
+
             var dailySRecordings = await context.DailyEmpSalaryRecordings
                 .Include(d => d.Employee)
                 .Where(d => d.EmployeeId == employeeId && !d.IsDeleted)
@@ -47,8 +54,15 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailySRecordingDto>> GetByEmployeeIdAndDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
+
+            var employee = await context.DailyEmployees
+                .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
+                throw new Exception($"the employee with id: ({employeeId}) doesn't exist!");
 
             var dailySRecordings = await context.DailyEmpSalaryRecordings
                 .Include(d => d.Employee)
@@ -76,13 +90,21 @@ namespace Shader.Services.Implementation
             var dailySRecordings = new List<DailyEmpSalaryRecording>();
             foreach (var employeeId in employeeIds)
             {
-                var employee = await context.DailyEmployees.FindAsync(employeeId) ??
+                var employee = await context.DailyEmployees
+                    .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
                     throw new Exception($"Employee with ID {employeeId} not found.");
+
+                var existingRecording = await context.DailyEmpSalaryRecordings
+                    .FirstOrDefaultAsync(d => d.EmployeeId == employeeId && d.Date == DateOnly.FromDateTime(DateTime.Now.Date) && !d.IsDeleted);
+
+                if (existingRecording != null)
+                    throw new Exception($"Daily Salary Recording for employee {employee.Name} already exists for today.");
 
                 var dailySRecordingDto = new WDailySRecordingDto();
                 dailySRecordingDto.EmployeeId = employeeId;
                 var dailySRecording = dailySRecordingDto.ToDailySRecording();
-                //dailySRecording.Employee = employee;
+                dailySRecording.Employee = employee;
+                dailySRecording.DailySalary = dailySRecording.Employee.DailySalary;
                 dailySRecordings.Add(dailySRecording);
             }
             await context.DailyEmpSalaryRecordings.AddRangeAsync(dailySRecordings);
@@ -99,6 +121,12 @@ namespace Shader.Services.Implementation
 
             var employee = await context.DailyEmployees.FindAsync(dailySRecordingDto.EmployeeId) ??
                 throw new Exception($"Employee with ID {dailySRecordingDto.EmployeeId} not found.");
+
+            var existingRecording = await context.DailyEmpSalaryRecordings
+                    .FirstOrDefaultAsync(d => d.EmployeeId == dailySRecordingDto.EmployeeId && d.Date == DateOnly.FromDateTime(DateTime.Now.Date) && !d.IsDeleted);
+
+            if (existingRecording != null)
+                throw new Exception($"Daily Salary Recording for employee {employee.Name} already exists for this day.");
 
             dailySRecording = dailySRecordingDto.ToDailySRecording(dailySRecording);
             context.DailyEmpSalaryRecordings.Update(dailySRecording);

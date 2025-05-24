@@ -23,6 +23,10 @@ namespace Shader.Services.Implementation
 
         public async Task<PagedResponse<RDailyEmpAbsenceDto>> GetAbsencesByEmployeeIdAsync(int employeeId, int pageNumber, int pageSize)
         {
+            var employee = await context.DailyEmployees
+                .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
+                throw new Exception($"the employee with id: ({employeeId}) doesn't exist!");
+
             var absences = await context.DailyEmpAbsences
                 .Include(a => a.Employee)
                 .Where(a => a.EmployeeId == employeeId && !a.IsDeleted)
@@ -34,6 +38,9 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailyEmpAbsenceDto>> GetAbsencesByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date."); 
 
@@ -48,8 +55,15 @@ namespace Shader.Services.Implementation
         public async Task<PagedResponse<RDailyEmpAbsenceDto>> GetAbsencesForEmployeeByDateRangeAsync
             (int employeeId, DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
         {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate >= endDate)
                 throw new Exception("Start date must be less than end date.");
+
+            var employee = await context.DailyEmployees
+                .FirstOrDefaultAsync(e => e.Id == employeeId && !e.IsDeleted) ??
+                throw new Exception($"the employee with id: ({employeeId}) doesn't exist!");
 
             var absences = await context.DailyEmpAbsences
                 .Include(a => a.Employee)
@@ -62,8 +76,14 @@ namespace Shader.Services.Implementation
         public async Task<RDailyEmpAbsenceDto> AddPastAbsenceAsync(WDailyPastAbsenceDto absenceDto)
         {
             var employee = await context.DailyEmployees
-                .FindAsync(absenceDto.EmployeeId) ??
+                .FirstOrDefaultAsync(e => e.Id == absenceDto.EmployeeId && !e.IsDeleted) ??
                 throw new Exception($"Employee with ID {absenceDto.EmployeeId} not found.");
+
+            bool isAlreadyAbsent = await context.DailyEmpAbsences
+                    .AnyAsync(a => a.EmployeeId == absenceDto.EmployeeId && a.Date == DateOnly.FromDateTime(DateTime.Now.Date) && !a.IsDeleted);
+
+            if (isAlreadyAbsent)
+                throw new Exception($"Employee {employee.Name} is already absent in this day.");
 
             var absence = absenceDto.MapFromPastToDailyEmpAbsence();
             await context.DailyEmpAbsences.AddAsync(absence);
@@ -111,6 +131,12 @@ namespace Shader.Services.Implementation
 
             var employee = await context.DailyEmployees.FindAsync(absenceDto.EmployeeId) ??
                 throw new Exception($"Employee with ID {absenceDto.EmployeeId} not found.");
+
+            bool isAlreadyAbsent = await context.DailyEmpAbsences
+                    .AnyAsync(a => a.EmployeeId == absenceDto.EmployeeId && a.Date == DateOnly.FromDateTime(DateTime.Now.Date) && !a.IsDeleted);
+
+            if (isAlreadyAbsent)
+                throw new Exception($"Employee {employee.Name} is already absent in this day.");
 
             absenceDto.MapToAbsence(absence);
             context.DailyEmpAbsences.Update(absence);

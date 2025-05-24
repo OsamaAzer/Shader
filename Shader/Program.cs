@@ -1,3 +1,5 @@
+using Mapster;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Shader.Data;
 using Shader.Services;
@@ -29,7 +31,8 @@ builder.Services.AddScoped<IMonthlyEmpService, MonthlyEmpService>();
 builder.Services.AddScoped<IEmployeeLoanService, EmployeeLoanService>();
 builder.Services.AddScoped<IMonthlyEmpAbsenceService, MonthlyEmpAbsenceService>();
 builder.Services.AddScoped<IMonthlySRecordingService, MonthlySRecordingService>();
-
+// Register Mapster
+builder.Services.AddMapster();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });

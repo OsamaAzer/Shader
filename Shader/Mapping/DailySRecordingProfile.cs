@@ -25,7 +25,6 @@ namespace Shader.Mapping
         {
             dailySRecording ??= new DailyEmpSalaryRecording();
             dailySRecording.EmployeeId = dailySRecordingDto.EmployeeId;
-            dailySRecording.DailySalary = dailySRecording.Employee.DailySalary;
             if (dailySRecording.Date == default)
             {
                 dailySRecording.Date = DateOnly.FromDateTime(DateTime.Now);

@@ -27,6 +27,12 @@ namespace Shader.Services.Implementation
         public async Task<RDailyEmpDto> AddEmployeeAsync(WDailyEmpDto employeeDto)
         {
             var employee = employeeDto.MapToEmployee();
+
+            bool nameFlag = await context.DailyEmployees.Where(e => e.Name.ToLower() == employeeDto.Name).AnyAsync();
+
+            if (nameFlag)
+                throw new Exception($"There is already an employee with this name ({employeeDto.Name})");
+
             await context.DailyEmployees.AddAsync(employee);
             await context.SaveChangesAsync();
             return employee.MapToREmployeeDto();
@@ -36,6 +42,11 @@ namespace Shader.Services.Implementation
             var employee = await context.DailyEmployees
                 .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted) ??
                 throw new Exception($"Employee with ID {id} not found.");
+
+            bool nameFlag = await context.DailyEmployees.Where(e => e.Name.ToLower() == employeeDto.Name).AnyAsync();
+
+            if (nameFlag)
+                throw new Exception($"There is already an employee with this name ({employeeDto.Name})");
 
             employeeDto.MapToEmployee(employee);
             context.DailyEmployees.Update(employee);

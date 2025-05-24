@@ -23,6 +23,8 @@ namespace Shader.Mapping
         {
             employee ??= new DailyEmployee();
             employee.Name = employeeDto.Name;
+            if (employeeDto.DailySalary <= 0)
+                throw new Exception($"Daily salary can't be less than or equal zero!");
             employee.DailySalary = employeeDto.DailySalary;
             employee.PhoneNumber = employeeDto.PhoneNumber;
             return employee;

@@ -36,6 +36,9 @@ namespace Shader.Services.Implementation
        public async Task<PagedResponse<RClientPaymentDto>> GetAllPaymentsByDateRangeAsync
             (DateOnly startDate, DateOnly endDate, int pageNumber, int pageSize)
        {
+            if (startDate == default || endDate == default)
+                throw new Exception("Start date and end date are both required.");
+
             if (startDate > endDate)
                 throw new Exception($"Start date {startDate} can't be greater than end date {endDate}.");
 

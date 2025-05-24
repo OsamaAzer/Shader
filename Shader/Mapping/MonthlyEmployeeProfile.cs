@@ -7,13 +7,7 @@ namespace Shader.Mapping
     {
         public static IEnumerable<RMonthlyEmpDto> MapToREmployeeDtos(this IEnumerable<MonthlyEmployee> employees)
         {
-            return employees.Select(e => new RMonthlyEmpDto
-            {
-                Id = e.Id,
-                Name = e.Name,
-                PhoneNumber = e.PhoneNumber,
-                BaseSalary = e.BaseSalary
-            });
+            return employees.Select(e => e.MapToREmployeeDto());
         }
         public static RMonthlyEmpDto MapToREmployeeDto(this MonthlyEmployee employee)
         {
